@@ -17,9 +17,12 @@ import new
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-rootPath = sys.path[0][0:sys.path[0].index('invest/scripts')]+'invest/scripts'
+rootPath = sys.path[0][0:sys.path[0].index('StockParser')]+'StockParser'
 sys.path.append(rootPath+'/src') 
 from common import Tools
+
+if __name__ == '__main__':
+  print rootPath
 
 class BaseSpider(threading.Thread): 
   _idList = []   # 本次线程需要处理的任务
