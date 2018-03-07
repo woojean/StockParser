@@ -12,7 +12,7 @@ import datetime
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-rootPath = sys.path[0][0:sys.path[0].index('invest/scripts')]+'invest/scripts'
+rootPath = sys.path[0][0:sys.path[0].index('StockParser')]+'StockParser'
 sys.path.append(rootPath+'/src') 
 from common import Tools
 from parsers import BaseParser

@@ -17,7 +17,7 @@ import new
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-rootPath = sys.path[0][0:sys.path[0].index('invest/scripts')]+'invest/scripts'
+rootPath = sys.path[0][0:sys.path[0].index('StockParser')]+'/StockParser'
 sys.path.append(rootPath+'/src') 
 from common import Tools
 
@@ -76,9 +76,11 @@ class BaseParser:
     '''
     31 成交量
     36 量比
+    
     37 换手率
     38 市盈率
     43 市净率
+    
     45 流通市值
     46 总市值
     '''

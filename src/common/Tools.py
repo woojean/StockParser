@@ -17,7 +17,7 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 def getRootPath():
-  rootPath = sys.path[0][0:sys.path[0].index('invest/scripts')]+'invest/scripts'
+  rootPath = sys.path[0][0:sys.path[0].index('StockParser')]+'StockParser'
   return rootPath
 
 def getParsersDirPath():
