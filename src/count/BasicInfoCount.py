@@ -19,120 +19,150 @@ from parsers import BaseParser
 
 
 PE_RANGES = [
-  ['<10',0,10],
-  ['10-20',10,20],
-  ['20-30',20,30],
-  ['30-40',30,40],
-  ['40-50',40,50],
-  ['50-60',50,60],
-  ['60-70',60,70],
-  ['70-80',70,80],
-  ['80-90',80,90],
-  ['90-100',90,100],
-  ['>=100-100',100,100000],
+  ['< 10',0,10],
+  ['10 ~ 20',10,20],
+  ['20 ~ 30',20,30],
+  ['30 ~ 40',30,40],
+  ['40 ~ 50',40,50],
+  ['50 ~ 60',50,60],
+  ['60 ~ 70',60,70],
+  ['70 ~ 80',70,80],
+  ['80 ~ 90',80,90],
+  ['90 ~ 100',90,100],
+  ['>= 100',100,100000],
 ]
 
 
 PB_RANGES = [
-  ['<1',0,1],
-  ['1-2',1,2],
-  ['2-3',2,3],
-  ['3-4',3,4],
-  ['4-5',4,5],
-  ['5-6',5,6],
-  ['6-7',6,7],
-  ['7-8',7,8],
-  ['8-9',8,9],
-  ['9-10',9,10],
-  ['>=10',10,100000],
+  ['< 1',0,1],
+  ['1 ~ 2',1,2],
+  ['2 ~ 3',2,3],
+  ['3 ~ 4',3,4],
+  ['4 ~ 5',4,5],
+  ['5 ~ 6',5,6],
+  ['6 ~ 7',6,7],
+  ['7 ~ 8',7,8],
+  ['8 ~ 9',8,9],
+  ['9 ~ 10',9,10],
+  ['>= 10',10,100000],
 ]
 
 CR_RANGES = [
-  ['<1%',0,1],
-  ['1%-2%',1,2],
-  ['2%-3%',2,3],
-  ['3%-4%',3,4],
-  ['4%-5%',4,5],
-  ['5%-6%',5,6],
-  ['6%-7%',6,7],
-  ['7%-8%',7,8],
-  ['8%-9%',8,9],
-  ['9%-10%',9,10],
-  ['>=10%',10,100000],
+  ['0% ~ 0.1%',0,0.1],
+  ['0.1% ~ 0.2%',0.1,0.2],
+  ['0.2% ~ 0.3%',0.2,0.3],
+  ['0.3% ~ 0.4%',0.3,0.4],
+  ['0.4% ~ 0.5%',0.4,0.5],
+  ['0.5% ~ 0.6%',0.5,0.6],
+  ['0.6% ~ 0.7%',0.6,0.7],
+  ['0.7% ~ 0.8%',0.7,0.8],
+  ['0.8% ~ 0.9%',0.8,0.9],
+  ['0.9% ~ 1%',0.9,1],
+  ['1% ~ 1.1%',1,1.1],
+  ['1.1% ~ 1.2%',1.1,1.2],
+  ['1.2% ~ 1.3%',1.2,1.3],
+  ['1.3% ~ 1.4%',1.3,1.4],
+  ['1.4% ~ 1.5%',1.4,1.5],
+  ['1.5% ~ 1.6%',1.5,1.6],
+  ['1.6% ~ 1.7%',1.6,1.7],
+  ['1.7% ~ 1.8%',1.7,1.8],
+  ['1.8% ~ 1.9%',1.8,1.9],
+  ['1.9% ~ 2%',1.9,2],
+  ['2% ~ 3%',2,3],
+  ['3% ~ 4%',3,4],
+  ['4% ~ 5%',4,5],
+  ['5% ~ 6%',5,6],
+  ['6% ~ 7%',6,7],
+  ['7% ~ 8%',7,8],
+  ['8% ~ 9%',8,9],
+  ['9% ~ 10%',9,10],
+  ['>= 10%',10,100000],
 ]
 
 
 def dump(csvPe,csvPb,csvCr):
-  s = '<html>'
-  s +='<head></head>'
+  s = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /></head>'
   s +='<body>'
   
 
   # --- PE
-  s += '<h1>PE</h1>'
+  s += '<h3>市盈率</h3>'
   s += '<hr/>'
   s += '<table width="40%" border="0"  cellspacing="0" cellpadding="0" style="word-break:break-all;word-wrap:break-word">'
-  s +='<tr style="font-size:1.5em"><td>range</td><td>num</td><td>percentage</td></tr>'
+  s +='<tr style="font-size:1.2em"><td>范围</td><td>数量</td><td>占比</td></tr>'
 
   sumOfNum = 0
   for k,v in csvPb.items():
     sumOfNum += v
 
   for rg in PE_RANGES:
-  	s += '<tr>'
-  	s +='<td>' + rg[0] + '</td>'
+    num = csvPe[rg[0]]
+    per = round(num*100.0/sumOfNum,3)
+    
+    style = '"color:black;"'
+    if per >=10:
+      style = '"color:red;"'
 
-  	num = csvPe[rg[0]]
-  	s +='<td>' + str(num) + '</td>'
-
-  	per = round(num*100.0/sumOfNum,3)
-  	s +='<td>' + str(per) + ' %</td>'
-  	s +='</tr>'
+    s += '<tr style='+style+'>'
+    s +='<td>' + rg[0] + '</td>'
+    s +='<td>' + str(num) + '</td>'
+    s +='<td>' + str(per) + ' %</td>'
+    s +='</tr>'
   s += '</table>'
-
+  s += '<br/>'
 
   # --- PB
-  s += '<h1>PB</h1>'
+  s += '<h3>市净率</h3>'
   s += '<hr/>'
   s += '<table width="40%" border="0"  cellspacing="0" cellpadding="0" style="word-break:break-all;word-wrap:break-word">'
-  s +='<tr style="font-size:1.5em"><td>range</td><td>num</td><td>percentage</td></tr>'
+  s +='<tr style="font-size:1.2em"><td>范围</td><td>数量</td><td>占比</td></tr>'
 
   sumOfNum = 0
   for k,v in csvPe.items():
     sumOfNum += v
 
   for rg in PB_RANGES:
-  	s += '<tr>'
-  	s +='<td>' + rg[0] + '</td>'
+    num = csvPb[rg[0]]
+    per = round(num*100.0/sumOfNum,3)
 
-  	num = csvPb[rg[0]]
-  	s +='<td>' + str(num) + '</td>'
+    style = '"color:black;"'
+    if per >=10:
+      style = '"color:red;"'
 
-  	per = round(num*100.0/sumOfNum,3)
-  	s +='<td>' + str(per) + ' %</td>'
-  	s +='</tr>'
+    s += '<tr style='+style+'>'
+    s +='<td>' + rg[0] + '</td>'
+
+    s +='<td>' + str(num) + '</td>'
+
+    per = round(num*100.0/sumOfNum,3)
+    s +='<td>' + str(per) + ' %</td>'
+    s +='</tr>'
   s += '</table>'
+  s += '<br/>'
 
   # --- CR
-  s += '<h1>CR</h1>'
+  s += '<h3>换手率</h3>'
   s += '<hr/>'
   s += '<table width="40%" border="0"  cellspacing="0" cellpadding="0" style="word-break:break-all;word-wrap:break-word">'
-  s +='<tr style="font-size:1.5em"><td>range</td><td>num</td><td>percentage</td></tr>'
+  s +='<tr style="font-size:1.2em"><td>范围</td><td>数量</td><td>占比</td></tr>'
 
   sumOfNum = 0
   for k,v in csvCr.items():
     sumOfNum += v
 
   for rg in CR_RANGES:
-  	s += '<tr>'
-  	s +='<td>' + rg[0] + '</td>'
+    num = csvCr[rg[0]]
+    per = round(num*100.0/sumOfNum,3)
 
-  	num = csvCr[rg[0]]
-  	s +='<td>' + str(num) + '</td>'
+    style = '"color:black;"'
+    if per >= 5:
+      style = '"color:red;"'
 
-  	per = round(num*100.0/sumOfNum,3)
-  	s +='<td>' + str(per) + ' %</td>'
-  	s +='</tr>'
+    s += '<tr style='+style+'>'
+    s +='<td>' + rg[0] + '</td>'
+    s +='<td>' + str(num) + '</td>'
+    s +='<td>' + str(per) + ' %</td>'
+    s +='</tr>'
   s += '</table>'
 
 
