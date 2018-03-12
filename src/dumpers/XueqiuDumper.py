@@ -35,27 +35,32 @@ if __name__ == '__main__':
     'MacdReverseParser':'MACD趋势反转'
   }
   
-  dirEnterList = Tools.getEnterListDirPath()
   xq = ''
-  nums = {}
+  dirEnterList = Tools.getEnterListDirPath()
+  xq += '<b>盘后技术选股（'+parseDay+'）'+'</b> \n'
+  xq += '分析工具的源代码见这里：https://github.com/woojean/StockParser'
   for parser,tag in parsers.items():
     try:
       f = dirEnterList+'/'+parseDay+'-'+parser+'.sel'
       l = open(f,'r').read().split(',')
-      nums[parser] = len(l)
       
-      xq += "\n\n\n"
-      xq += '<b>' + tag + '</b>'
       xq += "\n"
-      xq += "----------------------------------------------------------------------------------------------------------"
       xq += "\n"
+      xq += '<b>' + tag + '</b> （'+str(len(l))+'）'
+      xq += "\n"
+      xq += "\n"
+
+      c = 0
       for id in l:
         name = Tools.getNameById(id)
         if len(name) < 1:
           continue
 
-        xq += name+' ('+str(id)+')'
-        xq += " | "
+        xq += name +' ('+str(id)+')'
+        xq += " 、 "
+        if c%4 == 0:
+          xq += '\n'
+        c += 1
     except Exception, e:
       print e
       pass

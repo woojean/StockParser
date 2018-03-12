@@ -2,10 +2,10 @@
 ![image](https://github.com/woojean/StockParser/blob/master/imgs/report.png)
 
 
-python src/spiders/PriceSpider.py
-python src/spiders/MacdSpider.py
-python src/spiders/BasicInfoSpider.py
+## 运行
+* python src/Do.py 2018-03-09 new
+若提示目录不存在，可能是因为权限问题，可手工新建目录。
 
-python src/Do.py 2018-03-07
-python src/dumpers/XueqiuDumper.py 2018-03-07
+
+
 
