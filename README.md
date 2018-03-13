@@ -4,7 +4,7 @@
 
 ## 运行
 
-```python
+```
 python src/Do.py 2018-03-09 new
 ```
 
