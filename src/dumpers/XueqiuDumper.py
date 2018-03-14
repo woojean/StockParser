@@ -26,15 +26,20 @@ if __name__ == '__main__':
   parseDay = time.strftime('%Y-%m-%d',time.localtime(time.time())) if (len(sys.argv) <= 1) else sys.argv[1]
   parsers = {
     'BaldRiseLineAndVolumeReduceParser':'光头光脚阳线且缩量',
-    'RgbParser':'短线均线多头',
+    'MaConvergenceParser':'均线汇合于实体',
     'MaxPriceParser':'新高',
     'GoldenPinBottomParser':'“金针探底”',
     'VenusParser':'启明星',
     'SwallowUpParser':'向上吞没线',
     'VolumeMutationParser':'成交量突变',
-    'MacdReverseParser':'MACD趋势反转'
+    'MacdReverseParser':'MACD趋势反转',
+    'RgbParser':'短线均线多头',
   }
-  
+
+  parsers2 = {
+    'MaConvergenceParser':'均线汇合于实体',
+  }
+
   xq = ''
   dirEnterList = Tools.getEnterListDirPath()
   xq += '<b>盘后技术选股（'+parseDay+'）'+'</b> \n'

@@ -232,17 +232,18 @@ font-size:0.8em;
 if __name__ == '__main__':
   parsers = [
     'BaldRiseLineAndVolumeReduceParser',
-    'RgbParser',
+    'MaConvergenceParser',
     'MaxPriceParser',
     'GoldenPinBottomParser',
     'VenusParser',
     'SwallowUpParser',
     'VolumeMutationParser',
-    'MacdReverseParser'
+    'MacdReverseParser',
+    'RgbParser',
   ]
 
   parsers2 = [
-    'RgbParser',
+    'MaConvergenceParser',
   ]
 
   (parseDay, isNew,traceDay) = getParams()
