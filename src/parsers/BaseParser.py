@@ -223,7 +223,7 @@ class BaseParser:
           print str(num) + ' ↗'
       except Exception, e:
         pass
-        print repr(e)
+        #print repr(e)
 
     if isDump:
       self.dumpIdList(idList)

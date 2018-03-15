@@ -37,21 +37,23 @@ if __name__ == '__main__':
   }
 
   parsers2 = {
-    'MaConvergenceParser':'均线汇合于实体',
+    
+    
   }
 
   xq = ''
   dirEnterList = Tools.getEnterListDirPath()
   xq += '<b>盘后技术选股（'+parseDay+'）'+'</b> \n'
-  xq += '分析工具的源代码见这里：https://github.com/woojean/StockParser'
+  #xq += '分析工具的源代码见这里：https://github.com/woojean/StockParser'
   for parser,tag in parsers.items():
+    print parser
     try:
       f = dirEnterList+'/'+parseDay+'-'+parser+'.sel'
       l = open(f,'r').read().split(',')
       
       xq += "\n"
       xq += "\n"
-      xq += '<b>' + tag + '</b> （'+str(len(l))+'）'
+      xq += '<b>' + tag + '</b> （共：'+str(len(l))+'个）'
       xq += "\n"
       xq += "\n"
 

@@ -22,7 +22,7 @@ class BasicSpider(BaseSpider):
   def genUrl(self,id):
     url = 'http://nuff.eastmoney.com/EM_Finance2015TradeInterface/JS.ashx?id='
     url += str(id)
-    if '0' == str(id)[0]:
+    if '0' == str(id)[0] or '3' == str(id)[0] :
       url +='2' 
     elif '6' == str(id)[0]:
       url +='1'

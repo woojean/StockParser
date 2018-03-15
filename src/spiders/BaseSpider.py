@@ -77,7 +77,7 @@ class BaseSpider(threading.Thread):
   def run(self):
     for id in self._idList:
       idType = str(id)[0]
-      if idType not in ['6','0']: # 只看A股 0 深，6 沪，3 创业板，5 基金权证， 1 深市基金
+      if idType not in ['6','0','3']: # 只看A股 0 深，6 沪，3 创业板，5 基金权证， 1 深市基金
         continue
 
       try:
