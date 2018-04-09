@@ -27,13 +27,14 @@ if __name__ == '__main__':
   parsers = {
     'BaldRiseLineAndVolumeReduceParser':'光头光脚阳线且缩量',
     'MaConvergenceParser':'均线汇合于实体',
-    'MaxPriceParser':'新高',
+    'MaxPriceParser':'创新高',
     'GoldenPinBottomParser':'“金针探底”',
     'VenusParser':'启明星',
     'SwallowUpParser':'向上吞没线',
     'VolumeMutationParser':'成交量突变',
     'MacdReverseParser':'MACD趋势反转',
-    'RgbParser':'短线均线多头',
+    'RgbParser':'短线均线多头排列',
+    'TriangularSupportParser':'底部三角托'
   }
 
   parsers2 = {

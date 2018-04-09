@@ -227,7 +227,9 @@ font-size:0.8em;
   	os.system('open '+path)
 
 
-
+'''
+python src/Do.py 2018-03-26 x 2018-04-09 
+'''
 
 if __name__ == '__main__':
   parsers = [
@@ -240,17 +242,19 @@ if __name__ == '__main__':
     'VolumeMutationParser',
     'MacdReverseParser',
     'RgbParser',
+    'TriangularSupportParser'
   ]
 
-  parsers2 = [
-    'MaConvergenceParser',
+  parsers = [
+    'TriangularSupportParser',
   ]
 
   (parseDay, isNew,traceDay) = getParams()
 
   run(parseDay,parsers,isNew)
-
   report(parseDay,parsers,True,traceDay)
+
+
 
   
 
