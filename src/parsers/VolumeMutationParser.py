@@ -37,8 +37,8 @@ class VolumeMutationParser(BaseParser):
       return False
 
     # 成交量最大
-    #if not self.isMaxVolumeOfDays(res,parseDay,self._days):
-    #  return False
+    if not self.isMaxVolumeOfDays(res,parseDay,self._days):
+     return False
 
     # 之前的成交量比较小
 

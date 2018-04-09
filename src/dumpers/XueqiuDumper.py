@@ -34,7 +34,8 @@ if __name__ == '__main__':
     'VolumeMutationParser':'成交量突变',
     'MacdReverseParser':'MACD趋势反转',
     'RgbParser':'短线均线多头排列',
-    'TriangularSupportParser':'底部三角托'
+    'TriangularSupportParser':'底部三角托',
+    'TwoLimitsParser':'二板定龙头'
   }
 
   parsers2 = {
