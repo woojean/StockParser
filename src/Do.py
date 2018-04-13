@@ -76,10 +76,10 @@ a:visited { color:blue; }
 a:hover   { color:red; }
 a:active  { color:yellow; }
 
-font-size:0.6em;
+font-size:0.8em;
 
-table{
-  font-size:0.6em;
+td{
+  font-size:0.8em;
 }
 </style>
   '''
@@ -163,7 +163,7 @@ table{
           basicInfo = BaseParser.BaseParser.getBasicInfoById(id)
           changeRate = float(basicInfo[37])
           if changeRate >= 3.0:
-            div += '<br/><font size=1 color="orange">CR '+str(changeRate)+'% </font>' 
+            div += '<br/><font size=1 color="orange">换手率： '+str(changeRate)+'% </font>' 
           else:
             isFocus = False
           
@@ -198,7 +198,7 @@ table{
       if len(traceDay) == 10:
         riseNum = '<font color="red">'+str(riseNums[parser])+'</font>/'
       th += '<td width="'+ w +'" style="border:1px solid #000;padding:10px;">'
-      th += tag +'<br/>'+riseNum+'<font color="black" size=1><b>'+str(nums[parser])+'</b></font>'
+      th += '<font color="red">'+tag +'</font>'+'<br/>'+riseNum+'<font color="black" size=1>[ <b>'+str(nums[parser])+'</b> ]</font>'
       th +='</td>'
     except Exception, e:
       pass
@@ -210,7 +210,7 @@ table{
   for k,v in nums.items():
     total += int(v)
   s += '<table width="100%"><tr>'
-  s +='<td align="left">盘后技术选股（'+parseDay +'）</td>'
+  s +='<td align="left"><font color="red"><b>盘后技术选股（'+parseDay +'）</b></font></td>'
   if len(traceDay) == 10:
     s +='<td align="left">Trace Day: '+traceDay +'</td>'
   s +='<td align="right">'+' Total: <font color="red"> '+str(total)+'</font>'+'</td>'
@@ -242,21 +242,26 @@ python src/Do.py 2018-03-26 x 2018-04-09
 
 if __name__ == '__main__':
   parsers = {
-    'BaldRiseLineAndVolumeReduceParser':'光头光脚阳线且缩量',
-    'MaConvergenceParser':'均线汇合于实体',
-    'MaxPriceParser':'创新高',
+    'BaldRiseLineAndVolumeReduceParser':'秃阳线且缩量☆',
     'GoldenPinBottomParser':'金针探底',
-    'VenusParser':'启明星',
+    'MacdReverseParser':'MACD反转☆',
+    'MaConvergenceParser':'均线汇合',
+    'MaPenetrateParser':'均线穿透',
+    'MaTrendParser':'MA短线趋势',
+    'MaxPriceParser':'创新高',
+    'OneLimitsParser':'一板',
+    'RgbParser':'短线多头',
+    'SimpleParser':'简单解析',
     'SwallowUpParser':'向上吞没线',
-    'VolumeMutationParser':'成交量突变',
-    'MacdReverseParser':'MACD趋势反转',
-    'RgbParser':'短线多头排列',
+    'ThreeLimitsParser':'三板',
     'TriangularSupportParser':'均线三角托',
-    'TwoLimitsParser':'二板'
+    'TwoLimitsParser':'二板',
+    'VenusParser':'启明星',
+    'VolumeMutationParser':'成交量突变',
   }
 
-  parsers2 = {
-    'RgbParser':'短线均线多头排列',
+  parsers = {
+    'SimpleParser':'简单解析'
   }
 
   (parseDay, isNew,traceDay) = getParams()

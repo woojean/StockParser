@@ -104,6 +104,13 @@ class BaseParser:
     allDays = len(allDayList)
     return allDayList[allDays-days:]
 
+  @staticmethod
+  def getNextTradingDayList(firstDay,days):
+    allDayList = Tools.getAllTradeDayList()
+    idx = allDayList.index(firstDay)
+    allDayList = allDayList[idx+1:]
+    return allDayList[:days]
+
 
   # 获取某一日的增长率
   def getGrowthRate(self,id,startDay,endDay):
@@ -223,7 +230,7 @@ class BaseParser:
           print str(num) + ' ↗'
       except Exception, e:
         pass
-        #print repr(e)
+        print repr(e)
 
     if isDump:
       self.dumpIdList(idList)

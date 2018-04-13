@@ -18,10 +18,10 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 '''
-二板
+三板
 '''
-class TwoLimitsParser(BaseParser):
-  _tag = 'TwoLimitsParser'
+class ThreeLimitsParser(BaseParser):
+  _tag = 'ThreeLimitsParser'
   
   def __init__(self,parseDay):
     BaseParser.__init__(self,parseDay) 
@@ -30,7 +30,13 @@ class TwoLimitsParser(BaseParser):
   def parse(self,res,parseDay,id=''):
     ret = False
 
-    dayList = BaseParser.getPastTradingDayList(parseDay,4)
+    dayList = BaseParser.getPastTradingDayList(parseDay,5)
+
+    startPrice = self.getEndPriceOfDay(res,dayList[3])
+    endPrice = self.getEndPriceOfDay(res,dayList[4])
+    growthRate =  (endPrice-startPrice)/startPrice
+    if growthRate < 0.09:
+      return False
 
     startPrice = self.getEndPriceOfDay(res,dayList[2])
     endPrice = self.getEndPriceOfDay(res,dayList[3])
@@ -56,12 +62,12 @@ class TwoLimitsParser(BaseParser):
 
 
 if __name__ == '__main__':
-  print 'TwoLimitsParser'
+  print 'ThreeLimitsParser'
 
   parseDay = BaseParser.getParseDay()
   print parseDay
 
-  idList = TwoLimitsParser(parseDay).getParseResult(True)
+  idList = ThreeLimitsParser(parseDay).getParseResult(True)
   print idList
 
 

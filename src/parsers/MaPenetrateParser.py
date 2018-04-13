@@ -37,13 +37,13 @@ class MaPenetrateParser(BaseParser):
     shortTerm = 13
     longTerm = 34
    
-    # 第一天MA5小于MA60
+    # 第一天短线小于长线
     maLong = self.getMAPrice(res,BaseParser.getPastTradingDayList(day1,longTerm))
     maShort = self.getMAPrice(res,BaseParser.getPastTradingDayList(day1,shortTerm))
     if maShort >= maLong:
       return False
 
-    # 第二天MA5大于MA60
+    # 第二天长线大于短线
     maLong = self.getMAPrice(res,BaseParser.getPastTradingDayList(day2,longTerm))
     maShort = self.getMAPrice(res,BaseParser.getPastTradingDayList(day2,shortTerm))
     if maShort < maLong:

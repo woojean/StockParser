@@ -25,17 +25,22 @@ from parsers import BaseParser
 if __name__ == '__main__':
   parseDay = time.strftime('%Y-%m-%d',time.localtime(time.time())) if (len(sys.argv) <= 1) else sys.argv[1]
   parsers = {
-    'BaldRiseLineAndVolumeReduceParser':'光头光脚阳线且缩量',
-    'MaConvergenceParser':'均线汇合于实体',
+    'BaldRiseLineAndVolumeReduceParser':'秃阳线且缩量☆',
+    'GoldenPinBottomParser':'金针探底',
+    'MacdReverseParser':'MACD反转☆',
+    'MaConvergenceParser':'均线汇合',
+    'MaPenetrateParser':'均线穿透',
+    'MaTrendParser':'MA短线趋势',
     'MaxPriceParser':'创新高',
-    'GoldenPinBottomParser':'“金针探底”',
-    'VenusParser':'启明星',
+    'OneLimitsParser':'一板',
+    'RgbParser':'短线多头',
+    'SimpleParser':'简单解析',
     'SwallowUpParser':'向上吞没线',
+    'ThreeLimitsParser':'三板',
+    'TriangularSupportParser':'均线三角托',
+    'TwoLimitsParser':'二板',
+    'VenusParser':'启明星',
     'VolumeMutationParser':'成交量突变',
-    'MacdReverseParser':'MACD趋势反转',
-    'RgbParser':'短线均线多头排列',
-    'TriangularSupportParser':'底部三角托',
-    'TwoLimitsParser':'二板定龙头'
   }
 
   parsers2 = {

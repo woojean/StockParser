@@ -38,6 +38,12 @@ def getReportDirPath():
     os.mkdir(path)
   return path
 
+def getCountDirPath():
+  path = getRootPath()+'/data/count'  # 
+  if not os.path.exists(path):
+    os.mkdir(path)
+  return path
+
 def getEnterListDirPath():
   dirPath =  getRootPath()+'/data/enterList'  
   if not os.path.exists(dirPath):

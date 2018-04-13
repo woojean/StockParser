@@ -18,10 +18,10 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 '''
-二板
+一板
 '''
-class TwoLimitsParser(BaseParser):
-  _tag = 'TwoLimitsParser'
+class OneLimitsParser(BaseParser):
+  _tag = 'OneLimitsParser'
   
   def __init__(self,parseDay):
     BaseParser.__init__(self,parseDay) 
@@ -30,24 +30,29 @@ class TwoLimitsParser(BaseParser):
   def parse(self,res,parseDay,id=''):
     ret = False
 
-    dayList = BaseParser.getPastTradingDayList(parseDay,4)
+    dayList = BaseParser.getPastTradingDayList(parseDay,5)
+
+    startPrice = self.getEndPriceOfDay(res,dayList[3])
+    endPrice = self.getEndPriceOfDay(res,dayList[4])
+    growthRate =  (endPrice-startPrice)/startPrice
+    if growthRate < 0.09:
+      return False
 
     startPrice = self.getEndPriceOfDay(res,dayList[2])
     endPrice = self.getEndPriceOfDay(res,dayList[3])
     growthRate =  (endPrice-startPrice)/startPrice
-    if growthRate < 0.09:
+    if growthRate > 0.03:
       return False
 
     startPrice = self.getEndPriceOfDay(res,dayList[1])
     endPrice = self.getEndPriceOfDay(res,dayList[2])
     growthRate =  (endPrice-startPrice)/startPrice
-    if growthRate < 0.09:
+    if growthRate > 0.03:
       return False
 
     startPrice = self.getEndPriceOfDay(res,dayList[0])
     endPrice = self.getEndPriceOfDay(res,dayList[1])
     growthRate =  (endPrice-startPrice)/startPrice
-
     if growthRate > 0.03:
       return False
 
@@ -56,12 +61,12 @@ class TwoLimitsParser(BaseParser):
 
 
 if __name__ == '__main__':
-  print 'TwoLimitsParser'
+  print 'OneLimitsParser'
 
   parseDay = BaseParser.getParseDay()
   print parseDay
 
-  idList = TwoLimitsParser(parseDay).getParseResult(True)
+  idList = OneLimitsParser(parseDay).getParseResult(True)
   print idList
 
 
