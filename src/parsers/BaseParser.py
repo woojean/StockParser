@@ -145,7 +145,7 @@ class BaseParser:
       isRise = (endDayMa > beginDayMa)
     except Exception, e:
       isRise = None
-      print repr(e)
+      #print repr(e)
     return isRise
 
 
@@ -230,7 +230,7 @@ class BaseParser:
           print str(num) + ' ↗'
       except Exception, e:
         pass
-        print repr(e)
+        #print repr(e)
 
     if isDump:
       self.dumpIdList(idList)
@@ -275,7 +275,11 @@ class BaseParser:
   # 获取某一日的开盘价
   def getStartPriceOfDay(self,res,day):
     try:
-      price = float((re.findall('"'+ day +',(.*?)%"', res)[0]).split(',')[0])
+      #print re.findall('"'+ day +',(.*?)"', res)
+      #print (re.findall('"'+ day +',(.*?)"', res)[0]).split(',')
+      #print res
+      #print '"'+ day +',(.*?)"'
+      price = float((re.findall('"'+ day +',(.*?)"', res)[0]).split(',')[0])
     except Exception, e:
       price = 0
       #print repr(e)
@@ -285,7 +289,7 @@ class BaseParser:
   # 获取某一日的收盘价
   def getEndPriceOfDay(self,res,day):
     try:
-      price = float((re.findall('"'+ day +',(.*?)%"', res)[0]).split(',')[1])
+      price = float((re.findall('"'+ day +',(.*?)"', res)[0]).split(',')[1])
     except Exception, e:
       price = 0
     return price
@@ -294,7 +298,7 @@ class BaseParser:
   # 获取某一日的最低价
   def getMinPriceOfDay(self,res,day):
     try:
-      price = float((re.findall('"'+ day +',(.*?)%"', res)[0]).split(',')[3])
+      price = float((re.findall('"'+ day +',(.*?)"', res)[0]).split(',')[3])
     except Exception, e:
       price = 0
     return price
@@ -303,7 +307,7 @@ class BaseParser:
   # 获取某一日的最高价
   def getMaxPriceOfDay(self,res,day):
     try:
-      price = float((re.findall('"'+ day +',(.*?)%"', res)[0]).split(',')[2])
+      price = float((re.findall('"'+ day +',(.*?)"', res)[0]).split(',')[2])
     except Exception, e:
       price = 0
     return price
@@ -311,7 +315,7 @@ class BaseParser:
   # 获取某一日的成交量
   def getVolumeOfDay(self,res,day):
     try:
-      volume = float((re.findall('"'+ day +',(.*?)%"', res)[0]).split(',')[4])
+      volume = float((re.findall('"'+ day +',(.*?)"', res)[0]).split(',')[4])
     except Exception, e:
       volume = 0
     return volume

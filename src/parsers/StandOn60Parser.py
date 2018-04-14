@@ -18,11 +18,10 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 '''
-简单解析
 60日线是一个重要位置，突破意义重大
 '''
-class SimpleParser(BaseParser):
-  _tag = 'SimpleParser'
+class StandOn60Parser(BaseParser):
+  _tag = 'StandOn60Parser'
   
   def __init__(self,parseDay):
     BaseParser.__init__(self,parseDay) 
@@ -31,7 +30,7 @@ class SimpleParser(BaseParser):
   def isPenetrateMa(self,res,parseDay):
     dayList = BaseParser.getPastTradingDayList(parseDay,60)
     (v,v,ma) = self.getMAPrice(res,dayList)
-    
+
     startPrice = self.getStartPriceOfDay(res,parseDay)
     endPrice = self.getEndPriceOfDay(res,parseDay)
 
@@ -74,17 +73,21 @@ class SimpleParser(BaseParser):
     if endPrice3 <= ma:
       return False
 
+    # 去掉底太小的（至少10根最低价在线下，即两周的蓄能）
+
+    # 去掉站不稳的（线穿3实体）
+
     return ret
 
 
 
 if __name__ == '__main__':
-  print 'SimpleParser'
+  print 'StandOn60Parser'
 
   parseDay = BaseParser.getParseDay()
   print parseDay
 
-  idList = SimpleParser(parseDay).getParseResult(True)
+  idList = StandOn60Parser(parseDay).getParseResult(True)
   print idList
 
 
