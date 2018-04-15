@@ -250,7 +250,7 @@ if __name__ == '__main__':
     'MaTrendParser':'MA短线趋势',
     'MaxPriceParser':'创新高',
     'OneLimitsParser':'一板',
-    'PenetrateUpward60Parser':'上穿60日线',
+    'PenetrateUpwardMa60Parser':'上穿60日线',
     'RgbParser':'短线多头',
     'StandOn60Parser':'站稳60日均线',
     'SwallowUpParser':'向上吞没线',
@@ -262,7 +262,7 @@ if __name__ == '__main__':
   }
 
   parsers = {
-    'StandOn60Parser':'站稳60日均线'
+    'GoldenPinBottomParser':'金针探底',
   }
 
   (parseDay, isNew,traceDay) = getParams()

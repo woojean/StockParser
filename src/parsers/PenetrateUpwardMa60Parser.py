@@ -20,8 +20,8 @@ sys.setdefaultencoding('utf-8')
 '''
 向上穿透60日线
 '''
-class PenetrateUpward60Parser(BaseParser):
-  _tag = 'PenetrateUpward60Parser'
+class PenetrateUpwardMa60Parser(BaseParser):
+  _tag = 'PenetrateUpwardMa60Parser'
   
   def __init__(self,parseDay):
     BaseParser.__init__(self,parseDay) 
@@ -49,7 +49,7 @@ class PenetrateUpward60Parser(BaseParser):
     if endPrice2 <= ma:
       return False
 
-    # 当日MA大于5，20日、60日、120前MA（用于确定上升趋势）
+    # 当日MA大于5日、20日、60日、120前MA（用于确定上升趋势）
     dayList = BaseParser.getPastTradingDayList(parseDay,120)
     day1 = dayList[0]
     day2 = dayList[59]
@@ -78,12 +78,12 @@ class PenetrateUpward60Parser(BaseParser):
 
 
 if __name__ == '__main__':
-  print 'PenetrateUpward60Parser'
+  print 'PenetrateUpwardMa60Parser'
 
   parseDay = BaseParser.getParseDay()
   print parseDay
 
-  idList = PenetrateUpward60Parser(parseDay).getParseResult(True)
+  idList = PenetrateUpwardMa60Parser(parseDay).getParseResult(True)
   print idList
 
 
