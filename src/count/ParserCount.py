@@ -21,88 +21,111 @@ from parsers import BaseParser
 
 if __name__ == '__main__':
   # config ==========================================================================
-  parser = 'SimpleParser'
-  beginDate = '2018-01-02'
-  countNum = 60 # 统计天数
-  traceNum = 15  # 跟踪天数
+  parserList = [
+    #'BaldRiseLineAndVolumeReduceParser',
+    #'GoldenPinBottomParser',
+    #'MacdReverseParser',
+    #'MaConvergenceParser',
+    #'MaPenetrateParser',
+    #'MaTrendParser',
+    #'MaxPriceParser',
+    #'OneLimitsParser',
+    'PenetrateUpwardMa60Parser',
+    'RgbParser',
+    'StandOn60Parser',
+    'SwallowUpParser',
+    'ThreeLimitsParser',
+    'TriangularSupportParser',
+    'TwoLimitsParser',
+    'VenusParser',
+    'VolumeMutationParser'
+  ]
+
+  # 2017-01-17 - 2017-05-05
+  beginDate = '2017-01-17'
+  countNum = 71 # 统计天数
+  traceNum = 5  # 跟踪天数
 
 
-  # run parser ======================================================================
-  Tools.initDir('enterList')
+  Tools.initDir('count')
 
-  print parser,beginDate,countNum,traceNum
-  dayList = BaseParser.BaseParser.getNextTradingDayList(beginDate,countNum)
-  print dayList
+  for parser in parserList:
+    # run parser ======================================================================
+    Tools.initDir('enterList')
 
-  for parseDay in dayList:
-    print parseDay
-    cmd = 'python '+Tools.getParsersDirPath() + '/'+ parser +'.py ' + parseDay
-    print cmd
-    os.system(cmd)
+    print parser,beginDate,countNum,traceNum
+    dayList = BaseParser.BaseParser.getNextTradingDayList(beginDate,countNum)
+    print dayList
+
+    for parseDay in dayList:
+      print parseDay
+      cmd = 'python '+Tools.getParsersDirPath() + '/'+ parser +'.py ' + parseDay
+      print cmd
+      os.system(cmd)
   
 
-  # count ===========================================================================
-  selectedList = {}
-  enterListDirPath = Tools.getEnterListDirPath()
-  for root,dirs,files in os.walk(enterListDirPath):
-    for f in files:
+    # count ===========================================================================
+    selectedList = {}
+    enterListDirPath = Tools.getEnterListDirPath()
+    for root,dirs,files in os.walk(enterListDirPath):
+      for f in files:
+        try:
+          path = root + '/' + f
+          date = f[:10]
+          idList = open(path,'r').read().split(',')
+          if len(idList)<2:  # 会包含''
+            continue
+          selectedList[date] = idList
+        except Exception, e:
+          pass
+          print repr(e)
+  
+    print selectedList
+  
+
+    # trace ===========================================================================
+    selectedNum = 0
+    riseNum = 0
+    declineNum = 0
+    drawNum = 0
+
+    totalRise = 0.0
+    avgRise = 0.0
+    for parseDay,idList in selectedList.items():
       try:
-        path = root + '/' + f
-        date = f[:10]
-        idList = open(path,'r').read().split(',')
-        if len(idList)<2:  # 会包含''
-          continue
-        selectedList[date] = idList
+        dayList = BaseParser.BaseParser.getNextTradingDayList(parseDay,traceNum)
+        traceDay = dayList[-1]
+        for id in idList:
+          selectedNum += 1
+          growthRate = BaseParser.BaseParser(parseDay).getGrowthRate(id,parseDay,traceDay)
+          totalRise += growthRate
+          if growthRate > 0:
+            riseNum +=1
+          elif growthRate == 0:
+            drawNum += 1
+          elif growthRate < 0:
+            declineNum += 1
       except Exception, e:
         pass
-        print repr(e)
-  
-  print selectedList
-  
+        #print repr(e)
+    avgRise = round(totalRise/selectedNum,3)
 
-  # trace ===========================================================================
-  selectedNum = 0
-  riseNum = 0
-  declineNum = 0
-  drawNum = 0
-
-  totalRise = 0.0
-  avgRise = 0.0
-  for parseDay,idList in selectedList.items():
-    try:
-      dayList = BaseParser.BaseParser.getNextTradingDayList(parseDay,traceNum)
-      traceDay = dayList[-1]
-      for id in idList:
-        selectedNum += 1
-        growthRate = BaseParser.BaseParser(parseDay).getGrowthRate(id,parseDay,traceDay)
-        totalRise += growthRate
-        if growthRate > 0:
-          riseNum +=1
-        elif growthRate == 0:
-          drawNum += 1
-        elif growthRate < 0:
-          declineNum += 1
-    except Exception, e:
-      pass
-      #print repr(e)
-  avgRise = round(totalRise/selectedNum,3)
-
-  print 'selectedNum: '+ str(selectedNum)
-  print 'riseNum: '+ str(riseNum)
-  print 'declineNum: '+ str(declineNum)
-  print 'drawNum: '+ str(drawNum)
-  print 'avgRise: '+ str(avgRise)
+    print 'selectedNum: '+ str(selectedNum)
+    print 'riseNum: '+ str(riseNum)
+    print 'declineNum: '+ str(declineNum)
+    print 'drawNum: '+ str(drawNum)
+    print 'avgRise: '+ str(avgRise)
 
 
-  # dump ============================================================================
-  s = str(selectedNum)
-  s += ','+str(riseNum)
-  s += ','+str(declineNum)
-  s += ','+str(drawNum)
-  s += ','+str(avgRise)
+    # dump ============================================================================
+    s = str(selectedNum)
+    s += ','+str(riseNum)
+    s += ','+str(declineNum)
+    s += ','+str(drawNum)
+    s += ','+str(avgRise)
 
-  path = Tools.getCountDirPath() + '/' + parser +'-' + beginDate + '-' +  str(countNum) +'-' + str(traceNum) 
-  open(path,'w').write(s)
+    path = Tools.getCountDirPath() + '/' + parser +'-' + beginDate + '-' +  str(countNum) +'-' + str(traceNum) 
+    open(path,'w').write(s)
 
 
 

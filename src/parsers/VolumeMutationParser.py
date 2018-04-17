@@ -41,7 +41,6 @@ class VolumeMutationParser(BaseParser):
      return False
 
     # 之前的成交量比较小
-
     parseDayVolume = self.getVolumeOfDay(res,parseDay)
 
     pastDayList = BaseParser.getPastTradingDayList(parseDay,self._days)[:-1]

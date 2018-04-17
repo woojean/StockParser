@@ -47,8 +47,6 @@ class GoldenPinBottomParser(BaseParser):
 
     # 下引线相对长度（按《日本蜡烛图技术》的定义，至少2倍，这里适度放松）
     rate = downLine/entity
-    if id =='002606':
-      print rate
     if rate < 1.618:
       return False
     
@@ -56,29 +54,6 @@ class GoldenPinBottomParser(BaseParser):
     if not self.isMinPriceOfDays(res,parseDay,5):
       return False
 
-    # 当日MA大于20日、60日、120前MA（用于确定上升趋势）
-    dayList = BaseParser.getPastTradingDayList(parseDay,60)
-    (v,v,ma) = self.getMAPrice(res,dayList)
-    parseDayMa = ma
-    if parseDayMa<0: # -1
-      return False
-
-    dayList = BaseParser.getPastTradingDayList(parseDay,120)
-    day1 = dayList[0]
-    day2 = dayList[59]
-    day3 = dayList[99]
-
-    (v,v,ma1) = self.getMAPrice(res,BaseParser.getPastTradingDayList(day1,60))
-    if parseDayMa < ma1:
-      return False
-
-    (v,v,ma2) = self.getMAPrice(res,BaseParser.getPastTradingDayList(day2,60))
-    if parseDayMa < ma2:
-      return False
-
-    (v,v,ma3) = self.getMAPrice(res,BaseParser.getPastTradingDayList(day3,60))
-    if parseDayMa < ma3:
-      return False
 
     return True
 

@@ -262,7 +262,7 @@ if __name__ == '__main__':
   }
 
   parsers = {
-    'GoldenPinBottomParser':'金针探底',
+    'BaldRiseLineAndVolumeReduceParser':'',
   }
 
   (parseDay, isNew,traceDay) = getParams()
