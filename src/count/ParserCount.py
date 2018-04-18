@@ -31,14 +31,15 @@ if __name__ == '__main__':
     #'MaxPriceParser',
     #'OneLimitsParser',
     #'PenetrateUpwardMa60Parser',
-    'RgbParser',
-    'StandOn60Parser',
-    'SwallowUpParser',
-    'ThreeLimitsParser',
-    'TriangularSupportParser',
-    'TwoLimitsParser',
-    'VenusParser',
-    'VolumeMutationParser'
+    #'RgbParser',
+    #'StandOn60Parser',
+    #'SwallowUpParser',
+    #'ThreeLimitsParser',
+    #'TriangularSupportParser',
+    #'TwoLimitsParser',
+    #'VenusParser',
+    #'VolumeMutationParser',
+    'WJParser'
   ]
 
   # 2017-01-17 - 2017-05-05

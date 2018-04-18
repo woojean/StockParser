@@ -33,7 +33,10 @@ class WJParser(BaseParser):
     ret = True
     length = len(l)
     for i in xrange(0,length-1):
-      if l[i]>l[i+1]:
+      if l[i] <0 or l[i+1]<0:
+        ret = False
+        break
+      if l[i] >= l[i+1]: # MA = -1
         ret = False
         break
     return ret
@@ -53,34 +56,29 @@ class WJParser(BaseParser):
     (v,v,ma3) = self.getMAPrice(res,dayList3)
     (v,v,ma4) = self.getMAPrice(res,dayList4)
     
+    if ma1<=0 or ma2<=0 or ma3<=0 or ma4<=0: # -1
+      return False
 
-    #     /
-    #    /
-    #   /
-    # 〇
+    #print ma1,ma2,ma3,ma4
+
     if self.isInRise([ma2,ma3,ma4]):
+      #print '〇↗↗↗'
       return True
     
-    #     /
-    #    /
-    # /〇
+    
     if self.isInRise([ma1,ma3,ma4]):
+      #print '↗〇↗↗'
       return True
 
-    #     /
-    #   〇
-    #  /
-    # /
+    
     if self.isInRise([ma1,ma2,ma4]):
+      #print '↗↗〇↗'
       return True
 
-
-    #   〇
-    #  /
-    # / 
-    #/
-    if self.isInRise([ma1,ma2,ma3]):
-      return True
+    
+    #if self.isInRise([ma1,ma2,ma3]):
+    #  print '↗↗↗〇'
+    #  return True
 
     return False
 
@@ -230,9 +228,9 @@ class WJParser(BaseParser):
     if upLine > 0: 
       return False
 
-    # 下引线相对长度（按《日本蜡烛图技术》的定义，至少2倍，这里适度放松）
+    # 下引线相对长度（按《日本蜡烛图技术》的定义，至少2倍）
     rate = downLine/entity
-    if rate < 1.618:
+    if rate < 2:
       return False
     
     # 触及10日最低价（用于排除上吊线）
