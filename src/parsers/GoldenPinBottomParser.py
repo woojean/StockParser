@@ -51,7 +51,7 @@ class GoldenPinBottomParser(BaseParser):
       return False
     
     # 触及5日最低价（用于排除上吊线）
-    if not self.isMinPriceOfDays(res,parseDay,5):
+    if not self.isTouchMinPriceOfDays(res,parseDay,5):
       return False
 
 

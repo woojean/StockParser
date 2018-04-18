@@ -30,7 +30,7 @@ if __name__ == '__main__':
     #'MaTrendParser',
     #'MaxPriceParser',
     #'OneLimitsParser',
-    'PenetrateUpwardMa60Parser',
+    #'PenetrateUpwardMa60Parser',
     'RgbParser',
     'StandOn60Parser',
     'SwallowUpParser',

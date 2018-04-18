@@ -275,10 +275,6 @@ class BaseParser:
   # 获取某一日的开盘价
   def getStartPriceOfDay(self,res,day):
     try:
-      #print re.findall('"'+ day +',(.*?)"', res)
-      #print (re.findall('"'+ day +',(.*?)"', res)[0]).split(',')
-      #print res
-      #print '"'+ day +',(.*?)"'
       price = float((re.findall('"'+ day +',(.*?)"', res)[0]).split(',')[0])
     except Exception, e:
       price = 0
@@ -360,7 +356,7 @@ class BaseParser:
 
 
   # 判断某一天是否是过去若干天的最低价
-  def isMinPriceOfDays(self,res,day,days):
+  def isTouchMinPriceOfDays(self,res,day,days):
     dayList = BaseParser.getPastTradingDayList(day,days)
     dayList = dayList[:-1]
     minPrice = self.getMinPriceOfDay(res,day)

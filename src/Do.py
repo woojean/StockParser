@@ -259,10 +259,11 @@ if __name__ == '__main__':
     'TwoLimitsParser':'二板',
     'VenusParser':'启明星',
     'VolumeMutationParser':'成交量突变',
+    'WJParser':'W'
   }
 
   parsers = {
-    'BaldRiseLineAndVolumeReduceParser':'',
+    'WJParser':'W',
   }
 
   (parseDay, isNew,traceDay) = getParams()

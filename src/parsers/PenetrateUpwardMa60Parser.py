@@ -49,22 +49,6 @@ class PenetrateUpwardMa60Parser(BaseParser):
     if endPrice2 <= ma:
       return False
 
-
-    # 240-180 | 180-120 | 120-60 | 60 - 0 | 区间均价递增
-    dayList = BaseParser.getPastTradingDayList(parseDay,240)
-    dayList1 = dayList[0:60]
-    dayList2 = dayList[60:120]
-    dayList3 = dayList[120:180]
-    dayList4 = dayList[180:240]
-    (v,v,ma1) = self.getMAPrice(res,dayList1)
-    (v,v,ma2) = self.getMAPrice(res,dayList2)
-    (v,v,ma3) = self.getMAPrice(res,dayList3)
-    (v,v,ma4) = self.getMAPrice(res,dayList4)
-
-    if not ((ma1 < ma2) and (ma2 < ma3) and (ma3 < ma4)):
-      return False
-
-
     return True
 
 
