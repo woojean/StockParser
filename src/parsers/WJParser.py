@@ -238,11 +238,54 @@ class WJParser(BaseParser):
       return False
     return True
 
+  # 镊形底
+  # ============================================================
+  def isGoldenPinBottom(self,res,parseDay):
+    ret = False
+    
+    dayList = self.getPastTradingDayList(parseDay,2)
+    day1 = dayList[0]  # 前一天
+    day2 = dayList[1]  # 后一天
+    
+    # 前一天触及10日最低价
+    if not self.isTouchMinPriceOfDays(res,day1,10):
+      return False
+
+    # 两天的最低价“接近或一致”
+    minPriceOfDay1 = self.getMinPriceOfDay(res,day1)
+    minPriceOfDay2 = self.getMinPriceOfDay(res,day2)
+    rate = abs((minPriceOfDay2- minPriceOfDay1)/minPriceOfDay1)
+    if rate > 0.001:
+      return False
+
+    return True
+
+
+  def isTweezersBottom(self,res,parseDay):
+    ret = False
+    
+    dayList = self.getPastTradingDayList(parseDay,2)
+    day1 = dayList[0]  # 前一天
+    day2 = dayList[1]  # 后一天
+    
+    # 前一天触及10日最低价
+    if not self.isTouchMinPriceOfDays(res,day1,10):
+      return False
+
+    # 两天的最低价“接近或一致”
+    minPriceOfDay1 = self.getMinPriceOfDay(res,day1)
+    minPriceOfDay2 = self.getMinPriceOfDay(res,day2)
+    rate = abs((minPriceOfDay2- minPriceOfDay1)/minPriceOfDay1)
+    if rate > 0.001:
+      return False
+
+    return True
 
 
   # 解析
   # ================================================================================
   def parse(self,res,parseDay,id=''):
+
     # 上升趋势
     if not self.isRiseIsStronger(res,parseDay):
       return False
@@ -261,6 +304,10 @@ class WJParser(BaseParser):
 
     # 金针探底
     if self.isGoldenPinBottom(res,parseDay):
+      return True
+
+    # 镊形底
+    if self.isTweezersBottom(res,parseDay):
       return True
 
     return False

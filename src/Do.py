@@ -256,6 +256,7 @@ if __name__ == '__main__':
     'SwallowUpParser':'向上吞没线',
     'ThreeLimitsParser':'三板',
     'TriangularSupportParser':'均线三角托',
+    'TweezersBottomParser':'镊形底',
     'TwoLimitsParser':'二板',
     'VenusParser':'启明星',
     'VolumeMutationParser':'成交量突变',
@@ -263,7 +264,7 @@ if __name__ == '__main__':
   }
 
   parsers = {
-    'WJParser':'W',
+    'WJParser':'W'
   }
 
   (parseDay, isNew,traceDay) = getParams()
