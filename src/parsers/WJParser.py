@@ -59,8 +59,7 @@ class WJParser(BaseParser):
     if ma1<=0 or ma2<=0 or ma3<=0 or ma4<=0: # -1
       return False
 
-    #print ma1,ma2,ma3,ma4
-
+    # 四象
     if self.isInRise([ma2,ma3,ma4]):
       #print '〇↗↗↗'
       return True
@@ -76,9 +75,8 @@ class WJParser(BaseParser):
       return True
 
     
-    #if self.isInRise([ma1,ma2,ma3]):
-    #  print '↗↗↗〇'
-    #  return True
+    if self.isInRise([ma1,ma2,ma3]):
+      return True
 
     return False
 
@@ -282,17 +280,7 @@ class WJParser(BaseParser):
     return True
 
   
-  def isFlatBottom(self,res,parseDay):
-    # 前期跌势当日MA60小于20日前MA60
-    dayList = BaseParser.getPastTradingDayList(parseDay,20)
-    day1 = dayList[0]
-    day2 = dayList[-1]
-    dayList1 = BaseParser.getPastTradingDayList(day1,60)
-    dayList2 = BaseParser.getPastTradingDayList(day2,60)
-    (v,v,ma1) = self.getMAPrice(res,dayList1)
-    (v,v,ma2) = self.getMAPrice(res,dayList2)
-    if ma2 > ma1:
-      return False
+  def isFlat(self,res,parseDay):
 
     # 连续10日涨跌幅绝对值不超过3%
     isExceed = False 
@@ -358,26 +346,50 @@ class WJParser(BaseParser):
       return False
 
     return True
+  
+
+  # ma5斜率增加
+  def isMa5RiseUp(self,res,parseDay):
+    dayList = BaseParser.getPastTradingDayList(parseDay,3)
+    day1 = dayList[0]
+    day2 = dayList[1]
+    day3 = dayList[2]
+    dayList1 = BaseParser.getPastTradingDayList(day1,5)
+    dayList2 = BaseParser.getPastTradingDayList(day2,5)
+    dayList3 = BaseParser.getPastTradingDayList(day3,5)
+    (v,v,ma1) = self.getMAPrice(res,dayList1)
+    (v,v,ma2) = self.getMAPrice(res,dayList2)
+    (v,v,ma3) = self.getMAPrice(res,dayList3)
+    diff1 = ma2 - ma1
+    diff2 = ma3 - ma2
+    #print diff1,diff2
+    if diff2 < diff1:
+      return False
+    return True
 
   
   # 判断是否有趋势
   # ---------------------------------------------------------------------------------
   def haveTrend(self,res,parseDay):
-    # 趋势1：上升趋势
-    if self.isRiseIsStronger(res,parseDay):
-      return True
+    # 趋势：MA5上升趋势
+    if not self.isMa5RiseUp(res,parseDay):
+      return False
 
-    # 趋势2：最近10日内出现过平底
+    # 趋势：一年四季度均价偏强
+    if not self.isRiseIsStronger(res,parseDay):
+      return False
+
+    # 趋势：最近出现过平台
     haveFlatBottom = False
     dayList = BaseParser.getPastTradingDayList(parseDay,10)
     for day in dayList:
-      if self.isFlatBottom(res,day):
+      if self.isFlat(res,day):
         haveFlatBottom = True
         break
-    if haveFlatBottom:
-      return True
+    if not haveFlatBottom:
+      return False
 
-    return False
+    return True
 
 
   # 判断是否有信号
@@ -414,6 +426,8 @@ class WJParser(BaseParser):
 
     if not self.haveSignal(res,parseDay):
       return False
+
+    return True
 
 
 

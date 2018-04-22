@@ -26,6 +26,11 @@ class FlatBottomParser(BaseParser):
   def __init__(self,parseDay):
     BaseParser.__init__(self,parseDay) 
 
+
+  
+  
+
+
   def parse(self,res,parseDay,id=''):
     
     # 前期跌势当日MA60小于20日前MA60
@@ -49,13 +54,13 @@ class FlatBottomParser(BaseParser):
       endPriceOfDay1 = self.getEndPriceOfDay(res,day1)
       endPriceOfDay2 = self.getEndPriceOfDay(res,day2)
       rate = abs((endPriceOfDay2 - endPriceOfDay1)/endPriceOfDay1)
-      if rate > 0.03:
+      if rate > 0.02:
         isExceed = True
         break
     if isExceed:
       return False
 
-    # 连续10日的最高价序列、最低价序列的差额不超过10%
+    # 连续10日的最高价序列、最低价序列的差额
     minMaxPrice = 999999
     maxMaxPrice = 0
     minMinPrice = 999999
