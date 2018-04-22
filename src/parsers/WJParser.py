@@ -281,36 +281,139 @@ class WJParser(BaseParser):
 
     return True
 
-
-  # 解析
-  # ================================================================================
-  def parse(self,res,parseDay,id=''):
-
-    # 上升趋势
-    if not self.isRiseIsStronger(res,parseDay):
+  
+  def isFlatBottom(self,res,parseDay):
+    # 前期跌势当日MA60小于20日前MA60
+    dayList = BaseParser.getPastTradingDayList(parseDay,20)
+    day1 = dayList[0]
+    day2 = dayList[-1]
+    dayList1 = BaseParser.getPastTradingDayList(day1,60)
+    dayList2 = BaseParser.getPastTradingDayList(day2,60)
+    (v,v,ma1) = self.getMAPrice(res,dayList1)
+    (v,v,ma2) = self.getMAPrice(res,dayList2)
+    if ma2 > ma1:
       return False
 
-    # 大秃阳线 + 缩量
+    # 连续10日涨跌幅绝对值不超过3%
+    isExceed = False 
+    dayList = BaseParser.getPastTradingDayList(parseDay,10)
+    l = len(dayList)
+    for i in xrange(0,l-1):
+      day1 = dayList[i]
+      day2 = dayList[i+1]
+      endPriceOfDay1 = self.getEndPriceOfDay(res,day1)
+      endPriceOfDay2 = self.getEndPriceOfDay(res,day2)
+      rate = abs((endPriceOfDay2 - endPriceOfDay1)/endPriceOfDay1)
+      if rate > 0.03:
+        isExceed = True
+        break
+    if isExceed:
+      return False
+
+    # 连续10日的最高价序列、最低价序列的差额不超过10%
+    minMaxPrice = 999999
+    maxMaxPrice = 0
+    minMinPrice = 999999
+    maxMinPrice = 0
+    dayList = BaseParser.getPastTradingDayList(parseDay,10)
+    for day in dayList:
+      minPrice = self.getMinPriceOfDay(res,day)
+      maxPrice = self.getMaxPriceOfDay(res,day)
+      if minPrice > maxMinPrice:
+        maxMinPrice = minPrice
+      if minPrice < minMinPrice:
+        minMinPrice = minPrice
+
+      if maxPrice > maxMaxPrice:
+        maxMaxPrice = maxPrice
+      if maxPrice < minMaxPrice:
+        minMaxPrice = maxPrice
+
+    isExceed = False 
+    maxRate = 0.05
+    for day in dayList:
+      minPrice = self.getMinPriceOfDay(res,day)
+      maxPrice = self.getMaxPriceOfDay(res,day)
+      rate = abs((minPrice-minMinPrice)/minMinPrice)
+      if rate > maxRate:
+        isExceed = True
+        break
+
+      rate = abs((minPrice-maxMinPrice)/maxMinPrice)
+      if rate > maxRate:
+        isExceed = True
+        break
+
+      rate = abs((maxPrice-minMaxPrice)/minMaxPrice)
+      if rate > maxRate:
+        isExceed = True
+        break
+
+      rate = abs((maxPrice-maxMaxPrice)/maxMaxPrice)
+      if rate > maxRate:
+        isExceed = True
+        break
+
+    if isExceed:
+      return False
+
+    return True
+
+  
+  # 判断是否有趋势
+  # ---------------------------------------------------------------------------------
+  def haveTrend(self,res,parseDay):
+    # 趋势1：上升趋势
+    if self.isRiseIsStronger(res,parseDay):
+      return True
+
+    # 趋势2：最近10日内出现过平底
+    haveFlatBottom = False
+    dayList = BaseParser.getPastTradingDayList(parseDay,10)
+    for day in dayList:
+      if self.isFlatBottom(res,day):
+        haveFlatBottom = True
+        break
+    if haveFlatBottom:
+      return True
+
+    return False
+
+
+  # 判断是否有信号
+  # ---------------------------------------------------------------------------------
+  def haveSignal(self,res,parseDay):
+    # 信号1：大秃阳线 + 缩量
     if self.isBigBaldRiseLineAndVolumeReduce(res,parseDay):
       return True
 
-    # 上穿MA60
+    # 信号2：上穿MA60
     if self.isPenetrateUpwardMa60(res,parseDay):
       return True
 
-    # 均线三角托
+    # 信号3：均线三角托
     if self.isTriangularSupport(res,parseDay):
       return True
 
-    # 金针探底
+    # 信号4：金针探底
     if self.isGoldenPinBottom(res,parseDay):
       return True
 
-    # 镊形底
+    # 信号5：镊形底
     if self.isTweezersBottom(res,parseDay):
       return True
 
     return False
+
+
+  # 解析
+  # ================================================================================
+  def parse(self,res,parseDay,id=''):
+    if not self.haveTrend(res,parseDay):
+      return False
+
+    if not self.haveSignal(res,parseDay):
+      return False
 
 
 
