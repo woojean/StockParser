@@ -203,39 +203,7 @@ class BaseParser:
       #print repr(e)
     return isMaInTrend
 
-  #  inherit
-  # ----------------------------------------------------------------------------------------
-  def dumpIdList(self,idList):
-    enterListDirPath = Tools.getEnterListDirPath()
-    #open('data/golden-pin-bottom/'+ confirmDay +'.sel','w').write(','.join(idList))
-    open(enterListDirPath + '/' + self._parseDay + '-'+ self._tag+'.sel','w').write(','.join(idList))
-    print "\n\n",self._parseDay
-    print "============================================ Result ============================================ \n"
-    print str(idList) + "\n\n"
-    print " - " + str(len(idList)) + " - \n\n"
-
-
-  def getParseResult(self,isDump=False):
-    idList = []
-    num = 0
-    priceFileList = BaseParser.getPriceFileList()
-    for f in priceFileList:
-      try:
-        id = f[-6:]
-        res = open(f,'r').read()
-        ret = self.parse(res,self._parseDay,id)
-        if ret:
-          idList.append(id)
-          num += 1
-          print str(num) + ' ↗'
-      except Exception, e:
-        pass
-        #print repr(e)
-
-    if isDump:
-      self.dumpIdList(idList)
-
-    return idList
+  
 
 
   # compute
@@ -424,5 +392,52 @@ class BaseParser:
 
     return True
 
+  #  inherit
+  # ----------------------------------------------------------------------------------------
+  def dumpIdList(self,idList):
+    enterListDirPath = Tools.getEnterListDirPath()
+    #open('data/golden-pin-bottom/'+ confirmDay +'.sel','w').write(','.join(idList))
+    open(enterListDirPath + '/' + self._parseDay + '-'+ self._tag+'.sel','w').write(','.join(idList))
+    print "\n\n",self._parseDay
+    print "============================================ Result ============================================ \n"
+    print str(idList) + "\n\n"
+    print " - " + str(len(idList)) + " - \n\n"
 
+  def printProcess(self,current,total):
+    lastRate = round((current-1)*100.0/total,0)
+    currentRate = round(current*100.0/total,0)
+    if lastRate != currentRate:
+      rate = str(int(currentRate)) 
+      rate = rate.rjust(3,' ')
+      s = ' -> '+ rate + ' %'
+      length = len(s) + int(currentRate)
+      s = s.rjust(length,'.')
+      s = s.rjust(110,' ')
+      print s
+
+  def getParseResult(self,isDump=False):
+    idList = []
+    num = 0
+    parsedNum = 0
+    priceFileList = BaseParser.getPriceFileList()
+    total = len(priceFileList)
+    for f in priceFileList:
+      try:
+        self.printProcess(parsedNum,total)
+        id = f[-6:]
+        res = open(f,'r').read()
+        ret = self.parse(res,self._parseDay,id)
+        if ret:
+          idList.append(id)
+          num += 1
+          print str(num) + ' ↗'
+        parsedNum += 1
+      except Exception, e:
+        pass
+        print repr(e)
+
+    if isDump:
+      self.dumpIdList(idList)
+
+    return idList
 

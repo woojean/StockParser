@@ -26,9 +26,7 @@ class WJParser(BaseParser):
   def __init__(self,parseDay):
     BaseParser.__init__(self,parseDay) 
 
-
-  # 趋势判断
-  # ============================================================
+  # 判断一组数字是否处于上升序列中
   def isInRise(self,l):
     ret = True
     length = len(l)
@@ -41,7 +39,7 @@ class WJParser(BaseParser):
         break
     return ret
 
-
+  # 一年四季度均价偏强
   def isRiseIsStronger(self,res,parseDay):
     # 240-180 | 180-120 | 120-60 | 区间均价递增
 
@@ -80,10 +78,7 @@ class WJParser(BaseParser):
 
     return False
 
-
-
-  # 光头光脚大阳线，且缩量
-  # ============================================================
+  # 光头光脚阳线
   def isBigBaldRiseLine(self,res,parseDay):
     startPrice = self.getStartPriceOfDay(res,parseDay)
     endPrice = self.getEndPriceOfDay(res,parseDay)
@@ -103,7 +98,7 @@ class WJParser(BaseParser):
 
     return True
 
-
+  # 大阳线，且缩量
   def isBigBaldRiseLineAndVolumeReduce(self,res,parseDay):
     ret = False
     # 秃阳线
@@ -146,9 +141,7 @@ class WJParser(BaseParser):
 
     return True
 
-  
   # 收盘价向上穿透MA60
-  # ============================================================
   def isPenetrateUpwardMa60(self,res,parseDay):
     dayList = BaseParser.getPastTradingDayList(parseDay,2)
     day1 = dayList[0]
@@ -171,9 +164,7 @@ class WJParser(BaseParser):
 
     return True
 
-
   # 均线形成三角托
-  # ============================================================
   def isTriangularSupport(self,res,parseDay):
     dayList5 = BaseParser.getPastTradingDayList(parseDay,5)
     dayList10 = BaseParser.getPastTradingDayList(parseDay,10)
@@ -205,9 +196,7 @@ class WJParser(BaseParser):
 
     return True
 
-
   # 日K线金针探底
-  # ============================================================
   def isGoldenPinBottom(self,res,parseDay):
     startPrice = self.getStartPriceOfDay(res,parseDay)
     endPrice = self.getEndPriceOfDay(res,parseDay)
@@ -237,28 +226,6 @@ class WJParser(BaseParser):
     return True
 
   # 镊形底
-  # ============================================================
-  def isGoldenPinBottom(self,res,parseDay):
-    ret = False
-    
-    dayList = self.getPastTradingDayList(parseDay,2)
-    day1 = dayList[0]  # 前一天
-    day2 = dayList[1]  # 后一天
-    
-    # 前一天触及10日最低价
-    if not self.isTouchMinPriceOfDays(res,day1,10):
-      return False
-
-    # 两天的最低价“接近或一致”
-    minPriceOfDay1 = self.getMinPriceOfDay(res,day1)
-    minPriceOfDay2 = self.getMinPriceOfDay(res,day2)
-    rate = abs((minPriceOfDay2- minPriceOfDay1)/minPriceOfDay1)
-    if rate > 0.001:
-      return False
-
-    return True
-
-
   def isTweezersBottom(self,res,parseDay):
     ret = False
     
@@ -279,12 +246,22 @@ class WJParser(BaseParser):
 
     return True
 
-  
-  def isFlat(self,res,parseDay):
+  # 是否处于平台当中
+  def isInPlatform(self,res,parseDay):
+    platformDays = 10
+    # 平台期总涨跌幅小于5%
+    dayList = BaseParser.getPastTradingDayList(parseDay,platformDays)
+    day1 = dayList[0]
+    day2 = dayList[-1]
+    startPriceOfDay1 = self.getStartPriceOfDay(res,day1)
+    endPriceOfDay2 = self.getEndPriceOfDay(res,day2)
+    rate = (endPriceOfDay2 - startPriceOfDay1)/startPriceOfDay1
+    if abs(rate) > 0.05:
+      return False
 
-    # 连续10日涨跌幅绝对值不超过3%
+    # 平台期每一日的涨跌幅绝对值不超过3%
     isExceed = False 
-    dayList = BaseParser.getPastTradingDayList(parseDay,10)
+    dayList = BaseParser.getPastTradingDayList(parseDay,platformDays)
     l = len(dayList)
     for i in xrange(0,l-1):
       day1 = dayList[i]
@@ -298,12 +275,12 @@ class WJParser(BaseParser):
     if isExceed:
       return False
 
-    # 连续10日的最高价序列、最低价序列的差额不超过10%
-    minMaxPrice = 999999
-    maxMaxPrice = 0
-    minMinPrice = 999999
-    maxMinPrice = 0
-    dayList = BaseParser.getPastTradingDayList(parseDay,10)
+    # 平台期的最高价序列、最低价序列的差额不超过10%
+    minMaxPrice = 999999 # 最高价序列中的最小值
+    maxMaxPrice = 0 # 最高价序列中的最大值
+    minMinPrice = 999999 # 最低价序列中的最小值
+    maxMinPrice = 0 # 最低价序列中的最大值
+    dayList = BaseParser.getPastTradingDayList(parseDay,platformDays)
     for day in dayList:
       minPrice = self.getMinPriceOfDay(res,day)
       maxPrice = self.getMaxPriceOfDay(res,day)
@@ -316,8 +293,8 @@ class WJParser(BaseParser):
         maxMaxPrice = maxPrice
       if maxPrice < minMaxPrice:
         minMaxPrice = maxPrice
-
-    isExceed = False 
+     
+    isExceed = False # 每一日的最高价、最低价与边界值的差异小于5%
     maxRate = 0.05
     for day in dayList:
       minPrice = self.getMinPriceOfDay(res,day)
@@ -346,9 +323,8 @@ class WJParser(BaseParser):
       return False
 
     return True
-  
 
-  # ma5斜率增加
+  # ma5斜率是否增加
   def isMa5RiseUp(self,res,parseDay):
     dayList = BaseParser.getPastTradingDayList(parseDay,3)
     day1 = dayList[0]
@@ -362,37 +338,40 @@ class WJParser(BaseParser):
     (v,v,ma3) = self.getMAPrice(res,dayList3)
     diff1 = ma2 - ma1
     diff2 = ma3 - ma2
-    #print diff1,diff2
     if diff2 < diff1:
       return False
     return True
 
-  
-  # 判断是否有趋势
+  # 判断最近（两周内）是否经历过平台走势
+  def isRecentlyInPlatform(self,res,parseDay):
+    havePlatformTrend = False
+    dayList = BaseParser.getPastTradingDayList(parseDay,10)
+    for day in dayList:
+      if self.isInPlatform(res,day):
+        havePlatformTrend = True
+        break
+    if not havePlatformTrend:
+      return False
+    return True
+
+  # 趋势判断
   # ---------------------------------------------------------------------------------
   def haveTrend(self,res,parseDay):
-    # 趋势：MA5上升趋势
+    # 趋势1：MA5上升趋势
     if not self.isMa5RiseUp(res,parseDay):
       return False
 
-    # 趋势：一年四季度均价偏强
+    # 趋势2：一年四季度均价偏强
     if not self.isRiseIsStronger(res,parseDay):
       return False
 
-    # 趋势：最近出现过平台
-    haveFlatBottom = False
-    dayList = BaseParser.getPastTradingDayList(parseDay,10)
-    for day in dayList:
-      if self.isFlat(res,day):
-        haveFlatBottom = True
-        break
-    if not haveFlatBottom:
+    # 趋势3：最近出现过平台
+    if not self.isRecentlyInPlatform(res,parseDay):
       return False
 
     return True
 
-
-  # 判断是否有信号
+  # 信号判断
   # ---------------------------------------------------------------------------------
   def haveSignal(self,res,parseDay):
     # 信号1：大秃阳线 + 缩量
@@ -416,7 +395,6 @@ class WJParser(BaseParser):
       return True
 
     return False
-
 
   # 解析
   # ================================================================================
