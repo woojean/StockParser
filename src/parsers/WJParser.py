@@ -227,8 +227,6 @@ class WJParser(BaseParser):
 
   # 镊形底
   def isTweezersBottom(self,res,parseDay):
-    ret = False
-    
     dayList = self.getPastTradingDayList(parseDay,2)
     day1 = dayList[0]  # 前一天
     day2 = dayList[1]  # 后一天
@@ -241,7 +239,7 @@ class WJParser(BaseParser):
     minPriceOfDay1 = self.getMinPriceOfDay(res,day1)
     minPriceOfDay2 = self.getMinPriceOfDay(res,day2)
     rate = abs((minPriceOfDay2- minPriceOfDay1)/minPriceOfDay1)
-    if rate > 0.001:
+    if rate > 0.005:  # 差距在0.5%以内
       return False
 
     return True
@@ -373,25 +371,30 @@ class WJParser(BaseParser):
 
   # 信号判断
   # ---------------------------------------------------------------------------------
-  def haveSignal(self,res,parseDay):
-    # 信号1：大秃阳线 + 缩量
+  def haveSignal(self,res,parseDay,id):
+    # 信号1：缩量大秃阳线
     if self.isBigBaldRiseLineAndVolumeReduce(res,parseDay):
+      print id,'缩量大秃阳线'
       return True
 
     # 信号2：上穿MA60
     if self.isPenetrateUpwardMa60(res,parseDay):
+      print id,'上穿MA60'
       return True
 
     # 信号3：均线三角托
     if self.isTriangularSupport(res,parseDay):
+      print id,'均线三角托'
       return True
 
     # 信号4：金针探底
     if self.isGoldenPinBottom(res,parseDay):
+      print id,'金针探底'
       return True
 
     # 信号5：镊形底
     if self.isTweezersBottom(res,parseDay):
+      print id,'镊形底'
       return True
 
     return False
@@ -402,7 +405,7 @@ class WJParser(BaseParser):
     if not self.haveTrend(res,parseDay):
       return False
 
-    if not self.haveSignal(res,parseDay):
+    if not self.haveSignal(res,parseDay,id):
       return False
 
     return True

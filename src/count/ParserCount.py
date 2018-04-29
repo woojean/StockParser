@@ -45,7 +45,7 @@ if __name__ == '__main__':
   # 2017-01-17 - 2017-05-05
   beginDate = '2017-01-17'
   countNum = 71 # 统计天数
-  traceNum = 5  # 跟踪天数
+  traceNum = 1  # 跟踪天数
 
 
   Tools.initDir('count')
@@ -115,7 +115,7 @@ if __name__ == '__main__':
     print 'riseNum: '+ str(riseNum)
     print 'declineNum: '+ str(declineNum)
     print 'drawNum: '+ str(drawNum)
-    print 'avgRise: '+ str(avgRise)
+    print 'avgRise: '+ str(avgRise)+'%'
 
 
     # dump ============================================================================
@@ -123,7 +123,7 @@ if __name__ == '__main__':
     s += ','+str(riseNum)
     s += ','+str(declineNum)
     s += ','+str(drawNum)
-    s += ','+str(avgRise)
+    s += ','+str(avgRise)+'%'
 
     path = Tools.getCountDirPath() + '/' + parser +'-' + beginDate + '-' +  str(countNum) +'-' + str(traceNum) 
     open(path,'w').write(s)

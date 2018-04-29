@@ -51,20 +51,7 @@ def runSpiders(spiders):
     print cmd
     os.system(cmd)
 
-def run(parseDay,parsers,isNew=False):
-  if isNew:
-    spiders = [
-      'PriceSpider',
-      'MacdSpider',
-      'BasicInfoSpider'
-    ]
-    runSpiders(spiders)
-    
-  Tools.initDir('enterList')
-  for parser,tag in parsers.items():
-    cmd = 'python '+Tools.getParsersDirPath() + '/'+ parser +'.py ' + parseDay
-    print cmd
-    os.system(cmd)
+
   
 def report(parseDay,parsers,isOpen=False,traceDay=''):
   sel = ''
@@ -236,6 +223,23 @@ td{
   	os.system('open '+path)
 
 
+
+def run(parseDay,parsers,isNew=False):
+  if isNew:
+    spiders = [
+      'PriceSpider',
+      #'MacdSpider',
+      'BasicInfoSpider'
+    ]
+    runSpiders(spiders)
+    
+  Tools.initDir('enterList')
+  for parser,tag in parsers.items():
+    cmd = 'python '+Tools.getParsersDirPath() + '/'+ parser +'.py ' + parseDay
+    print cmd
+    os.system(cmd)
+
+    
 '''
 python src/Do.py 2018-03-26 x 2018-04-09 
 '''

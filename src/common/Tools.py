@@ -23,6 +23,9 @@ def getRootPath():
 def getParsersDirPath():
   return getRootPath()+'/src/parsers'  
 
+def getTracersDirPath():
+  return getRootPath()+'/src/tracers'  
+
 def getBasicDirPath():
   return getRootPath()+'/data/basic'  
 
@@ -34,6 +37,12 @@ def getSpiderDirPath():
 
 def getReportDirPath():
   path = getRootPath()+'/data/report'  # 价格数据的存储路径
+  if not os.path.exists(path):
+    os.mkdir(path)
+  return path
+
+def getTracerDirPath():
+  path = getRootPath()+'/data/tracer'  
   if not os.path.exists(path):
     os.mkdir(path)
   return path

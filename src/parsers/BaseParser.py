@@ -334,7 +334,7 @@ class BaseParser:
       price = self.getMinPriceOfDay(res,d)
       if price < otherDayMinPrice: # 错误数据（交易日不连贯）
         otherDayMinPrice = price
-    return minPrice < otherDayMinPrice
+    return minPrice <= otherDayMinPrice
 
   # 判断某一天是否是过去若干天的最高价
   def isMaxPriceOfDays(self,res,day,days):
@@ -409,10 +409,11 @@ class BaseParser:
     if lastRate != currentRate:
       rate = str(int(currentRate)) 
       rate = rate.rjust(3,' ')
-      s = ' -> '+ rate + ' %'
-      length = len(s) + int(currentRate)
-      s = s.rjust(length,'.')
-      s = s.rjust(110,' ')
+      s = ''
+      s = s.rjust(int(currentRate),'.')
+      s += ' -> '
+      s = s.ljust(104,' ')
+      s += rate + ' %'
       print s
 
   def getParseResult(self,isDump=False):
@@ -434,7 +435,7 @@ class BaseParser:
         parsedNum += 1
       except Exception, e:
         pass
-        print repr(e)
+        #print repr(e)
 
     if isDump:
       self.dumpIdList(idList)
