@@ -28,6 +28,9 @@ if __name__ == '__main__':
 
   # ================================================================================
   total = 0
+  totalRise = 0
+  totalDecline = 0
+  totalDraw = 0
   totalPr = 0
   totalGrowthRate = 0
   totalRiskRate = 0
@@ -38,7 +41,9 @@ if __name__ == '__main__':
     tables += '<h4>'+parseDay+'</h4>'
     tables +='<table>'
     tables += '<tr>'
+    tables += '<td>买入日</td>'
     tables += '<td>代码</td>'
+    tables += '<td>名称</td>'
     tables += '<td>PR</td>'
     tables += '<td>涨幅</td>'
     tables += '<td>买入价</td>'
@@ -54,14 +59,31 @@ if __name__ == '__main__':
       totalRiskRate += i['riskRate']
       totalHoldDays += i['holdDays']
 
-      tables += '<tr>'
+      if i['riskRate'] == i['growthRate']:
+      	tables += '<tr style="background-color:#eee;">'
+      else:
+        tables += '<tr>'
+      tables += '<td>'+str(i['day'])+'</td>'
       tables += '<td>'+str(i['id'])+'</td>'
-      tables += '<td>'+str(i['PR'])+'</td>'
+      tables += '<td>'+str(i['name'])+'</td>'
 
+      if i['PR'] > 3:
+      	tables += '<td><font color="red"><b>'+str(i['PR'])+'</b></font></td>'
+      else:
+        tables += '<td>'+str(i['PR'])+'</td>'
+
+      # 涨跌幅
       growthRate = i['growthRate']
-      if growthRate >= 0.1:
+      if growthRate > 0:
+      	totalRise += 1
+      elif growthRate < 0:
+      	totalDecline +=1
+      else:
+      	totalDraw +=1
+
+      if growthRate >= 0.05:
         tables += '<td><font color="red"><b>'+str(i['profitRate'])+'</b></font></td>'
-      elif growthRate <= -0.05:
+      elif growthRate <= -0.03:
       	tables += '<td><font color="green"><b>'+str(i['profitRate'])+'</b></font></td>'
       else:
       	tables += '<td>'+str(i['profitRate'])+'</td>'
@@ -74,10 +96,10 @@ if __name__ == '__main__':
     
       tables += '</tr>'
     tables += '</table>'
-
-  avgPr = totalPr/total
-  avgGrowthRate = totalGrowthRate/total
-  avgRiskRate = totalRiskRate/total
+  
+  avgPr = round(totalPr/total,5)
+  avgGrowthRate = round(totalGrowthRate/total,5)
+  avgRiskRate = round(totalRiskRate/total,5)
   avgHoldDays = totalHoldDays/total
 
   # ================================================================================
@@ -121,9 +143,12 @@ td {
   s += '</head><body>'
   s += '<table>'
   s += '<tr><td>总数：</td><td>'+str(total)+'</td></tr>'
+  s += '<tr><td>涨：</td><td>'+str(totalRise)+' / '+str(round(totalRise*100.0/total,3))+'%</td></tr>'
+  s += '<tr><td>跌：</td><td>'+str(totalDecline)+'</td></tr>'
+  s += '<tr><td>平：</td><td>'+str(totalDraw)+'</td></tr>'
   s += '<tr><td>PR平均值：</td><td>'+str(avgPr)+'</td></tr>'
-  s += '<tr><td>平均涨幅：</td><td>'+str(round(avgGrowthRate*100.0,5))+'%</td></tr>'
-  s += '<tr><td>平均风险幅度：</td><td>'+str(avgRiskRate)+'</td></tr>'
+  s += '<tr><td>平均涨幅：</td><td>'+str(avgGrowthRate*100.0)+'%</td></tr>'
+  s += '<tr><td>平均风险幅度：</td><td>'+str(avgRiskRate*100.0)+'%</td></tr>'
   s += '<tr><td>平均持股天数：</td><td>'+str(avgHoldDays)+'</td></tr>'
   s += '</table>'
   # ================================================================================

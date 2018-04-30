@@ -42,8 +42,9 @@ if __name__ == '__main__':
     'WJParser'
   ]
 
-  beginDate = '2018-03-08'
-  traceDays = 1 # 统计天数
+  #beginDate = '2017-12-06'
+  beginDate = '2018-01-02'
+  traceDays = 10 # 统计天数
 
   isNew = False if (len(sys.argv) <= 1) else ('new' ==sys.argv[1])
   if isNew:
@@ -55,6 +56,11 @@ if __name__ == '__main__':
       dayList = BaseParser.BaseParser.getNextTradingDayList(beginDate,traceDays-1)
       dayList.insert(0,beginDate)
       print dayList
+
+      dayList = [
+        #'2017-07-13',
+        '2018-03-01',
+      ]
 
       for parseDay in dayList:
         print parseDay

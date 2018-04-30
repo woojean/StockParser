@@ -73,8 +73,9 @@ class WJParser(BaseParser):
       return True
 
     
-    if self.isInRise([ma1,ma2,ma3]):
-      return True
+    #if self.isInRise([ma1,ma2,ma3]):
+    #print '↗↗↗〇'
+    #  return True
 
     return False
 
@@ -192,6 +193,52 @@ class WJParser(BaseParser):
 
     # 2日前 ma20 > ma5 > ma10
     if not ((ma20 > ma5) and (ma5 > ma10)):
+      return False
+
+    return True
+
+
+  def isSwallowUp(self,res,parseDay):
+    ret = False
+    dayList = BaseParser.getPastTradingDayList(parseDay,3)
+    day1 = dayList[0]  # 第一天
+    day2 = dayList[1]  # 第二天
+    day3 = dayList[2]  # 第二天
+    
+    startPriceOfDay1 = self.getStartPriceOfDay(res,day1)
+    endPriceOfDay1 = self.getEndPriceOfDay(res,day1)
+    entityOfDay1 = abs(startPriceOfDay1 - endPriceOfDay1)
+    startPriceOfDay2 = self.getStartPriceOfDay(res,day2)
+    endPriceOfDay2 = self.getEndPriceOfDay(res,day2)
+    entityOfDay2 = abs(startPriceOfDay2 - endPriceOfDay2)
+    startPriceOfDay3 = self.getStartPriceOfDay(res,day3)
+    endPriceOfDay3 = self.getEndPriceOfDay(res,day3)
+    entityOfDay3 = abs(startPriceOfDay2 - endPriceOfDay3)
+
+    # 第2天阴线
+    if endPriceOfDay2 > startPriceOfDay2:
+      return False
+
+    # 第3天阳线
+    if endPriceOfDay3 <= startPriceOfDay3:
+      return False
+  
+    # 第3天实体长度是第2天的2倍
+    if (entityOfDay2 != 0) and (entityOfDay3/entityOfDay2 < 2.618):
+      return False
+
+    # 第3天开盘低于第2天收盘
+    if endPriceOfDay2 < startPriceOfDay3:
+      return False
+
+    # 第3天收盘大于第2天开盘
+    if endPriceOfDay3 <= startPriceOfDay2:
+      return False
+   
+    # 第3天同时吞没第1天
+    if min(startPriceOfDay3,endPriceOfDay3) >= min(startPriceOfDay1,endPriceOfDay1):
+      return False
+    if max(startPriceOfDay3,endPriceOfDay3) <= max(startPriceOfDay1,endPriceOfDay1):
       return False
 
     return True
@@ -340,6 +387,24 @@ class WJParser(BaseParser):
       return False
     return True
 
+  
+  def isHaveTwoPointTrend(self,res,parseDay,days):
+    dayList = BaseParser.getPastTradingDayList(parseDay,days)
+    day1 = dayList[0]
+    day2 = dayList[-1]
+    endPrice1 = self.getEndPriceOfDay(res,day1)
+    endPrice2 = self.getEndPriceOfDay(res,day2)
+    return day2 > day1
+
+
+  def isPriceBiggerThanAvg(self,res,parseDay,days):
+    dayList = BaseParser.getPastTradingDayList(parseDay,days)
+    (v,v,ma) = self.getMAPrice(res,dayList)
+    endPrice = self.getEndPriceOfDay(res,parseDay)
+    return endPrice > ma
+
+
+
   # 判断最近（两周内）是否经历过平台走势
   def isRecentlyInPlatform(self,res,parseDay):
     havePlatformTrend = False
@@ -352,9 +417,26 @@ class WJParser(BaseParser):
       return False
     return True
 
+  def isUpGap(self,res,parseDay):
+    dayList = BaseParser.getPastTradingDayList(parseDay,2)
+    day1 = dayList[0]
+    day2 = dayList[1]
+    maxPriceOfDay1 = self.getMaxPriceOfDay(res,day1)
+    minPriceOfDay2 = self.getMinPriceOfDay(res,day2)
+    return minPriceOfDay2 > maxPriceOfDay1
+
+
   # 趋势判断
   # ---------------------------------------------------------------------------------
   def haveTrend(self,res,parseDay):
+    # 趋势1：起点、终点存在趋势
+    if not self.isHaveTwoPointTrend(res,parseDay,60):
+      return False
+
+    # 趋势1：MA5上升趋势
+    if not self.isPriceBiggerThanAvg(res,parseDay,60):
+      return False
+
     # 趋势1：MA5上升趋势
     if not self.isMa5RiseUp(res,parseDay):
       return False
@@ -369,42 +451,57 @@ class WJParser(BaseParser):
 
     return True
 
+
   # 信号判断
   # ---------------------------------------------------------------------------------
   def haveSignal(self,res,parseDay,id):
-    # 信号1：缩量大秃阳线
+    # 信号：上穿MA60
+    #if self.isPenetrateUpwardMa60(res,parseDay):
+    #  print id,'上穿MA60'
+    #  return True
+
+    # 信号：均线三角托
+    #if self.isTriangularSupport(res,parseDay):
+    #  print id,'均线三角托'
+    #  return True
+
+
+    # 信号：缩量大秃阳线
     if self.isBigBaldRiseLineAndVolumeReduce(res,parseDay):
       print id,'缩量大秃阳线'
       return True
-
-    # 信号2：上穿MA60
-    if self.isPenetrateUpwardMa60(res,parseDay):
-      print id,'上穿MA60'
-      return True
-
-    # 信号3：均线三角托
-    if self.isTriangularSupport(res,parseDay):
-      print id,'均线三角托'
-      return True
-
-    # 信号4：金针探底
+    
+    # 信号：金针探底
     if self.isGoldenPinBottom(res,parseDay):
       print id,'金针探底'
       return True
 
-    # 信号5：镊形底
+    # 信号：镊形底
     if self.isTweezersBottom(res,parseDay):
       print id,'镊形底'
       return True
 
+    # 信号：吞没线
+    if self.isSwallowUp(res,parseDay):
+      print id,'吞没线'
+      return True
+
+    # 信号：向上缺口
+    if self.isUpGap(res,parseDay):
+      print id,'向上缺口'
+      return True
+
     return False
+
 
   # 解析
   # ================================================================================
   def parse(self,res,parseDay,id=''):
+    # 趋势
     if not self.haveTrend(res,parseDay):
       return False
 
+    # 信号
     if not self.haveSignal(res,parseDay,id):
       return False
 
