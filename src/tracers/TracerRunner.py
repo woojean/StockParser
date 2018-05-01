@@ -43,8 +43,8 @@ if __name__ == '__main__':
   ]
 
   #beginDate = '2017-12-06'
-  beginDate = '2018-01-02'
-  traceDays = 10 # 统计天数
+  beginDate = '2017-01-17'
+  traceDays = 71 # 统计天数
 
   isNew = False if (len(sys.argv) <= 1) else ('new' ==sys.argv[1])
   if isNew:
@@ -57,9 +57,10 @@ if __name__ == '__main__':
       dayList.insert(0,beginDate)
       print dayList
 
-      dayList = [
-        #'2017-07-13',
-        '2018-03-01',
+      dayList2 = [
+        '2017-03-21',
+        '2017-03-23',
+        '2017-03-24',
       ]
 
       for parseDay in dayList:

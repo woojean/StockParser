@@ -108,7 +108,7 @@ def trace(id,day):
   ret['riskRate'] = round(ret['risk']/ret['inPrice'],5)
   #if ret['riskRate'] < -0.03:  
   #if ret['riskRate'] < -0.1: 
-  if ret['riskRate'] < -0.05: # 初始止损不超过n%（平均持股时间才4天） <-----------------
+  if ret['riskRate'] < -0.04: # 初始止损不超过n%（平均持股时间才4天） <-----------------
     return  False
 
   dayList = parser.getNextTradingDayList(day,30)
@@ -128,7 +128,7 @@ def trace(id,day):
       break
     
     if not inTracking: # 处于启动期
-      if minPrice > inDayMaxPrice:  # <-----------------
+      if minPrice > inDayMaxPrice:  # 进入跟踪止损的信号<-----------------
       #if minPrice > ret['inPrice']:
       #if minPrice > inDayMinPrice:
         inTracking = True

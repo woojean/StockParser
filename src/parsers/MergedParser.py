@@ -457,14 +457,14 @@ class MergedParser(BaseParser):
   # ---------------------------------------------------------------------------------
   def haveSignal(self,res,parseDay,id):
     # 信号：上穿MA60
-    #if self.isPenetrateUpwardMa60(res,parseDay):
-    #  print id,'上穿MA60'
-    #  return True
+    if self.isPenetrateUpwardMa60(res,parseDay):
+      print id,'上穿MA60'
+      return True
 
     # 信号：均线三角托
-    #if self.isTriangularSupport(res,parseDay):
-    #  print id,'均线三角托'
-    #  return True
+    if self.isTriangularSupport(res,parseDay):
+      print id,'均线三角托'
+      return True
 
 
     # 信号：缩量大秃阳线
