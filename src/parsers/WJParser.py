@@ -1,7 +1,7 @@
 #coding:utf-8
 #!/usr/bin/env python
 '''
-woojean@2018-01-06
+woojean@2018-05-01
 '''
 
 import os
@@ -26,58 +26,53 @@ class WJParser(BaseParser):
   def __init__(self,parseDay):
     BaseParser.__init__(self,parseDay) 
 
-  # 判断一组数字是否处于上升序列中
-  def isInRise(self,l):
-    ret = True
-    length = len(l)
-    for i in xrange(0,length-1):
-      if l[i] <0 or l[i+1]<0:
-        ret = False
-        break
-      if l[i] >= l[i+1]: # MA = -1
-        ret = False
-        break
-    return ret
+  def getMinPriceOfDays(self,res,dayList):
+    price = 999999
+    for day in dayList:
+      minPrice = self.getMinPriceOfDay(res,day)
+      if minPrice < price:
+        price = minPrice
+    return price
 
-  # 一年四季度均价偏强
-  def isRiseIsStronger(self,res,parseDay):
-    # 240-180 | 180-120 | 120-60 | 区间均价递增
+  def getMaxPriceOfDays(self,res,dayList):
+    price = 0
+    for day in dayList:
+      maxPrice = self.getMaxPriceOfDay(res,day)
+      if maxPrice > price:
+        price = maxPrice
+    return price
 
-    dayList = BaseParser.getPastTradingDayList(parseDay,240)
-    dayList1 = dayList[0:60]
-    dayList2 = dayList[60:120]
-    dayList3 = dayList[120:180]
-    dayList4 = dayList[180:240]
-    
-    (v,v,ma1) = self.getMAPrice(res,dayList1)
-    (v,v,ma2) = self.getMAPrice(res,dayList2)
-    (v,v,ma3) = self.getMAPrice(res,dayList3)
-    (v,v,ma4) = self.getMAPrice(res,dayList4)
-    
-    if ma1<=0 or ma2<=0 or ma3<=0 or ma4<=0: # -1
-      return False
 
-    # 四象
-    if self.isInRise([ma2,ma3,ma4]):
-      #print '〇↗↗↗'
-      return True
-    
-    
-    if self.isInRise([ma1,ma3,ma4]):
-      #print '↗〇↗↗'
-      return True
+  def getAvgPriceOfDays(self,res,dayList):
+    total = 0
+    for day in dayList:
+      price = self.getEndPriceOfDay(res,day)
+      total += price
+    avgPrice = total/len(dayList)
+    return avgPrice
 
-    
-    if self.isInRise([ma1,ma2,ma4]):
-      #print '↗↗〇↗'
-      return True
 
-    
-    #if self.isInRise([ma1,ma2,ma3]):
-    #print '↗↗↗〇'
-    #  return True
+  # [开盘价，收盘价，最低价，最高价]
+  def genKLines(self,res,parseDay):
+    kLines = {}
+    dayList = BaseParser.getPastTradingDayList(parseDay,60) # 过去一个季度
+    splitList = []
+    for i in xrange(0,12):
+      splitList.append([i*5,(i+1)*5])
 
-    return False
+    index = 1
+    for l in splitList:
+      kLines[index] ={}
+      kLineDayList = dayList[l[0]:l[1]]
+      kLines[index]['dayList'] = kLineDayList
+      kLines[index]['start'] = self.getStartPriceOfDay(res,kLineDayList[0])
+      kLines[index]['end'] = self.getEndPriceOfDay(res,kLineDayList[-1])
+      kLines[index]['min'] = self.getMinPriceOfDays(res,kLineDayList)
+      kLines[index]['max'] = self.getMaxPriceOfDays(res,kLineDayList)
+      kLines[index]['avg'] = self.getAvgPriceOfDays(res,kLineDayList)
+      index += 1
+    return kLines
+
 
   # 光头光脚阳线
   def isBigBaldRiseLine(self,res,parseDay):
@@ -140,62 +135,7 @@ class WJParser(BaseParser):
       return False
     
 
-    return True
-
-  # 收盘价向上穿透MA60
-  def isPenetrateUpwardMa60(self,res,parseDay):
-    dayList = BaseParser.getPastTradingDayList(parseDay,2)
-    day1 = dayList[0]
-    day2 = dayList[1]
-
-    # 前一日收盘价在MA之下
-    dayList = BaseParser.getPastTradingDayList(day1,60)
-    (v,v,ma) = self.getMAPrice(res,dayList)
-    endPrice1 = self.getEndPriceOfDay(res,day1)
-    if endPrice1 >= ma:
-      return False
-
-    # 当日收盘价在MA之上
-    dayList = BaseParser.getPastTradingDayList(day2,60)
-    (v,v,ma) = self.getMAPrice(res,dayList)
-    parseDayMa = ma
-    endPrice2 = self.getEndPriceOfDay(res,day2)
-    if endPrice2 <= ma:
-      return False
-
-    return True
-
-  # 均线形成三角托
-  def isTriangularSupport(self,res,parseDay):
-    dayList5 = BaseParser.getPastTradingDayList(parseDay,5)
-    dayList10 = BaseParser.getPastTradingDayList(parseDay,10)
-    dayList20 = BaseParser.getPastTradingDayList(parseDay,20)
-
-    (v1,v2,ma5) = self.getMAPrice(res,dayList5)
-    (v1,v2,ma10) = self.getMAPrice(res,dayList10)
-    (v1,v2,ma20) = self.getMAPrice(res,dayList20)
-    
-    # 当日 ma5 > ma20 > ma10
-    if not ((ma5 > ma20) and (ma20 > ma10)):
-      return False
-
-    if abs(ma20-ma5) < abs(ma20-ma10):
-      return False
-
-    dayList = BaseParser.getPastTradingDayList(parseDay,2)
-    parseDay = dayList[0]
-    dayList5 = BaseParser.getPastTradingDayList(parseDay,5)
-    dayList10 = BaseParser.getPastTradingDayList(parseDay,10)
-    dayList20 = BaseParser.getPastTradingDayList(parseDay,20)
-    (v1,v2,ma5) = self.getMAPrice(res,dayList5)
-    (v1,v2,ma10) = self.getMAPrice(res,dayList10)
-    (v1,v2,ma20) = self.getMAPrice(res,dayList20)
-
-    # 2日前 ma20 > ma5 > ma10
-    if not ((ma20 > ma5) and (ma5 > ma10)):
-      return False
-
-    return True
+    return True 
 
 
   def isSwallowUp(self,res,parseDay):
@@ -267,10 +207,11 @@ class WJParser(BaseParser):
     if rate < 2:
       return False
     
-    # 触及10日最低价（用于排除上吊线）
-    if not self.isTouchMinPriceOfDays(res,parseDay,10):
+    # 触及n日最低价（用于排除上吊线）
+    if not self.isTouchMinPriceOfDays(res,parseDay,5):
       return False
     return True
+
 
   # 镊形底
   def isTweezersBottom(self,res,parseDay):
@@ -278,8 +219,8 @@ class WJParser(BaseParser):
     day1 = dayList[0]  # 前一天
     day2 = dayList[1]  # 后一天
     
-    # 前一天触及10日最低价
-    if not self.isTouchMinPriceOfDays(res,day1,10):
+    # 前一天触及n日最低价
+    if not self.isTouchMinPriceOfDays(res,day1,5):
       return False
 
     # 两天的最低价“接近或一致”
@@ -291,132 +232,6 @@ class WJParser(BaseParser):
 
     return True
 
-  # 是否处于平台当中
-  def isInPlatform(self,res,parseDay):
-    platformDays = 10
-    # 平台期总涨跌幅小于5%
-    dayList = BaseParser.getPastTradingDayList(parseDay,platformDays)
-    day1 = dayList[0]
-    day2 = dayList[-1]
-    startPriceOfDay1 = self.getStartPriceOfDay(res,day1)
-    endPriceOfDay2 = self.getEndPriceOfDay(res,day2)
-    rate = (endPriceOfDay2 - startPriceOfDay1)/startPriceOfDay1
-    if abs(rate) > 0.05:
-      return False
-
-    # 平台期每一日的涨跌幅绝对值不超过3%
-    isExceed = False 
-    dayList = BaseParser.getPastTradingDayList(parseDay,platformDays)
-    l = len(dayList)
-    for i in xrange(0,l-1):
-      day1 = dayList[i]
-      day2 = dayList[i+1]
-      endPriceOfDay1 = self.getEndPriceOfDay(res,day1)
-      endPriceOfDay2 = self.getEndPriceOfDay(res,day2)
-      rate = abs((endPriceOfDay2 - endPriceOfDay1)/endPriceOfDay1)
-      if rate > 0.03:
-        isExceed = True
-        break
-    if isExceed:
-      return False
-
-    # 平台期的最高价序列、最低价序列的差额不超过10%
-    minMaxPrice = 999999 # 最高价序列中的最小值
-    maxMaxPrice = 0 # 最高价序列中的最大值
-    minMinPrice = 999999 # 最低价序列中的最小值
-    maxMinPrice = 0 # 最低价序列中的最大值
-    dayList = BaseParser.getPastTradingDayList(parseDay,platformDays)
-    for day in dayList:
-      minPrice = self.getMinPriceOfDay(res,day)
-      maxPrice = self.getMaxPriceOfDay(res,day)
-      if minPrice > maxMinPrice:
-        maxMinPrice = minPrice
-      if minPrice < minMinPrice:
-        minMinPrice = minPrice
-
-      if maxPrice > maxMaxPrice:
-        maxMaxPrice = maxPrice
-      if maxPrice < minMaxPrice:
-        minMaxPrice = maxPrice
-     
-    isExceed = False # 每一日的最高价、最低价与边界值的差异小于5%
-    maxRate = 0.05
-    for day in dayList:
-      minPrice = self.getMinPriceOfDay(res,day)
-      maxPrice = self.getMaxPriceOfDay(res,day)
-      rate = abs((minPrice-minMinPrice)/minMinPrice)
-      if rate > maxRate:
-        isExceed = True
-        break
-
-      rate = abs((minPrice-maxMinPrice)/maxMinPrice)
-      if rate > maxRate:
-        isExceed = True
-        break
-
-      rate = abs((maxPrice-minMaxPrice)/minMaxPrice)
-      if rate > maxRate:
-        isExceed = True
-        break
-
-      rate = abs((maxPrice-maxMaxPrice)/maxMaxPrice)
-      if rate > maxRate:
-        isExceed = True
-        break
-
-    if isExceed:
-      return False
-
-    return True
-
-  # ma5斜率是否增加
-  def isMa5RiseUp(self,res,parseDay):
-    dayList = BaseParser.getPastTradingDayList(parseDay,3)
-    day1 = dayList[0]
-    day2 = dayList[1]
-    day3 = dayList[2]
-    dayList1 = BaseParser.getPastTradingDayList(day1,5)
-    dayList2 = BaseParser.getPastTradingDayList(day2,5)
-    dayList3 = BaseParser.getPastTradingDayList(day3,5)
-    (v,v,ma1) = self.getMAPrice(res,dayList1)
-    (v,v,ma2) = self.getMAPrice(res,dayList2)
-    (v,v,ma3) = self.getMAPrice(res,dayList3)
-    diff1 = ma2 - ma1
-    diff2 = ma3 - ma2
-    if diff2 < diff1:
-      return False
-    return True
-
-  
-  def isHaveTwoPointTrend(self,res,parseDay,days):
-    dayList = BaseParser.getPastTradingDayList(parseDay,days)
-    day1 = dayList[0]
-    day2 = dayList[-1]
-    endPrice1 = self.getEndPriceOfDay(res,day1)
-    endPrice2 = self.getEndPriceOfDay(res,day2)
-    return day2 > day1
-
-
-  def isPriceBiggerThanAvg(self,res,parseDay,days):
-    dayList = BaseParser.getPastTradingDayList(parseDay,days)
-    (v,v,ma) = self.getMAPrice(res,dayList)
-    endPrice = self.getEndPriceOfDay(res,parseDay)
-    return endPrice > ma
-
-
-
-  # 判断最近（两周内）是否经历过平台走势
-  def isRecentlyInPlatform(self,res,parseDay):
-    havePlatformTrend = False
-    dayList = BaseParser.getPastTradingDayList(parseDay,10)
-    for day in dayList:
-      if self.isInPlatform(res,day):
-        havePlatformTrend = True
-        break
-    if not havePlatformTrend:
-      return False
-    return True
-
   def isUpGap(self,res,parseDay):
     dayList = BaseParser.getPastTradingDayList(parseDay,2)
     day1 = dayList[0]
@@ -425,47 +240,41 @@ class WJParser(BaseParser):
     minPriceOfDay2 = self.getMinPriceOfDay(res,day2)
     return minPriceOfDay2 > maxPriceOfDay1
 
+  
 
-  # 趋势判断
-  # ---------------------------------------------------------------------------------
-  def haveTrend(self,res,parseDay):
-    # 趋势1：起点、终点存在趋势
-    if not self.isHaveTwoPointTrend(res,parseDay,60):
+  
+  def haveTrends(self,kLines):
+    # 收盘价
+    if not (kLines[1]['end'] < kLines[7]['end']):
+      return False
+    if not (kLines[2]['end'] < kLines[8]['end']):
+      return False
+    
+    # 最低价
+    if not (kLines[1]['min'] < kLines[7]['min']):
+      return False
+    if not (kLines[2]['min'] < kLines[8]['min']):
+      return False
+    
+    # 平均价
+    if not (kLines[1]['avg'] < kLines[7]['avg']):
+      return False
+    if not (kLines[2]['avg'] < kLines[8]['avg']):
       return False
 
-    # 趋势1：MA5上升趋势
-    if not self.isPriceBiggerThanAvg(res,parseDay,60):
-      return False
 
-    # 趋势1：MA5上升趋势
-    if not self.isMa5RiseUp(res,parseDay):
+    # 预期价与当前价的比较：不能低于当前价
+    if (kLines[7]['end'] + (kLines[7]['end'] - kLines[1]['end'])) < kLines[12]['end']:
       return False
-
-    # 趋势2：一年四季度均价偏强
-    if not self.isRiseIsStronger(res,parseDay):
+    if (kLines[7]['min'] + (kLines[7]['min'] - kLines[1]['min'])) < kLines[12]['min']:
       return False
-
-    # 趋势3：最近出现过平台
-    if not self.isRecentlyInPlatform(res,parseDay):
+    if (kLines[7]['avg'] + (kLines[7]['avg'] - kLines[1]['avg'])) < kLines[12]['avg']:
       return False
 
     return True
 
 
-  # 信号判断
-  # ---------------------------------------------------------------------------------
-  def haveSignal(self,res,parseDay,id):
-    # 信号：上穿MA60
-    #if self.isPenetrateUpwardMa60(res,parseDay):
-    #  print id,'上穿MA60'
-    #  return True
-
-    # 信号：均线三角托
-    #if self.isTriangularSupport(res,parseDay):
-    #  print id,'均线三角托'
-    #  return True
-
-
+  def haveSignals(self,res,parseDay,id):
     # 信号：缩量大秃阳线
     if self.isBigBaldRiseLineAndVolumeReduce(res,parseDay):
       print id,'缩量大秃阳线'
@@ -498,11 +307,12 @@ class WJParser(BaseParser):
   # ================================================================================
   def parse(self,res,parseDay,id=''):
     # 趋势
-    if not self.haveTrend(res,parseDay):
+    kLines = self.genKLines(res,parseDay)
+    if not self.haveTrends(kLines):
       return False
-
+    
     # 信号
-    if not self.haveSignal(res,parseDay,id):
+    if not self.haveSignals(res,parseDay,id):
       return False
 
     return True
