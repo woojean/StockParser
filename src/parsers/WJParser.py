@@ -307,7 +307,7 @@ class WJParser(BaseParser):
     minPriceOfDay1 = self.getMinPriceOfDay(res,day1)
     minPriceOfDay2 = self.getMinPriceOfDay(res,day2)
     rate = abs((minPriceOfDay2- minPriceOfDay1)/minPriceOfDay1)
-    if rate > 0.005:  # 差距在0.1%以内  <-------------------------------------
+    if rate > 0.002:  # 差距在0.n%以内  <-------------------------------------
       return False
 
     return True
@@ -470,74 +470,120 @@ class WJParser(BaseParser):
     return True
   
   
-  def isMergedKLinesEndPriceInTrend(self,kLines):
-    if not (kLines[1]['end'] < kLines[7]['end']):
-      return False
-    if not (kLines[2]['end'] < kLines[8]['end']):
+  def isMergedKLinesEndPriceInTrend(self,kLines,firstIndex,secondIndex):
+    if not (kLines[firstIndex]['end'] < kLines[secondIndex]['end']):
       return False
     return True
 
-  def isMergedKLinesMinPriceInTrend(self,kLines):
-    if not (kLines[1]['min'] < kLines[7]['min']):
-      return False
-    if not (kLines[2]['min'] < kLines[8]['min']):
+  def isMergedKLinesMinPriceInTrend(self,kLines,firstIndex,secondIndex):
+    if not (kLines[firstIndex]['min'] < kLines[secondIndex]['min']):
       return False
     return True
 
-  def isMergedKLinesAvgPriceInTrend(self,kLines):
-    if not (kLines[1]['avg'] < kLines[7]['avg']):
-      return False
-    if not (kLines[2]['avg'] < kLines[8]['avg']):
+  def isMergedKLinesAvgPriceInTrend(self,kLines,firstIndex,secondIndex):
+    if not (kLines[firstIndex]['avg'] < kLines[secondIndex]['avg']):
       return False
     return True
 
-  def isPredictedKLinesInTrend(self,kLines):
-    if (kLines[7]['end'] + (kLines[7]['end'] - kLines[1]['end'])) < kLines[12]['end']:
+  def isPredictedKLinesInTrend(self,kLines,firstIndex,secondIndex,endIndex):
+    if (kLines[secondIndex]['end'] + (kLines[secondIndex]['end'] - kLines[firstIndex]['end'])) < kLines[endIndex]['end']:
       return False
-    if (kLines[7]['min'] + (kLines[7]['min'] - kLines[1]['min'])) < kLines[12]['min']:
+    if (kLines[secondIndex]['min'] + (kLines[secondIndex]['min'] - kLines[firstIndex]['min'])) < kLines[endIndex]['min']:
       return False
-    if (kLines[7]['avg'] + (kLines[7]['avg'] - kLines[1]['avg'])) < kLines[12]['avg']:
-      return False
-    if (kLines[8]['end'] + (kLines[8]['end'] - kLines[2]['end'])) < kLines[12]['end']:
-      return False
-    if (kLines[8]['min'] + (kLines[8]['min'] - kLines[2]['min'])) < kLines[12]['min']:
-      return False
-    if (kLines[8]['avg'] + (kLines[8]['avg'] - kLines[2]['avg'])) < kLines[12]['avg']:
+    if (kLines[secondIndex]['avg'] + (kLines[secondIndex]['avg'] - kLines[firstIndex]['avg'])) < kLines[endIndex]['avg']:
       return False
     return True
   
 
-  # ================================================================================
-  def haveTrends(self,res,parseDay,kLines):
+  def haveQuarterlyTrends(self,res,parseDay,kLines):
+    # 季度趋势
+    # ------------------------------------------------------------------------------
     # 组合K线收盘价趋势
-    if not self.isMergedKLinesEndPriceInTrend(kLines):
+    if not self.isMergedKLinesEndPriceInTrend(kLines,1,7):
+      return False
+    if not self.isMergedKLinesEndPriceInTrend(kLines,2,8):
       return False
     
     # 组合K线最低价趋势
-    if not self.isMergedKLinesMinPriceInTrend(kLines):
+    if not self.isMergedKLinesMinPriceInTrend(kLines,1,7):
+      return False
+    if not self.isMergedKLinesMinPriceInTrend(kLines,2,8):
       return False
     
     # 组合K线平均价趋势
-    if not self.isMergedKLinesAvgPriceInTrend(kLines):
+    if not self.isMergedKLinesAvgPriceInTrend(kLines,1,7):
+      return False
+    if not self.isMergedKLinesAvgPriceInTrend(kLines,2,8):
       return False
 
     # 预期组合K线不低于当前价
-    if not self.isPredictedKLinesInTrend(kLines):
+    if not self.isPredictedKLinesInTrend(kLines,1,7,12):
+      return False
+    if not self.isPredictedKLinesInTrend(kLines,2,8,12):
+      return False
+    return True
+
+
+  def haveMonthTrends(self,res,parseDay,kLines):
+    # 月趋势
+    # ------------------------------------------------------------------------------
+    if not self.isMergedKLinesEndPriceInTrend(kLines,9,11):
+      return False
+    if not self.isMergedKLinesEndPriceInTrend(kLines,10,12):
+      return False
+    
+    # 组合K线最低价趋势
+    if not self.isMergedKLinesMinPriceInTrend(kLines,9,11):
+      return False
+    if not self.isMergedKLinesMinPriceInTrend(kLines,10,12):
+      return False
+    
+    # 组合K线平均价趋势
+    if not self.isMergedKLinesAvgPriceInTrend(kLines,9,11):
+      return False
+    if not self.isMergedKLinesAvgPriceInTrend(kLines,10,12):
+      return False
+
+    # 预期组合K线不低于当前价
+    if not self.isPredictedKLinesInTrend(kLines,9,11,12):
+      return False
+    if not self.isPredictedKLinesInTrend(kLines,10,12,12):
+      return False
+    return True
+
+
+  def haveAdamTrends(self,res,parseDay,kLines):
+    if self.haveQuarterlyTrends(res,parseDay,kLines):
+      return True
+    if self.haveMonthTrends(res,parseDay,kLines):
+      return True
+    return False
+
+
+  # ================================================================================
+  def haveTrends(self,res,parseDay,kLines):
+    # 趋势
+    # ------------------------------------------------------------------------------
+    if not self.haveAdamTrends(res,parseDay,kLines):
       return False
     
     # 要有平台
+    # ------------------------------------------------------------------------------
     if not self.isRecentlyInPlatform(res,parseDay):
       return False
 
     # MA5上升趋势
+    # ------------------------------------------------------------------------------
     if not self.isMa5RiseUp(res,parseDay):
       return False
 
     # 过去一年的4个季度均价偏强
+    # ------------------------------------------------------------------------------
     if not self.isRiseIsStronger(res,parseDay):
       return False
 
     # 当日价大于前期均价
+    # ------------------------------------------------------------------------------
     if not self.isPriceBiggerThanAvg(res,parseDay,60):
       return False
     return True

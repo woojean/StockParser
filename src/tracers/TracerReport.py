@@ -36,6 +36,8 @@ if __name__ == '__main__':
   totalRiskRate = 0
   totalHoldDays = 0
   tables = ''
+  totalDay = 0 # 有候选项的天数
+  totalDayAvgGrowthRate = 0  # 日均涨幅之和
   for item in data:
     parseDay = item['parseDay']  
     tables += '<h4>'+parseDay+'</h4>'
@@ -52,6 +54,11 @@ if __name__ == '__main__':
     tables += '<td>卖出价</td>'
     tables += '<td>持股天数</td>'
     tables += '</tr>'
+    
+    
+    
+    dayTotalGrowthRate = 0 # 当日总数
+    dayTotal = len(item['idList'])  # 当日选股总数
     for i in item['idList']:
       total += 1
       totalPr += i['PR']
@@ -74,6 +81,7 @@ if __name__ == '__main__':
 
       # 涨跌幅
       growthRate = i['growthRate']
+      dayTotalGrowthRate += growthRate
       if growthRate > 0:
       	totalRise += 1
       elif growthRate < 0:
@@ -95,12 +103,20 @@ if __name__ == '__main__':
       tables += '<td>'+str(i['holdDays'])+'</td>'
     
       tables += '</tr>'
+
+    # 算日均涨幅
+    if len(item['idList']) > 0: # 当日有选股
+      totalDay +=1  # 有选股的天数总计
+      dayAvgGrowthRate = dayTotalGrowthRate/dayTotal  # 当日日均涨幅
+      totalDayAvgGrowthRate += dayAvgGrowthRate
+
     tables += '</table>'
   
   avgPr = round(totalPr/total,5)
   avgGrowthRate = round(totalGrowthRate/total,5)
   avgRiskRate = round(totalRiskRate/total,5)
   avgHoldDays = totalHoldDays/total
+  avgDayGrowthRate = round(totalDayAvgGrowthRate/totalDay,5)
 
   # ================================================================================
 
@@ -150,6 +166,7 @@ td {
   s += '<tr><td>平均涨幅：</td><td>'+str(avgGrowthRate*100.0)+'%</td></tr>'
   s += '<tr><td>平均风险幅度：</td><td>'+str(avgRiskRate*100.0)+'%</td></tr>'
   s += '<tr><td>平均持股天数：</td><td>'+str(avgHoldDays)+'</td></tr>'
+  s += '<tr><td>日均涨幅</td><td><font><b>'+str(avgDayGrowthRate*100.0)+'%</b></font></td></tr>'
   s += '</table>'
   # ================================================================================
   
