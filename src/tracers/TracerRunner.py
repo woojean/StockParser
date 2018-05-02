@@ -43,16 +43,16 @@ if __name__ == '__main__':
     'WJParser'
   ]
 
-  #beginDate = '2017-01-17'
-  #traceDays = 71 # 统计天数
+  beginDate = '2017-01-17'
+  traceDays = 71 # 统计天数
   
   # -0.07%
   #beginDate = '2017-12-08'
   #traceDays = 65 # 统计天数
 
   # 0.02  2016-08-17 ~ 2018-04-16
-  beginDate = '2016-08-17'
-  traceDays = 403 # 统计天数
+  #beginDate = '2016-08-17'
+  #traceDays = 403 # 统计天数
 
   #beginDate = '2017-12-08'
   #traceDays = 1 # 统计天数
