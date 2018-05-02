@@ -120,9 +120,9 @@ if __name__ == '__main__':
   
   avgRiskRate = round(totalRiskRate/total,5)
   avgHoldDays = totalHoldDays/total
-  avgSelectNum = round(totalDayAvgSelectNum*1.0/totalDay,5)
-  avgGrowthRate = round(totalGrowthRate*1.0/totalDay,5)
-
+  avgGrowthRate = round(totalGrowthRate*1.0/total,5)
+  
+  avgDaySelectNum = round(totalDayAvgSelectNum*1.0/totalDay,5)
   avgDayHoldDays = round(totalDayAvgHoldDays*1.0/totalDay,5)
   avgDayRiskRate = round(totalDayAvgRiskRate/totalDay,5)
   avgDayWinRate = round(totalDayAvgWinRate/totalDay,5)
@@ -189,7 +189,7 @@ table {
 
   s += '<table>'
   s += '<tr><td colspan=2><font><b>模拟交易分日统计</b></font><font>（只统计选股结果不为空的交易日）</font></td></tr>'
-  s += '<tr><td class="ar"><font color="red">日平均选股数：</font></td><td class="al"><font color="red">'+str(avgSelectNum)+'</font></td></tr>'
+  s += '<tr><td class="ar"><font color="red">日平均选股数：</font></td><td class="al"><font color="red">'+str(avgDaySelectNum)+'</font></td></tr>'
   s += '<tr><td class="ar"><font color="red">日选股平均持股天数：</font></td><td class="al"><font color="red">'+str(avgDayHoldDays)+'</font></td></tr>'
   s += '<tr><td class="ar"><font color="red">日选股平均初始止损幅度：</font></td><td class="al"><font color="red">'+str(avgDayRiskRate*100.0)+'%</font></td></tr>'
   s += '<tr><td class="ar"><font color="red">日平均选股胜率：</font></td><td class="al"><font color="red">'+str(avgDayWinRate*100.0)+'%</font></td></tr>'
