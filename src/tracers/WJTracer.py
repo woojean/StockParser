@@ -147,7 +147,6 @@ def trace(id,day):
   ret['profit'] = round(ret['outPrice'] - ret['inPrice'],5)
   ret['profitRate'] =str(round(ret['profit']/ret['inPrice'],5)*100.0)+'%'
   ret['growthRate'] =round(ret['profit']/ret['inPrice'],5)
-  ret['PR'] = round(-ret['profit']/ret['risk'],5)
   
   return ret
 

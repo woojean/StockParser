@@ -8,6 +8,7 @@ import sys
 import threading
 import time
 import datetime
+import random
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -42,9 +43,16 @@ if __name__ == '__main__':
     'WJParser'
   ]
 
-  beginDate = '2017-01-17'
-  #beginDate = '2018-03-01'
-  traceDays = 71 # 统计天数
+  #beginDate = '2017-01-17'
+  #traceDays = 71 # 统计天数
+  
+  # -0.07%
+  beginDate = '2017-12-08'
+  traceDays = 65 # 统计天数
+
+  # 0.02  2016-08-17 ~ 2018-04-16
+  beginDate = '2016-08-17'
+  traceDays = 403 # 统计天数
 
   isNew = False if (len(sys.argv) <= 1) else ('new' ==sys.argv[1])
   if isNew:
@@ -57,10 +65,16 @@ if __name__ == '__main__':
       dayList.insert(0,beginDate)
       print dayList
 
+      # --------------------------------------------------------------
+      '''
       dayList2 = [
         '2018-03-26',
       ]
-
+      beginDate = '2016-11-01'
+      dayList = BaseParser.BaseParser.getNextTradingDayList(beginDate,300)
+      dayList = random.sample(dayList, 60)
+      print dayList
+      '''
       for parseDay in dayList:
         print parseDay
         cmd = 'python '+Tools.getParsersDirPath() + '/'+ parser +'.py ' + parseDay
