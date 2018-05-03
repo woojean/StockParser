@@ -235,10 +235,29 @@ class BaseParser:
 
 
   '''
-  0        1        2        3        4        5         6
-  13.97,   14.20,   14.45,   13.73,   81722,   1.15亿,   5.14%
-  开盘      收盘     最高      最低     成交量    成交额     振幅
+  0        1        2        3        4        5         6        7
+  13.97,   14.20,   14.45,   13.73,   81722,   1.15亿,   5.14%    1.6
+  开盘      收盘     最高      最低     成交量    成交额     振幅     换手率
   '''
+  # 获取某一日的振幅
+  def getAmplitudeOfDay(self,res,day):
+    try:
+      v = (re.findall('"'+ day +',(.*?)"', res)[0]).split(',')[6]
+      v = v.replace('%','')
+      amplitude = float(v)/100.0
+    except Exception, e:
+      amplitude = 0
+      #print repr(e)
+    return amplitude
+
+  # 获取某一日的换手率
+  def geChangeRateOfDay(self,res,day):
+    try:
+      rate = float((re.findall('"'+ day +',(.*?)"', res)[0]).split(',')[7])/100.0
+    except Exception, e:
+      rate = 0
+      #print repr(e)
+    return rate
 
   # 获取某一日的开盘价
   def getStartPriceOfDay(self,res,day):

@@ -40,7 +40,8 @@ if __name__ == '__main__':
     #'TwoLimitsParser',
     #'VenusParser',
     #'VolumeMutationParser',
-    'WJParser'
+    #'WJParser',
+    'PriceAndVolumeParser'
   ]
 
   beginDate = '2017-01-17'
