@@ -119,6 +119,8 @@ class HotPointSniffer:
         '''
         if 'BK' != arr[1][:2]:
           continue
+        #if arr[1] in ['BK0816','BK0815']:  # BK0816 昨日连板，BK0815 昨日涨停
+        #  continue
         bkData = (arr[1],arr[2],arr[3])  # 板块编码、板块名称、板块涨幅
         bkList.append(bkData)
     length = len(bkList)
@@ -126,6 +128,7 @@ class HotPointSniffer:
     self.dumpBkDict(bkList)  # 保存文件到本地方便后续查询
     bkList = sorted(bkList,key=lambda x: (-float(x[2])if('-'!=x[2])else(0)))
     #bkList = sorted(bkList,key=itemgetter(2), reverse=True)
+    #topBkList = bkList[:n]
     topBkList = bkList[:n]
     self.dumpTopBkDict(topBkList)
     return topBkList
@@ -199,6 +202,10 @@ td{
   border-bottom: thin dotted #ccc;
 }
 
+tr:hover{
+  background-color:yellow;
+}
+
 .header{
   border-bottom: thin dotted #ccc;
   border-left: thin dotted #ccc;
@@ -216,11 +223,10 @@ td{
 
 .bk{
   font-weight:bold;
-  font-size:0.8em;
-  border-bottom: thin dotted #ccc;
+  font-size:0.6em;
   border-left: thin dotted #ccc;
   border-right: thin dotted #ccc;
-  padding:3px;
+  padding:1px;
   text-align:center;
   margin-top:20px;
   margin-bottom:20px;
@@ -230,6 +236,10 @@ td{
   font-weight:lighter;
   font-size:0.6em;
 }
+
+.match{
+  background-color:#E0FFFF;
+}
 </style>
   '''
     s += '</head><body>'
@@ -238,33 +248,37 @@ td{
     length = len(bkList)
     index = 1
     #i = 0
-    s += '<table width="100%">'
-    s +='<tr>'
+    s += '<table width="100%" cellspacing="0" cellpadding="0">'
+    tr1 = '<tr>'
+    tr2 = '<tr>'
+    tr3 = '<tr>'
     for data in bkList:
-      s += '<td class="bk" width="'+str(100.0/length)+'%">'
-      s += '<span class="bkindex">'+str(index)+'</span>'
-      s += '<br/>'
-      s += data[1]
-      s += '<br/>'
+      tr1 += '<td width="'+str(100.0/length)+'%"><span class="bkindex" >'+str(index)+'</span></td>'
+      tr2 += '<td class="bk">' + data[1] +'</td>'
       rate = float(data[2]) if ('-'!=data[2]) else(0)
+      tr3 +='<td width="'+str(100.0/length)+'%" class="bk">'
       if rate > 0:
-        s +='<font color="red"> '+data[2]+'%</font>'
+        tr3 +='<font color="red"> '+data[2]+'%</font>'
       else:
-        s +='<font color="green"> '+data[2]+'%</font>'
-      s +=' '
-      s +='</td>'
+        tr3 +='<font color="green"> '+data[2]+'%</font>'
+      tr3 += '</td>'
       index += 1
       #if (0 == i%5) and i>=3:
       #	s +="<br/>"
       #i += 1
-    s +='</tr>'
+    tr1 += '</tr>'
+    tr2 += '</tr>'
+    tr3 += '</tr>'
+    s += tr1
+    s += tr2
+    s += tr3
     s +='</table>'
 
 
     s += '<br/><br/>'
 
 
-    s += '<table width="100%">'
+    s += '<table width="100%" cellspacing="0" cellpadding="0">'
     
     th = '<tr align="center" style="font-size:1.2em;">'
     th += '<td class="header">序号</td>'
@@ -290,8 +304,8 @@ td{
       else:
         am = float(data['basicInfo'][6])
 
-      if len(data['bkList']) > n and am < 4.0:
-        trs +='<tr style="background-color:#E0FFFF;">'
+      if len(data['bkList']) > n and am < 4.0 and am !=0:
+        trs +='<tr class="match">'
         sel += data['basicInfo'][1]+','
       else:
         trs +='<tr>'
@@ -302,19 +316,24 @@ td{
       trs +='<td>'+data['basicInfo'][1]+'</td>'
 
       # 名称
-      trs +='<td>'+data['basicInfo'][2]+'</td>'
+      trs +='<td><b>'+data['basicInfo'][2]+'</b></td>'
 
       # 涨幅
       trs +='<td>'+data['basicInfo'][5]+'</td>'
 
       # 振幅
-      if am < 4.0:
-        trs +='<td><font color="red" size=3><b>'+data['basicInfo'][6]+'%</b></font></td>'
+      if am < 4.0 and am !=0:
+        trs +='<td><font color="red" ><b>'+data['basicInfo'][6]+'%</b></font></td>'
+      elif am ==0:
+        trs +='<td>'+data['basicInfo'][6]+'</td>'
       else:
         trs +='<td>'+data['basicInfo'][6]+'%</td>'
 
       # 换手率
-      trs +='<td>'+data['basicInfo'][23]+'%</td>'
+      if '-' == data['basicInfo'][23]:
+        trs +='<td>-</td>'
+      else:
+        trs +='<td>'+data['basicInfo'][23]+'%</td>'
       bks = ''
       for bk in data['bkList']:
         bkInfo = self.getBkInfoFromFile(bk)
@@ -329,11 +348,11 @@ td{
     s += trs
     s += '</table>'
     s += '</body></html>'
-    parseDay = time.strftime('%Y-%m-%d',time.localtime(time.time())) 
-    path = Tools.getReportDirPath()+'/HotPoint-'+parseDay+'.html'
+    parseTime = time.strftime('%Y-%m-%d_%H:%M:%S',time.localtime(time.time())) 
+    path = Tools.getReportDirPath()+'/HotPoint-'+parseTime+'.html'
     open(path,'w').write(s)
 
-    selPath = Tools.getReportDirPath()+'/HotPoint-'+parseDay+'.sel'
+    selPath = Tools.getReportDirPath()+'/HotPoint-'+parseTime+'.sel'
     open(selPath,'w').write(sel)
     print path
 
@@ -370,7 +389,7 @@ td{
 
 # config
 # ===============================================================
-TOP_BK_NUM = 14  # Top 5%
+TOP_BK_NUM = 28  # Top 5% + 2
 RESONANCE_NUM = 2 # Resonance atleast 2
 
 
