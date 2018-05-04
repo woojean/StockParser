@@ -183,7 +183,7 @@ class HotPointSniffer:
     return filterdIdList
 
 
-  def dumpReport(self,idList,n):
+  def dumpReport(self,idList,matchNum):
     print 'dumpReport...'
     sel = ''
     s = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />'
@@ -204,6 +204,7 @@ td{
 
 tr:hover{
   background-color:yellow;
+  cursor:pointer;
 }
 
 .header{
@@ -214,7 +215,8 @@ tr:hover{
 }
 
 .tag{
-  border: thin solid #ccc;
+  border-right: thin solid #ccc;
+  border-bottom: thin solid #ccc;
   border-radius:3px;
   padding:3px;
   margin:5px;
@@ -238,7 +240,7 @@ tr:hover{
 }
 
 .match{
-  background-color:#E0FFFF;
+  background-color:#F0FFFF;
 }
 </style>
   '''
@@ -287,6 +289,7 @@ tr:hover{
     th += '<td class="header">涨幅</td>'
     th += '<td class="header">振幅</td>'
     th += '<td class="header">换手率</td>'
+    th += '<td class="header"><font color="#009ACD">ISLP</font></td>'
     th += '<td class="header">所属板块</td>'
     th += '</tr>'
     s += th
@@ -299,12 +302,13 @@ tr:hover{
     for item in idList:
       self.printProcess(parsedNum,total)
       data = item[1]
-      if '-' == data['basicInfo'][6]:
-        am = 0
-      else:
-        am = float(data['basicInfo'][6])
-
-      if len(data['bkList']) > n and am < 4.0 and am !=0:
+      
+      # inittial stop lose price
+      price = float(data['basicInfo'][3]) if ('-'!=data['basicInfo'][3]) else (0)
+      minPrice = float(data['basicInfo'][12]) if ('-'!=data['basicInfo'][12]) else (0)
+      islp = round((price-minPrice)/price,5)*100.0 if(0!=price*minPrice)else(0)
+     
+      if len(data['bkList']) > matchNum and islp < 4.0 and islp !=0:
         trs +='<tr class="match">'
         sel += data['basicInfo'][1]+','
       else:
@@ -319,29 +323,47 @@ tr:hover{
       trs +='<td><b>'+data['basicInfo'][2]+'</b></td>'
 
       # 涨幅
-      trs +='<td>'+data['basicInfo'][5]+'</td>'
+      riseRate = float(data['basicInfo'][5].replace('%','')) if ('-'!=data['basicInfo'][5]) else (0)
+      if 0 == riseRate:
+        trs +='<td><b>'+data['basicInfo'][5]+'</b></td>'
+      elif riseRate> 0:
+        trs +='<td><font color="red"><b>'+data['basicInfo'][5]+'</b></font></td>'
+      elif riseRate< 0:
+        trs +='<td><font color="green"><b>'+data['basicInfo'][5]+'</b></font></td>'
 
       # 振幅
-      if am < 4.0 and am !=0:
-        trs +='<td><font color="red" ><b>'+data['basicInfo'][6]+'%</b></font></td>'
-      elif am ==0:
+      if '-' == data['basicInfo'][6]:
         trs +='<td>'+data['basicInfo'][6]+'</td>'
       else:
         trs +='<td>'+data['basicInfo'][6]+'%</td>'
+      
 
       # 换手率
       if '-' == data['basicInfo'][23]:
         trs +='<td>-</td>'
       else:
         trs +='<td>'+data['basicInfo'][23]+'%</td>'
+      
+      # ISLP
+      if 0 == islp:
+        trs +='<td>-</td>'
+      elif islp<4.0:
+        trs +='<td><font color="#009ACD"><b>'+str(islp)+'%</b></font></td>'
+      else:
+        trs +='<td>'+str(islp)+'%</td>'
+
+      # 板块
       bks = ''
       for bk in data['bkList']:
         bkInfo = self.getBkInfoFromFile(bk)
         bks += '<label class="tag">'+bkInfo[1] +'</label>'
-      if len(data['bkList']) > n:
-        trs +='<td><font color="red">'+bks+'</font></td>'
+      if len(data['bkList']) > matchNum:
+        trs +='<td><font color="#009ACD">'+bks+'</font></td>'
       else:
         trs +='<td>'+bks+'</td>'
+
+      
+
       trs +='</tr>'
       parsedNum += 1
       index += 1
@@ -390,7 +412,7 @@ tr:hover{
 # config
 # ===============================================================
 TOP_BK_NUM = 28  # Top 5% + 2
-RESONANCE_NUM = 2 # Resonance atleast 2
+RESONANCE_NUM = 3 # Resonance atleast 2
 
 
 if __name__ == '__main__':
