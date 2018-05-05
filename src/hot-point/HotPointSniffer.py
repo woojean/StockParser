@@ -38,10 +38,8 @@ class HotPointSniffer(BaseHotPoint):
     self._dataPath = self._source
     self._failedDataPath = 'failed_' + self._source
   
-  
 
-
-  def getFilteredBkList(self,n):
+  def getFilteredBkList(self,n,reverse = False):
     print 'getFilteredBkList...'
     d = self.getRootPath()+'/data/'+self._dataPath+'/'
     bkList = []
@@ -66,7 +64,10 @@ class HotPointSniffer(BaseHotPoint):
     self.dumpBkDict(bkList)  # 保存文件到本地方便后续查询
     bkList = sorted(bkList,key=lambda x: (-float(x[2])if('-'!=x[2])else(0)))
     #bkList = sorted(bkList,key=itemgetter(2), reverse=True)
-    topBkList = bkList[:n]  # <----------------------------------------------------------------------------------------
+    if not reverse:
+      topBkList = bkList[:n]  # <----------------------------------------------------------------------------------------
+    else:
+      topBkList = bkList[len(bkList)-n:]
     self.dumpFilteredBkDict(topBkList)
     return topBkList
   
@@ -114,7 +115,7 @@ class HotPointSniffer(BaseHotPoint):
     self.genBKdata()
 
     # 过滤板块
-    bkList = self.getFilteredBkList(TOP_BK_NUM) 
+    bkList = self.getFilteredBkList(TOP_BK_NUM,REVERSE) 
 
     # 获取板块个股数据
     self.genBkStockData(bkList)
@@ -130,6 +131,7 @@ class HotPointSniffer(BaseHotPoint):
 # ===============================================================
 TOP_BK_NUM = 28  # Top 5% + 2
 RESONANCE_NUM = 3 # Resonance atleast 2
+REVERSE = False 
 
 
 if __name__ == '__main__':
