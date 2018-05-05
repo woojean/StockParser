@@ -208,9 +208,8 @@ tr:hover{
 }
 
 .header{
-  border-bottom: thin dotted #ccc;
-  border-left: thin dotted #ccc;
-  border-right: thin dotted #ccc;
+  border-right: thin solid #ccc;
+  border-bottom: thin solid #ccc;
   font-weight:bold;
 }
 
@@ -226,8 +225,8 @@ tr:hover{
 .bk{
   font-weight:bold;
   font-size:0.6em;
-  border-left: thin dotted #ccc;
-  border-right: thin dotted #ccc;
+  border-right: thin solid #ccc;
+  border-bottom: thin solid #ccc;
   padding:1px;
   text-align:center;
   margin-top:20px;
@@ -240,7 +239,7 @@ tr:hover{
 }
 
 .match{
-  background-color:#F0FFFF;
+  background-color:#FFFFE0;
 }
 </style>
   '''
@@ -307,10 +306,14 @@ tr:hover{
       price = float(data['basicInfo'][3]) if ('-'!=data['basicInfo'][3]) else (0)
       minPrice = float(data['basicInfo'][12]) if ('-'!=data['basicInfo'][12]) else (0)
       islp = round((price-minPrice)/price,5)*100.0 if(0!=price*minPrice)else(0)
-     
-      if len(data['bkList']) > matchNum and islp < 4.0 and islp !=0:
-        trs +='<tr class="match">'
+      
+      match =False
+      #if len(data['bkList']) > matchNum and islp < 4.0 and islp !=0:
+      if islp < 4.0 and islp !=0:
+        #trs +='<tr class="match">'
+        trs +='<tr>'
         sel += data['basicInfo'][1]+','
+        match = True
       else:
         trs +='<tr>'
       
@@ -320,7 +323,11 @@ tr:hover{
       trs +='<td>'+data['basicInfo'][1]+'</td>'
 
       # 名称
-      trs +='<td><b>'+data['basicInfo'][2]+'</b></td>'
+      #if match:
+      #  trs +='<td>'+data['basicInfo'][2]+'</td>'
+      #else:
+      #  trs +='<td><font color="#009ACD"><b>'+data['basicInfo'][2]+'</b></font></td>'
+      trs +='<td>'+data['basicInfo'][2]+'</td>'
 
       # 涨幅
       riseRate = float(data['basicInfo'][5].replace('%','')) if ('-'!=data['basicInfo'][5]) else (0)
@@ -348,19 +355,20 @@ tr:hover{
       if 0 == islp:
         trs +='<td>-</td>'
       elif islp<4.0:
-        trs +='<td><font color="#009ACD"><b>'+str(islp)+'%</b></font></td>'
+        trs +='<td><font color="#009ACD" size=2><b>-'+str(islp)+'%</b></font></td>'
       else:
-        trs +='<td>'+str(islp)+'%</td>'
+        trs +='<td><font color="#aaa">-'+str(islp)+'%</font></td>'
 
       # 板块
       bks = ''
       for bk in data['bkList']:
         bkInfo = self.getBkInfoFromFile(bk)
         bks += '<label class="tag">'+bkInfo[1] +'</label>'
-      if len(data['bkList']) > matchNum:
-        trs +='<td><font color="#009ACD">'+bks+'</font></td>'
-      else:
-        trs +='<td>'+bks+'</td>'
+      #if len(data['bkList']) > matchNum:
+      #  trs +='<td><font color="#009ACD">'+bks+'</font></td>'
+      #else:
+      #  trs +='<td>'+bks+'</td>'
+      trs +='<td>'+bks+'</td>'
 
       
 
