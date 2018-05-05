@@ -1,7 +1,7 @@
 #coding:utf-8
 #!/usr/bin/env python
 '''
-woojean@2018-05-03
+woojean@2018-05-04
 '''
 
 import os
@@ -30,8 +30,8 @@ from common import Tools
 '''
 
 
-class HotPointSniffer: 
-  _source = 'hotpoint'
+class BaseHotPoint: 
+  _source = ''
   _BKs = {
     'DY':'http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?type=CT&cmd=C._BKDY&sty=FPGBKI&sortType=(ChangePercent)&page=1&pageSize=200&js=var%20nJmHNLLU=\{rank:\[(x)\],pages:(pc),total:(tot)\}&token=7bc05d0d4c3c22ef9fca8c2a912d779c',
     'GN':'http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?type=CT&cmd=C._BKGN&sty=FPGBKI&sortType=(ChangePercent)&page=1&pageSize=200&js=var%20nJmHNLLU=\{rank:\[(x)\],pages:(pc),total:(tot)\}&token=7bc05d0d4c3c22ef9fca8c2a912d779c',
@@ -55,7 +55,7 @@ class HotPointSniffer:
   def initDir(self):
     if len(self._source) < 1:
       raise Exception("Exception：source未设置！")
-    if HotPointSniffer.isNew():
+    if BaseHotPoint.isNew():
       Tools.initDir(self._source)
       Tools.initDir('failed_' + self._source)
     else:
@@ -79,113 +79,34 @@ class HotPointSniffer:
     for bk in bkList:
       d[bk[0]] = bk
     path = self.getRootPath()+'/data/'+self._dataPath+'/'
-    f = open(path+'bkdict','w')
+    f = open(path+'bk-dict','w')
     f.write(str(d))
     f.close()
 
-  def dumpTopBkDict(self,bkList):
+  def getBkInfoFromFile(self,bk):
     path = self.getRootPath()+'/data/'+self._dataPath+'/'
-    f = open(path+'topbkdict','w')
+    path = path + 'bk-dict'
+    d = eval(open(path,'r').read())
+    return d[bk]
+
+  def dumpFilteredBkDict(self,bkList):
+    path = self.getRootPath()+'/data/'+self._dataPath+'/'
+    f = open(path+'filtered-bk-dict','w')
     f.write(str(bkList))
     f.close()
 
-  def getTopBkListFromFile(self):
+  def getFilteredBkListFromFile(self):
     path = self.getRootPath()+'/data/'+self._dataPath+'/'
-    path = path + 'topbkdict'
+    path = path +'filtered-bk-dict'
     d = eval(open(path,'r').read())
     return d
-
-  def getBkInfoFromFile(self,bk):
-    path = self.getRootPath()+'/data/'+self._dataPath+'/'
-    path = path + 'bkdict'
-    d = eval(open(path,'r').read())
-    return d[bk]
   
 
-
-  def getTopBkList(self,n):
-    print 'getTopBkList...'
-    d = self.getRootPath()+'/data/'+self._dataPath+'/'
-    bkList = []
-    topBkList = []
-    for bk,url in self._BKs.items():
-      path = d + bk
-      res = open(path,'r').read()
-      l = re.findall('"(.*?)"', res)
-      for item in l:
-        arr = item.split(',')
-        '''
-        ['1', 'BK0458', '\xe4\xbb\xaa\xe5\x99\xa8\xe4\xbb\xaa\xe8\xa1\xa8', '1.95', '268981406042', '1.27', '38|2|3|2', '300007', '2', '\xe6\xb1\x89\xe5\xa8\x81\xe7\xa7\x91\xe6\x8a\x80', '15.97', '9.99', '300515', '2', '\xe4\xb8\x89\xe5\xbe\xb7\xe7\xa7\x91\xe6\x8a\x80', '11.00', '-2.65', '2', '7671.56', '146.92']
-        '''
-        if 'BK' != arr[1][:2]:
-          continue
-        #if arr[1] in ['BK0816','BK0815']:  # BK0816 昨日连板，BK0815 昨日涨停
-        #  continue
-        bkData = (arr[1],arr[2],arr[3])  # 板块编码、板块名称、板块涨幅
-        bkList.append(bkData)
-    length = len(bkList)
-    print "\n板块总数："+str(length)+"\n"
-    self.dumpBkDict(bkList)  # 保存文件到本地方便后续查询
-    bkList = sorted(bkList,key=lambda x: (-float(x[2])if('-'!=x[2])else(0)))
-    #bkList = sorted(bkList,key=itemgetter(2), reverse=True)
-    #topBkList = bkList[:n]
-    topBkList = bkList[:n]
-    self.dumpTopBkDict(topBkList)
-    return topBkList
-
   
-  def genBkStockData(self,bkList):
-    print 'genBkStockData...'
-    for bk in bkList:
-      bkCode = bk[0]
-      print bk[0],bk[1],bk[2]
-      url = 'http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?type=CT&cmd=C.'
-      url += bkCode
-      url += '1&sty=FCOIATA&sortType=(ChangePercent)&sortRule=-1&'
-      url += 'page=1&pageSize=1000&js=var%20ezMRpmTj=\{rank:\[(x)\],pages:(pc),total:(tot)\}&token=7bc05d0d4c3c22ef9fca8c2a912d779c'
-      data = requests.get(url,verify=False).text
-      self.dumpFile(bkCode,data)
-
-  def getIdList(self,n):
-    print 'getIdList...'
-    count = {}
-    d = self.getRootPath()+'/data/'+self._dataPath+'/'
-    for root,dirs,files in os.walk(d):
-      for f in files:
-        try:
-          if 'BK'== f[:2]:
-            path = root + f
-            res = open(path,'r').read()
-            l = re.findall('"(.*?)"', res)
-            for item in l:
-              '''
-              2018-05-03 
-              2,002681,奋达科技,9.41,0.86,10.06%,9.71,165823,153715449,8.55,8.59,9.41,8.58,-,-,-,-,-,-,-,-,0.00%,2.99,2.28,64.40,2012-06-05
-              
-              1 代码  2 名称  3 价格  4 价格增长  5 涨幅  6 振幅  23 换手率
-              '''
-              arr = item.split(',')
-              id = arr[1]
-              if 6 == len(id):
-                if count.has_key(id):
-                  count[id]['bkList'].append(f)
-                else:
-                  count[id] = {}
-                  count[id]['basicInfo'] = arr
-                  count[id]['bkList'] = [f]
-        except Exception, e:
-          pass
-          print repr(e)
-    filterdIdList = []
-    for id,data in count.items():
-      if len(data['bkList']) >= n:
-        filterdIdList.append((id,data))
-    return filterdIdList
-
-
   def dumpReport(self,idList,matchNum):
     print 'dumpReport...'
     sel = ''
+    csv = ''
     s = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />'
     s += '''
 <style>
@@ -245,7 +166,7 @@ tr:hover{
   '''
     s += '</head><body>'
 
-    bkList = self.getTopBkListFromFile()
+    bkList = self.getFilteredBkListFromFile()
     length = len(bkList)
     index = 1
     #i = 0
@@ -254,6 +175,7 @@ tr:hover{
     tr2 = '<tr>'
     tr3 = '<tr>'
     for data in bkList:
+      csv += data[1]+','
       tr1 += '<td width="'+str(100.0/length)+'%"><span class="bkindex" >'+str(index)+'</span></td>'
       tr2 += '<td class="bk">' + data[1] +'</td>'
       rate = float(data[2]) if ('-'!=data[2]) else(0)
@@ -265,7 +187,7 @@ tr:hover{
       tr3 += '</td>'
       index += 1
       #if (0 == i%5) and i>=3:
-      #	s +="<br/>"
+      # s +="<br/>"
       #i += 1
     tr1 += '</tr>'
     tr2 += '</tr>'
@@ -378,16 +300,35 @@ tr:hover{
     s += trs
     s += '</table>'
     s += '</body></html>'
-    parseTime = time.strftime('%Y-%m-%d_%H:%M:%S',time.localtime(time.time())) 
-    path = Tools.getReportDirPath()+'/HotPoint-'+parseTime+'.html'
+    parseTime = time.strftime('%Y-%m-%d',time.localtime(time.time())) 
+    path = Tools.getHotPointReportDirPath()+'/'+self._source+'-'+parseTime+'.html'
     open(path,'w').write(s)
 
-    selPath = Tools.getReportDirPath()+'/HotPoint-'+parseTime+'.sel'
+    selPath = Tools.getHotPointReportDirPath()+'/'+self._source+'-'+parseTime+'.sel'
     open(selPath,'w').write(sel)
+
+    csvPath = Tools.getHotPointReportDirPath()+'/'+self._source+'-'+parseTime+'.csv'
+    open(csvPath,'w').write(csv)
     print path
 
     os.system('open '+path)
-  
+
+
+  def genBkStockData(self,bkList):
+    print 'genBkStockData...'
+    for bk in bkList:
+      bkCode = bk[0]
+      print bk[0],bk[1],bk[2]
+      url = 'http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?type=CT&cmd=C.'
+      url += bkCode
+      url += '1&sty=FCOIATA&sortType=(ChangePercent)&sortRule=-1&'
+      url += 'page=1&pageSize=1000&js=var%20ezMRpmTj=\{rank:\[(x)\],pages:(pc),total:(tot)\}&token=7bc05d0d4c3c22ef9fca8c2a912d779c'
+      data = requests.get(url,verify=False).text
+      self.dumpFile(bkCode,data)
+
+  def getFilteredBkList(self,n):
+    pass
+
   def printProcess(self,current,total):
     lastRate = round((current-1)*100.0/total,0)
     currentRate = round(current*100.0/total,0)
@@ -402,32 +343,14 @@ tr:hover{
       print s
 
   def run(self):
-    # 获取板块数据
-    self.genBKdata()
-
-    # 获取前十板块
-    bkList = self.getTopBkList(TOP_BK_NUM)  # <--------------------
-
-    # 获取板块个股数据
-    self.genBkStockData(bkList)
-    # idList 
-    idList = self.getIdList(RESONANCE_NUM)  # <--------------------
-    print idList
-    
-    self.dumpReport(idList,RESONANCE_NUM)
+    pass
 
 
 # config
 # ===============================================================
-TOP_BK_NUM = 28  # Top 5% + 2
-RESONANCE_NUM = 3 # Resonance atleast 2
-
 
 if __name__ == '__main__':
-  print 'HotPointSniffer'
-  HotPointSniffer().initDir()
-  sniffer = HotPointSniffer()
-  sniffer.run()
+  print 'BaseHotPoint'
 
 
 

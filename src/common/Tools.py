@@ -41,6 +41,12 @@ def getReportDirPath():
     os.mkdir(path)
   return path
 
+def getHotPointReportDirPath():
+  path = getRootPath()+'/data/hot-point-report'  # 价格数据的存储路径
+  if not os.path.exists(path):
+    os.mkdir(path)
+  return path
+
 def getTracerDirPath():
   path = getRootPath()+'/data/tracer'  
   if not os.path.exists(path):
