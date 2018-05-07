@@ -24,6 +24,7 @@ if __name__ == '__main__':
   # config ==========================================================================
   parserList = [
     #'BaldRiseLineAndVolumeReduceParser',
+    'ContinuouslyBigRiseButNoRiseLimitParser',
     #'GoldenPinBottomParser',
     #'MacdReverseParser',
     #'MaConvergenceParser',
@@ -41,11 +42,11 @@ if __name__ == '__main__':
     #'VenusParser',
     #'VolumeMutationParser',
     #'WJParser',
-    'PriceAndVolumeParser'
+    #'PriceAndVolumeParser'
   ]
 
-  beginDate = '2017-01-17'
-  traceDays = 71 # 统计天数
+  #beginDate = '2017-01-17'
+  #traceDays = 71 # 统计天数
   
   # -0.07%
   #beginDate = '2017-12-08'
@@ -57,6 +58,9 @@ if __name__ == '__main__':
 
   #beginDate = '2017-12-08'
   #traceDays = 1 # 统计天数
+
+  beginDate = '2018-01-02'
+  traceDays = 71 # 统计天数
 
   isNew = False if (len(sys.argv) <= 1) else ('new' ==sys.argv[1])
   if isNew:
@@ -79,6 +83,7 @@ if __name__ == '__main__':
       dayList = random.sample(dayList, 60)
       print dayList
       '''
+
       for parseDay in dayList:
         print parseDay
         cmd = 'python '+Tools.getParsersDirPath() + '/'+ parser +'.py ' + parseDay

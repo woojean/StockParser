@@ -247,6 +247,7 @@ python src/Do.py 2018-03-26 x 2018-04-09
 if __name__ == '__main__':
   parsers = {
     'BaldRiseLineAndVolumeReduceParser':'秃阳线且缩量☆',
+    'ContinuouslyBigRiseButNoRiseLimitParser':'连续大涨',
     'GoldenPinBottomParser':'金针探底',
     'MacdReverseParser':'MACD反转☆',
     'MaConvergenceParser':'均线汇合',
@@ -268,7 +269,7 @@ if __name__ == '__main__':
   }
 
   parsers = {
-    'WJParser':'W'
+    'ContinuouslyBigRiseButNoRiseLimitParser':'T'
   }
 
   (parseDay, isNew,traceDay) = getParams()

@@ -141,6 +141,7 @@ tr:hover{
   padding:3px;
   margin:5px;
   font-size:0.6em;
+  width:60px;
 }
 
 .bk{
@@ -162,6 +163,11 @@ tr:hover{
 .match{
   background-color:#FFFFE0;
 }
+
+.bks{
+  text-align:left;
+}
+
 </style>
   '''
     s += '</head><body>'
@@ -210,8 +216,8 @@ tr:hover{
     th += '<td class="header">涨幅</td>'
     th += '<td class="header">振幅</td>'
     th += '<td class="header">换手率</td>'
-    th += '<td class="header"><font color="#009ACD">ISLP</font></td>'
-    th += '<td class="header">所属板块</td>'
+    th += '<td class="header"><font color="#4682B4">风险</font></td>'
+    th += '<td class="header" >所属板块</td>'
     th += '</tr>'
     s += th
 
@@ -248,7 +254,7 @@ tr:hover{
       #if match:
       #  trs +='<td>'+data['basicInfo'][2]+'</td>'
       #else:
-      #  trs +='<td><font color="#009ACD"><b>'+data['basicInfo'][2]+'</b></font></td>'
+      #  trs +='<td><font color="#4682B4"><b>'+data['basicInfo'][2]+'</b></font></td>'
       trs +='<td>'+data['basicInfo'][2]+'</td>'
 
       # 涨幅
@@ -273,11 +279,11 @@ tr:hover{
       else:
         trs +='<td>'+data['basicInfo'][23]+'%</td>'
       
-      # ISLP
+      # ISLP => Risk
       if 0 == islp:
         trs +='<td>-</td>'
       elif islp<4.0:
-        trs +='<td><font color="#009ACD" size=2><b>-'+str(islp)+'%</b></font></td>'
+        trs +='<td><font color="#4682B4" size=2><b>-'+str(islp)+'%</b></font></td>'
       else:
         trs +='<td><font color="#aaa">-'+str(islp)+'%</font></td>'
 
@@ -287,10 +293,10 @@ tr:hover{
         bkInfo = self.getBkInfoFromFile(bk)
         bks += '<label class="tag">'+bkInfo[1] +'</label>'
       #if len(data['bkList']) > matchNum:
-      #  trs +='<td><font color="#009ACD">'+bks+'</font></td>'
+      #  trs +='<td><font color="#4682B4">'+bks+'</font></td>'
       #else:
       #  trs +='<td>'+bks+'</td>'
-      trs +='<td>'+bks+'</td>'
+      trs +='<td class="bks">'+bks+'</td>'
 
       
 
