@@ -61,7 +61,7 @@ class BaseSpider(threading.Thread):
     return isNew
 
   def dumpFile(self,id,data):
-    path = (self.getRootPath()+'/data/'+self._failedDataPath+'/') if (len(data) < 100) else (self.getRootPath()+'/data/'+self._dataPath+'/')
+    path = (self.getRootPath()+'/data/'+self._failedDataPath+'/') if (len(data) < 10) else (self.getRootPath()+'/data/'+self._dataPath+'/')
     f = open(path+id,'w')
     f.write(data)
     f.close()

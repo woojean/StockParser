@@ -24,10 +24,7 @@ sys.path.append(rootPath+'/src')
 from common import Tools
 
 '''
-61 个行业  => 6
-189 个概念 => 19
-31 个地域  => 3
-共281个板块
+根据指定的板块集合预测个股
 '''
 
 

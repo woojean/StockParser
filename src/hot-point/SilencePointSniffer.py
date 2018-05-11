@@ -24,11 +24,11 @@ sys.path.append(rootPath+'/src')
 from common import Tools
 
 '''
-抓取靠前的板块
+从已有的数据中找出“沉寂”（有希望被轮动到）的板块
 '''
 
 
-class HotPointSniffer(BaseHotPoint): 
+class SilencePointSniffer(BaseHotPoint): 
   _source = 'hot-point-sniffer'
 
   def __init__(self): 

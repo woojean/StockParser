@@ -135,13 +135,15 @@ tr:hover{
 }
 
 .tag{
-  border-right: thin solid #ccc;
-  border-bottom: thin solid #ccc;
+  border-right: thin solid #888;
+  border-bottom: thin solid #888;
   border-radius:3px;
   padding:3px;
   margin:5px;
   font-size:0.6em;
-  width:60px;
+  display:inline-block;
+  width:50px;
+  text-align:center;
 }
 
 .bk{
