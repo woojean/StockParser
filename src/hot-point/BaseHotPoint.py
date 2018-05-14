@@ -115,22 +115,28 @@ font-size:0.8em;
 table {
 }
 
+a{
+  text-decoration:none;
+  color:black; 
+}
+
+a:hover{
+  text-decoration:underline;
+  cursor:pointer;
+  color:black; 
+}
 
 td{
   font-size:0.8em;
   text-align:center;
   padding:5px;
-  border-bottom: thin dotted #ccc;
+  border-bottom: thin solid #ddd;
 }
 
-tr:hover{
-  background-color:yellow;
-  cursor:pointer;
+td:hover{
 }
 
 .header{
-  border-right: thin solid #ccc;
-  border-bottom: thin solid #ccc;
   font-weight:bold;
 }
 
@@ -162,7 +168,8 @@ tr:hover{
   font-size:0.6em;
 }
 
-.match{
+.match{  
+  font-weight:bolder;
   background-color:#FFFFE0;
 }
 
@@ -185,13 +192,15 @@ tr:hover{
     for data in bkList:
       csv += data[1]+','
       tr1 += '<td width="'+str(100.0/length)+'%"><span class="bkindex" >'+str(index)+'</span></td>'
-      tr2 += '<td class="bk">' + data[1] +'</td>'
+      tr2 += '<td class="bk">'
+      tr2 += '<a target="_blank" href="http://quote.eastmoney.com/web/'+data[0]+'1.html">' + data[1] +'</a>'
+      tr2 += '</td>'
       rate = float(data[2]) if ('-'!=data[2]) else(0)
       tr3 +='<td width="'+str(100.0/length)+'%" class="bk">'
       if rate > 0:
         tr3 +='<font color="red"> '+data[2]+'%</font>'
       else:
-        tr3 +='<font color="green"> '+data[2]+'%</font>'
+        tr3 +='<font color="#aaa"> '+data[2]+'%</font>'
       tr3 += '</td>'
       index += 1
       #if (0 == i%5) and i>=3:
@@ -216,10 +225,12 @@ tr:hover{
     th += '<td class="header">代码</td>'
     th += '<td class="header">名称</td>'
     th += '<td class="header">涨幅</td>'
-    th += '<td class="header">振幅</td>'
-    th += '<td class="header">换手率</td>'
-    th += '<td class="header"><font color="#4682B4">风险</font></td>'
-    th += '<td class="header" >所属板块</td>'
+    #th += '<td class="header">振幅</td>'
+    #th += '<td class="header">换手率</td>'
+    th += '<td class="header"><font>强度</font></td>'
+    th += '<td class="header"><font>风险</font></td>'
+    th += '<td class="header">涨幅风险比</td>'
+    th += '<td class="header" >板块</td>'
     th += '</tr>'
     s += th
 
@@ -234,14 +245,26 @@ tr:hover{
       
       # inittial stop lose price
       price = float(data['basicInfo'][3]) if ('-'!=data['basicInfo'][3]) else (0)
+      maxPrice = float(data['basicInfo'][11]) if ('-'!=data['basicInfo'][11]) else (0)
       minPrice = float(data['basicInfo'][12]) if ('-'!=data['basicInfo'][12]) else (0)
       islp = round((price-minPrice)/price,5)*100.0 if(0!=price*minPrice)else(0)
+      riseRate = float(data['basicInfo'][5].replace('%','')) if ('-'!=data['basicInfo'][5]) else (0)
       
+      if 0 == maxPrice - minPrice:
+        amplitudeRate = 0
+      else:
+        amplitudeRate = (price - minPrice)/(maxPrice - minPrice)
+      
+      if 0 == islp:
+        riseRiskRate = 0
+      else:
+        riseRiskRate = round(riseRate/abs(islp),3)
+
       match =False
       #if len(data['bkList']) > matchNum and islp < 4.0 and islp !=0:
-      if islp < 4.0 and islp !=0:
-        #trs +='<tr class="match">'
-        trs +='<tr>'
+      if (islp < 4.0) and (islp !=0) and (riseRiskRate > 1.0) and (amplitudeRate > 0.5):
+        trs +='<tr class="match">'
+        #trs +='<tr>'
         sel += data['basicInfo'][1]+','
         match = True
       else:
@@ -256,18 +279,16 @@ tr:hover{
       #if match:
       #  trs +='<td>'+data['basicInfo'][2]+'</td>'
       #else:
-      #  trs +='<td><font color="#4682B4"><b>'+data['basicInfo'][2]+'</b></font></td>'
+      #  trs +='<td><font color="red"><b>'+data['basicInfo'][2]+'</b></font></td>'
       trs +='<td>'+data['basicInfo'][2]+'</td>'
 
       # 涨幅
-      riseRate = float(data['basicInfo'][5].replace('%','')) if ('-'!=data['basicInfo'][5]) else (0)
-      if 0 == riseRate:
-        trs +='<td><b>'+data['basicInfo'][5]+'</b></td>'
-      elif riseRate> 0:
+      if riseRate> 0:
         trs +='<td><font color="red"><b>'+data['basicInfo'][5]+'</b></font></td>'
-      elif riseRate< 0:
-        trs +='<td><font color="green"><b>'+data['basicInfo'][5]+'</b></font></td>'
+      elif riseRate <= 0:
+        trs +='<td><font color="#aaa"><b>'+data['basicInfo'][5]+'</b></font></td>'
 
+      '''
       # 振幅
       if '-' == data['basicInfo'][6]:
         trs +='<td>'+data['basicInfo'][6]+'</td>'
@@ -280,22 +301,44 @@ tr:hover{
         trs +='<td>-</td>'
       else:
         trs +='<td>'+data['basicInfo'][23]+'%</td>'
-      
+      '''
+
+      # 振幅坐标
+      if 0 == amplitudeRate:
+        trs +='<td>-</td>'
+      elif amplitudeRate > 0.5:
+        trs +='<td><font color="red" size=2><b>'+str(round(amplitudeRate*100.0,2))+'%</b></font></td>'
+      else:
+        trs +='<td><font color="#aaa" size=2>'+str(round(amplitudeRate*100.0,2))+'%</font></td>'
+
+
       # ISLP => Risk
       if 0 == islp:
         trs +='<td>-</td>'
       elif islp<4.0:
-        trs +='<td><font color="#4682B4" size=2><b>-'+str(islp)+'%</b></font></td>'
+        trs +='<td><font color="red" size=2><b>-'+str(islp)+'%</b></font></td>'
       else:
         trs +='<td><font color="#aaa">-'+str(islp)+'%</font></td>'
+
+
+      # 涨幅风险比
+      if 0 == riseRate:
+        trs +='<td>-</td>'
+      elif riseRate > 1.0:
+        trs +='<td><font color="red" size=2><b>'+str(riseRate)+'</b></font></td>'
+      else:
+        trs +='<td><font color="#aaa">'+str(riseRate)+'</font></td>'
+
 
       # 板块
       bks = ''
       for bk in data['bkList']:
         bkInfo = self.getBkInfoFromFile(bk)
-        bks += '<label class="tag">'+bkInfo[1] +'</label>'
+        bks += '<a target="_blank" href="http://quote.eastmoney.com/web/'+bkInfo[0]+'1.html">' 
+        bks += '<label class="tag">'+bkInfo[1] +'</label>' 
+        bks += '</a>'
       #if len(data['bkList']) > matchNum:
-      #  trs +='<td><font color="#4682B4">'+bks+'</font></td>'
+      #  trs +='<td><font color="red">'+bks+'</font></td>'
       #else:
       #  trs +='<td>'+bks+'</td>'
       trs +='<td class="bks">'+bks+'</td>'
