@@ -115,6 +115,7 @@ font-size:0.8em;
 table {
 }
 
+
 a{
   text-decoration:none;
   color:black; 
@@ -130,11 +131,10 @@ td{
   font-size:0.8em;
   text-align:center;
   padding:5px;
-  border-bottom: thin solid #ddd;
+  border-bottom: thin dashed #ccc;
 }
 
-td:hover{
-}
+
 
 .header{
   font-weight:bold;
@@ -155,8 +155,7 @@ td:hover{
 .bk{
   font-weight:bold;
   font-size:0.6em;
-  border-right: thin solid #ccc;
-  border-bottom: thin solid #ccc;
+  border-bottom: thin dashed #ccc;
   padding:1px;
   text-align:center;
   margin-top:20px;
@@ -171,6 +170,11 @@ td:hover{
 .match{  
   font-weight:bolder;
   background-color:#FFFFE0;
+}
+
+.matchedNum{
+  font-size:0.6em;
+  color:red;
 }
 
 .bks{
@@ -225,17 +229,19 @@ td:hover{
     th += '<td class="header">代码</td>'
     th += '<td class="header">名称</td>'
     th += '<td class="header">涨幅</td>'
+    th += '<td class="header"><font>风险指数</font></td>'
     #th += '<td class="header">振幅</td>'
     #th += '<td class="header">换手率</td>'
-    th += '<td class="header"><font>强度</font></td>'
-    th += '<td class="header"><font>风险</font></td>'
-    th += '<td class="header">涨幅风险比</td>'
+    th += '<td class="header">坚固指数</td>'
+    th += '<td class="header"><font>强度指数</font></td>'
     th += '<td class="header" >板块</td>'
+    th += '<td class="header" >备选编号</td>'
     th += '</tr>'
     s += th
 
     trs = ''
     parsedNum = 0
+    matchedNum = 0 
     index = 1
     total = len(idList)
     idList = sorted(idList,key=lambda i: (-len(i[1]['bkList'])))
@@ -247,22 +253,34 @@ td:hover{
       price = float(data['basicInfo'][3]) if ('-'!=data['basicInfo'][3]) else (0)
       maxPrice = float(data['basicInfo'][11]) if ('-'!=data['basicInfo'][11]) else (0)
       minPrice = float(data['basicInfo'][12]) if ('-'!=data['basicInfo'][12]) else (0)
-      islp = round((price-minPrice)/price,5)*100.0 if(0!=price*minPrice)else(0)
+      riskIndex = round((price-minPrice)/price,5)*100.0 if(0!=price*minPrice)else(0)
       riseRate = float(data['basicInfo'][5].replace('%','')) if ('-'!=data['basicInfo'][5]) else (0)
       
       if 0 == maxPrice - minPrice:
-        amplitudeRate = 0
+        strongIndex = 0
       else:
-        amplitudeRate = (price - minPrice)/(maxPrice - minPrice)
+        strongIndex = (price - minPrice)/(maxPrice - minPrice)
       
-      if 0 == islp:
-        riseRiskRate = 0
+
+      if riseRate != 0 and price != 0:
+        endPriceOfYesterday = price/(1 + riseRate/100.0)
+        firmIndex = (minPrice - endPriceOfYesterday)/endPriceOfYesterday
+        firmIndex = round(firmIndex*100.0,3) 
+        firmIndex = firmIndex*10.0 # 最多（涨停）10%，这里放大10倍，由-10%~+10%放大到-100%~+100%
       else:
-        riseRiskRate = round(riseRate/abs(islp),3)
+        firmIndex = 0
+
+      # if 0 == islp:
+      #   riseRiskRate = 0
+      # else:
+      #   riseRiskRate = round(riseRate/abs(islp),3)
 
       match =False
       #if len(data['bkList']) > matchNum and islp < 4.0 and islp !=0:
-      if (islp < 4.0) and (islp !=0) and (riseRiskRate > 1.0) and (amplitudeRate > 0.5):
+      #if data['basicInfo'][1] == '000568':
+      #  print data['basicInfo'][2],islp,riseRiskRate,amplitudeRate
+      if (riskIndex < 4.0) and (riskIndex !=0) and (firmIndex > 0) and (strongIndex > 0.5):
+        matchedNum += 1
         trs +='<tr class="match">'
         #trs +='<tr>'
         sel += data['basicInfo'][1]+','
@@ -288,6 +306,15 @@ td:hover{
       elif riseRate <= 0:
         trs +='<td><font color="#aaa"><b>'+data['basicInfo'][5]+'</b></font></td>'
 
+      # 风险
+      if riskIndex == 0:
+        trs +='<td><font color="#aaa">-</font></td>'
+      elif riskIndex < 4.0:
+        trs +='<td><font color="red" size=2><b>-'+str(riskIndex)+'%</b></font></td>'
+      else:
+        trs +='<td><font color="#aaa">-'+str(riskIndex)+'%</font></td>'
+
+
       '''
       # 振幅
       if '-' == data['basicInfo'][6]:
@@ -303,31 +330,20 @@ td:hover{
         trs +='<td>'+data['basicInfo'][23]+'%</td>'
       '''
 
-      # 振幅坐标
-      if 0 == amplitudeRate:
-        trs +='<td>-</td>'
-      elif amplitudeRate > 0.5:
-        trs +='<td><font color="red" size=2><b>'+str(round(amplitudeRate*100.0,2))+'%</b></font></td>'
+      # 坚固
+      if firmIndex > 0:
+        trs +='<td><font color="red" size=2><b>'+str(firmIndex)+'%</b></font></td>'
       else:
-        trs +='<td><font color="#aaa" size=2>'+str(round(amplitudeRate*100.0,2))+'%</font></td>'
+        trs +='<td><font color="#aaa">'+str(firmIndex)+'%</font></td>'
 
 
-      # ISLP => Risk
-      if 0 == islp:
+      #  强度
+      if 0 == strongIndex:
         trs +='<td>-</td>'
-      elif islp<4.0:
-        trs +='<td><font color="red" size=2><b>-'+str(islp)+'%</b></font></td>'
+      elif strongIndex > 0.5:
+        trs +='<td><font color="red" size=2><b>'+str(round(strongIndex*100.0,2))+'%</b></font></td>'
       else:
-        trs +='<td><font color="#aaa">-'+str(islp)+'%</font></td>'
-
-
-      # 涨幅风险比
-      if 0 == riseRate:
-        trs +='<td>-</td>'
-      elif riseRate > 1.0:
-        trs +='<td><font color="red" size=2><b>'+str(riseRate)+'</b></font></td>'
-      else:
-        trs +='<td><font color="#aaa">'+str(riseRate)+'</font></td>'
+        trs +='<td><font color="#aaa" size=2>'+str(round(strongIndex*100.0,2))+'%</font></td>'
 
 
       # 板块
@@ -343,7 +359,11 @@ td:hover{
       #  trs +='<td>'+bks+'</td>'
       trs +='<td class="bks">'+bks+'</td>'
 
-      
+      # 匹配计数
+      if match:
+        trs +='<td class="matchedNum">'+str(matchedNum)+'</td>'
+      else:
+        trs += '<td class="matchedNum"></td>'
 
       trs +='</tr>'
       parsedNum += 1
