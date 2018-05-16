@@ -23,8 +23,16 @@ sys.path.append(rootPath+'/src')
 from common import Tools
 
 
-def getAllTradeDayList():
-  s = open(Tools.getRootPath()+'/data/price/000001','r').read()
+
+def getAllTradeDayList(new= False):
+  path = Tools.getRootPath()+'/data/price/000001'
+  
+  if new or not os.path.exists(path):
+   url = 'http://pdfm2.eastmoney.com/EM_UBG_PDTI_Fast/api/js?id=0000012&TYPE=k&js=fsDataTeacma((x))&rtntype=5&isCR=false&fsDataTeacma=fsDataTeacma'
+   data = requests.get(url,verify=False).text
+   open(path,'w').write(data)
+  
+  s = open(path,'r').read()
   idx = s.index('"data":[')
   s = s[idx:]
   allDayList = re.findall(r"(\d{4}-\d{1,2}-\d{1,2})", s)
@@ -33,8 +41,10 @@ def getAllTradeDayList():
 
 def getHoldDays(beginDay,endDay):
   allDayList = getAllTradeDayList()
-  beginIndex = allDayList.index(beginDay)
+  if not endDay in allDayList:
+    allDayList = getAllTradeDayList(True)
   endIndex = allDayList.index(endDay)
+  beginIndex = allDayList.index(beginDay)
   return endIndex - beginIndex
 
 
@@ -177,7 +187,7 @@ td{
   sumStr += '<tr class="table_header_counted">'
   sumStr += '<td>开始日期</td>'
   sumStr += '<td>结束日期</td>'
-  sumStr += '<td>已成交笔数</td>'
+  sumStr += '<td>成交数</td>'
   sumStr += '<td>盈利数</td>'
   sumStr += '<td>亏损数</td>'
   sumStr += '<td>平均持股天数</td>'
