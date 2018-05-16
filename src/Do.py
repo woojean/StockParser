@@ -228,7 +228,7 @@ def run(parseDay,parsers,isNew=False):
   if isNew:
     spiders = [
       'PriceSpider',
-      #'MacdSpider',
+      'MacdSpider',
       'BasicInfoSpider'
     ]
     runSpiders(spiders)
@@ -248,12 +248,14 @@ if __name__ == '__main__':
   parsers = {
     'BaldRiseLineAndVolumeReduceParser':'秃阳线且缩量☆',
     'ContinuouslyBigRiseButNoRiseLimitParser':'连续大涨',
+    'FlatBottomParser':'平台',
     'GoldenPinBottomParser':'金针探底',
     'MacdReverseParser':'MACD反转☆',
     'MaConvergenceParser':'均线汇合',
     'MaPenetrateParser':'均线穿透',
     'MaTrendParser':'MA短线趋势',
     'MaxPriceParser':'创新高',
+    'MergedParser.py':'均线汇合',
     'OneLimitsParser':'一板',
     'PenetrateUpwardMa60Parser':'上穿60日线',
     'RgbParser':'短线多头',
@@ -268,7 +270,7 @@ if __name__ == '__main__':
     'WJParser':'W'
   }
 
-  parsers = {
+  parsers2 = {
     'ContinuouslyBigRiseButNoRiseLimitParser':'T'
   }
 
