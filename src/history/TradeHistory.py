@@ -49,7 +49,7 @@ def getHoldDays(beginDay,endDay):
 
 
 
-def dumpReport(recordList):
+def dumpReport(recordList,isHide = False):
   s = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />'
   s += '''
 <style>
@@ -81,11 +81,17 @@ td{
 }
 
 .win{
+  font-weight:lighter;
   color:red;
 }
 
 .lose{
-  color:#3CB371;
+  font-weight:lighter;
+  color:#00CD00;
+}
+
+.hide{
+  color:#aaa;
 }
 
 </style>
@@ -119,10 +125,10 @@ td{
   s += '<td>备注</td>'
   s += '</tr>'
 
-  i = 1
+  i = len(recordList)
   tradeNum = 0 # 成交记录数
   winNum = 0
-  totalWin = 0.0 # 盈亏总额
+  totalEarn = 0.0 # 盈亏总额
   totalHoldDay = 0
   totalProfitAndLoss = 0.0
   for record in recordList:
@@ -130,19 +136,32 @@ td{
       continue
     tr = '<tr>'
     tr += '<td>'+str(i) +'</td>'
-    i += 1
+    i -= 1
     tr += '<td>'+ str(record[0]) +'</td>'
     tr += '<td>'+ str(record[1]) +'</td>'
     tr += '<td>'+ str(record[2]) +'</td>'
     tr += '<td>'+ str(record[3]) +'</td>'
-    tr += '<td>'+ str(record[4]) +'</td>'
+
+    if isHide:
+      tr += '<td class="hide">隐藏</td>'
+    else:
+      tr += '<td>'+ str(record[4]) +'</td>'
+
     tr += '<td>'+ str(record[5]) +'</td>'
-    tr += '<td>'+ str(record[6]) +'</td>'
+
+    endDate = str(record[6])
+    if len(endDate) < 1:
+      tr += '<td>持仓中</td>'
+    else:
+      tr += '<td>'+ str(record[6]) +'</td>'
     tr += '<td>'+ str(record[7]) +'</td>'
     
     # 买入金额
     buyAmount = record[3] * record[4]
-    tr += '<td>'+ str(buyAmount) +'</td>'
+    if isHide:
+      tr += '<td class="hide">隐藏</td>'
+    else:
+      tr += '<td>'+ str(buyAmount) +'</td>'
     winAmount = 0
     if 0 != record[7]:  # 判断是否已卖出
       tradeNum += 1
@@ -151,7 +170,7 @@ td{
       totalHoldDay += holdDays
       profitAndLoss = round((sellAmount - buyAmount)/buyAmount,5)*100.0
       totalProfitAndLoss += profitAndLoss
-      totalWin += (sellAmount - buyAmount)
+      totalEarn += (sellAmount - buyAmount)
       winAmount = sellAmount - buyAmount
     else:
       sellAmount = 0
@@ -159,13 +178,18 @@ td{
       profitAndLoss = 0
 
     # 卖出金额
-    tr += '<td>'+ str(sellAmount) +'</td>'
+    if isHide:
+      tr += '<td class="hide">隐藏</td>'
+    else:
+      tr += '<td>'+ str(sellAmount) +'</td>'
 
     # 持股天数
     tr += '<td>'+ str(holdDays) +'</td>'
 
     # 盈亏金额
-    if winAmount>0:
+    if isHide:
+      tr += '<td class="hide">隐藏</td>'
+    elif winAmount>0:
       tr += '<td class="win">'+ str(winAmount) +'</td>'
     else:
       tr += '<td class="lose">'+ str(winAmount) +'</td>'
@@ -177,7 +201,9 @@ td{
     else:
       tr += '<td class="lose">'+ str(profitAndLoss) +'%</td>'
 
-    tr += '<td>'+ str(record[8]) +'</td>'
+
+    # 备注
+    tr += '<td><font color="orange">'+ str(record[8]) +'</font></td>'
     s += tr
   s += '</table>'
 
@@ -187,39 +213,46 @@ td{
   sumStr += '<tr class="table_header_counted">'
   sumStr += '<td>开始日期</td>'
   sumStr += '<td>结束日期</td>'
-  sumStr += '<td>成交数</td>'
-  sumStr += '<td>盈利数</td>'
-  sumStr += '<td>亏损数</td>'
-  sumStr += '<td>平均持股天数</td>'
+  sumStr += '<td>总交易数</td>'
+  sumStr += '<td>盈利交易数</td>'
+  sumStr += '<td>亏损交易数</td>'
   sumStr += '<td>胜率</td>'
-  sumStr += '<td>盈亏总额</td>'
-  sumStr += '<td>平均盈亏比例</td>'
+  sumStr += '<td>平均持股天数</td>'
+  sumStr += '<td>单笔交易平均盈亏</td>'
+  sumStr += '<td>盈亏总金额</td>'
   sumStr += '</tr>'
 
   sumStr += '<tr>'
+  sumStr += '<td>'+recordList[-1][0]+'</td>'
   sumStr += '<td>'+recordList[0][0]+'</td>'
-  sumStr += '<td>'+today+'</td>'
   sumStr += '<td>'+str(tradeNum)+'</td>'
   sumStr += '<td>'+str(winNum)+'</td>'
   sumStr += '<td>'+str(tradeNum - winNum)+'</td>'
-  sumStr += '<td>'+str(round(totalHoldDay/tradeNum,3))+'</td>'
 
+  # 胜率
   winRate = 100.0*round(winNum*1.0/tradeNum,5)
-  if winRate > 0:
+  if winRate > 50:
     sumStr += '<td class="win">'+str(winRate)+'%</td>'
   else:
     sumStr += '<td class="lose">'+str(winRate)+'%</td>'
 
-  if totalWin > 0:
-    sumStr += '<td class="win">'+str(totalWin)+'</td>'
-  else:
-    sumStr += '<td class="lose">'+str(totalWin)+'</td>'
+  # 平均持股天数
+  sumStr += '<td>'+str(round(totalHoldDay/tradeNum,3))+'</td>'
 
+  # 单笔交易平均盈利
   avgProfitAndLoss = round(totalProfitAndLoss/tradeNum,3)
   if avgProfitAndLoss > 0:
     sumStr += '<td class="win">'+str(avgProfitAndLoss)+'%</td>'
   else:
     sumStr += '<td class="lose">'+str(avgProfitAndLoss)+'%</td>'
+   
+  # 总盈亏
+  if isHide:
+    sumStr += '<td class="hide">隐藏</td>'
+  elif totalEarn > 0:
+    sumStr += '<td class="win">'+str(totalEarn)+'</td>'
+  else:
+    sumStr += '<td class="lose">'+str(totalEarn)+'</td>'
 
   
   sumStr += '</tr>'
@@ -247,6 +280,13 @@ def getAllTradeRecords():
       except Exception, e:
         pass
         #print repr(e)
+
+  # 删除非法元素
+  for record in recordList:
+    if len(record[0]) <1:
+      recordList.remove(record)
+
+  recordList.reverse()
   return recordList
 
 
@@ -255,7 +295,8 @@ def getAllTradeRecords():
 TRADE_RECORD_PATH = '/Users/wujian/woojean/ThinkingInTrade/Data/Trades'
 
 if __name__ == '__main__':
-  recordList = getAllTradeRecords()
-  dumpReport(recordList)
+  isHide = False if (len(sys.argv) <= 1) else ('hide' == sys.argv[1])
 
+  recordList = getAllTradeRecords()
+  dumpReport(recordList,isHide)
 

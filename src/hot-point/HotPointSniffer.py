@@ -24,7 +24,7 @@ sys.path.append(rootPath+'/src')
 from common import Tools
 
 '''
-抓取靠前的板块
+当日Top N的板块
 '''
 
 

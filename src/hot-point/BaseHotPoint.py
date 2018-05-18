@@ -110,7 +110,6 @@ class BaseHotPoint:
     s = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />'
     s += '''
 <style>
-font-size:0.8em;
 
 table {
 }
@@ -137,6 +136,7 @@ td{
 
 
 .header{
+  font-size:0.6em;
   font-weight:bold;
 }
 
