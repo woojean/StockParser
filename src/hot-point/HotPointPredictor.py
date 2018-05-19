@@ -39,16 +39,12 @@ class HotPointPredictor(BaseHotPoint):
     print 'getFilteredBkList...'
     d = self.getRootPath()+'/data/'+self._dataPath+'/'
     bkList = []
-    predictBkList = []
     for bk,url in self._BKs.items():
       path = d + bk
       res = open(path,'r').read()
       l = re.findall('"(.*?)"', res)
       for item in l:
         arr = item.split(',')
-        '''
-        ['1', 'BK0458', '\xe4\xbb\xaa\xe5\x99\xa8\xe4\xbb\xaa\xe8\xa1\xa8', '1.95', '268981406042', '1.27', '38|2|3|2', '300007', '2', '\xe6\xb1\x89\xe5\xa8\x81\xe7\xa7\x91\xe6\x8a\x80', '15.97', '9.99', '300515', '2', '\xe4\xb8\x89\xe5\xbe\xb7\xe7\xa7\x91\xe6\x8a\x80', '11.00', '-2.65', '2', '7671.56', '146.92']
-        '''
         if 'BK' != arr[1][:2]:
           continue
 
@@ -57,16 +53,15 @@ class HotPointPredictor(BaseHotPoint):
         
         bkData = (arr[1],arr[2],arr[3])  # 板块编码、板块名称、板块涨幅
         bkList.append(bkData)
-    length = len(bkList)
-    print "\n板块总数："+str(length)+"\n"
-    self.dumpBkDict(bkList)  # 保存文件到本地方便后续查询
-    bkList = sorted(bkList,key=lambda x: (-float(x[2])if('-'!=x[2])else(0)))
-    predictBkList = bkList
-    self.dumpFilteredBkDict(predictBkList)
-    return predictBkList
+
+    print "\n板块总数："+str(len(bkList))+"\n"
+    self.dumpBkDict(bkList)  # 保存文件到本地方便后续生成报告时查询
+    bkList = sorted(bkList,key=lambda x: (-float(x[2])if('-'!=x[2])else(0))) # 根据板块涨幅排序
+    self.dumpFilteredBkDict(bkList)  # 用于渲染报告的头部
+    return bkList
 
 
-  def getFilteredIdList(self,minBkNum=2):
+  def getFilteredIdList(self,minBkNum):
     print 'getFilteredIdList...'
     count = {}
     d = self.getRootPath()+'/data/'+self._dataPath+'/'
@@ -78,12 +73,6 @@ class HotPointPredictor(BaseHotPoint):
             res = open(path,'r').read()
             l = re.findall('"(.*?)"', res)
             for item in l:
-              '''
-              2018-05-03 
-              2,002681,奋达科技,9.41,0.86,10.06%,9.71,165823,153715449,8.55,8.59,9.41,8.58,-,-,-,-,-,-,-,-,0.00%,2.99,2.28,64.40,2012-06-05
-              
-              1 代码  2 名称  3 价格  4 价格增长  5 涨幅  6 振幅  23 换手率
-              '''
               arr = item.split(',')
               id = arr[1]
 
@@ -103,21 +92,18 @@ class HotPointPredictor(BaseHotPoint):
     filterdIdList = []
     for id,data in count.items():
 
-      # 共振看涨板块数量
+      # 共振板块数量
       if len(data['bkList']) < minBkNum: 
         continue
-
-      # 不属于看跌板块
-
 
       filterdIdList.append((id,data))
     return filterdIdList
   
 
-  def getIdListOfChoosedBkList(self,choosedBkList,resonanceNum=1):
+  def getIdListOfChoosedBkList(self,choosedBkList,resonanceNum):
     bkList = self.getFilteredBkList(choosedBkList)  
     self.genBkStockData(bkList)
-    idList = self.getFilteredIdList(RESONANCE_NUM) 
+    idList = self.getFilteredIdList(resonanceNum) 
     return idList
 
   def run(self):
@@ -128,11 +114,12 @@ class HotPointPredictor(BaseHotPoint):
     self.genBKdata()
 
     # 须排除
-    excludedIdList = self.getIdListOfChoosedBkList(MUST_NOT_CHOOSE_BK_LIST) 
+    excludedIdList = self.getIdListOfChoosedBkList(MUST_NOT_CHOOSE_BK_LIST,LIMIT_OF_EXCLUDED) 
     excludedCodeList = []
     for item in excludedIdList:
       excludedCodeList.append(item[0])
     print '须排除个股数：'+str(len(excludedIdList)) +"\n"
+
 
     # 确定初选个股
     # --------------------------------------------------------------------
@@ -140,96 +127,105 @@ class HotPointPredictor(BaseHotPoint):
     self.genBKdata()
 
     # 选中
-    choosedIdList = self.getIdListOfChoosedBkList(CHOOSEABLE_BK_LIST,RESONANCE_NUM)
+    choosedIdList = self.getIdListOfChoosedBkList(CHOOSEABLE_BK_LIST,LIMIT_OF_CHOOSED)
     print '初选中个股数：'+str(len(choosedIdList)) +"\n" 
 
 
     # 过滤
     # --------------------------------------------------------------------
-    idList = []
-    # 过滤
+    num = 1
     for item in choosedIdList:
-      if not(item[0] in excludedCodeList):
-        idList.append(item)
+      if item[0] in excludedCodeList:
+        print '排除：'+str(num)+' '+str(item[0])+" "+item[1]['basicInfo'][2]
+        num +=1
+        choosedIdList.remove(item)
 
-    print '排除后选中个股数：'+str(len(idList)) +"\n" 
+    print "\n排除后选中个股数："+str(len(choosedIdList)) +"\n" 
 
     # 生成报告
-    self.dumpReport(idList,RESONANCE_NUM)
+    self.dumpReport(choosedIdList,LIMIT_OF_CHOOSED)
 
 
 # config
 # ===============================================================
-RESONANCE_NUM = 2 # Resonance atleast 2
+LIMIT_OF_CHOOSED = 2 # Resonance atleast 2
+LIMIT_OF_EXCLUDED = 2 # Resonance atleast 2
 
 # 可选板块
 CHOOSEABLE_BK_LIST=[
-  '二胎概念',
-  '在线教育',
-  '生态农业',
-  '化工原料',
-  '塑胶制品',
-  '农药兽药',
-  '网络安全',
-  '甘肃板块',
-  '新疆板块',
-  '参股360',
-  '网红直播',
-  '化肥行业',
-  '农牧饲鱼',
   '可燃冰',
+  '文教休闲',
+  '油价相关',
+  '一带一路',
+  '全息技术',
+  '央视50_',
   '页岩气',
-  '油气设服',
-  '油改概念',
-  '海南板块',
+  '海工装备',
+  '长株潭',
+  '化工行业',
   '次新股',
+  '银行',
   '化纤行业',
-  '石油行业',
-  '昨日涨停',
-  '昨日连板',
+  '食品饮料',
+  '工程建设',
 ]
 
 # 必不选板块
 MUST_NOT_CHOOSE_BK_LIST=[
-  '苹果概念',
-  'OLED',
-  '基因测序',
-  '央视50_',
-  '融资融券',
-  '深证100R',
-  '福建板块',
-  '江西板块',
-  '机构重仓',
-  '健康中国',
-  '转债标的',
-  '珠宝首饰',
-  '通讯行业',
-  '万达概念',
-  'QFII重仓',
-  '阿里概念',
-  '病毒防治',
-  '医疗器械',
-  '免疫治疗',
-  '专用设备',
-  '医药制造',
-  '酿酒行业',
+  '新能源车',
   '单抗概念',
-  '精准医疗',
-  '医疗行业',
-  '北京东奥',
-  '民航机场',
-  '生物疫苗',
+  '小米概念',
+  '万达概念',
   '新零售',
+  '养老金',
+  '精准医疗',
+  '软件服务',
+  '医疗行业',
+  '高送转',
+  '北京东奥',
   '基金重仓',
-  '中超概念',
-  '中药',
-  '西藏板块',
-  '银行',
-  '木业家具',
-  '特斯拉',
-  '独家药品',
-  '超级品牌',
+  'AB股',
+  '深证100R',
+  '珠宝首饰',
+  '虚拟现实',
+  '健康中国',
+  '航母概念',
+  '5G概念',
   '人脑工程',
+  '超级电容',
+  '免疫治疗',
+  '国产软件',
+  '基因测序',
+  '阿里概念',
+  '国企改革',
+  '超导概念',
+  '独家药品',
+  '病毒防治',
+  '蓝宝石',
+  '医疗器械',
+  '国家安防',
+  '苹果概念',
+  '养老概念',
+  '特斯拉',
+  '智能穿戴',
+  '互联金融',
+  '大数据',
+  '送转预期',
+  '北斗导航',
+  '中药',
+  '太阳能',
+  '触摸屏',
+  '稀土永磁',
+  '锂电池',
+  '移动支付',
+  '物联网',
+  '生物疫苗',
+  '航天航空',
+  '保险',
+  '医药制造',
+  '交运物流',
+  '民航机场',
+  '西藏板块',
 ]
 
 

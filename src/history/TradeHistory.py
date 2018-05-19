@@ -203,7 +203,7 @@ td{
 
 
     # 备注
-    tr += '<td><font color="orange">'+ str(record[8]) +'</font></td>'
+    tr += '<td><font color="green">'+ str(record[8]) +'</font></td>'
     s += tr
   s += '</table>'
 

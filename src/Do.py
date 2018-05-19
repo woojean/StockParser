@@ -270,8 +270,8 @@ if __name__ == '__main__':
     'WJParser':'W'
   }
 
-  parsers2 = {
-    'ContinuouslyBigRiseButNoRiseLimitParser':'T'
+  parsers = {
+    'BaldRiseLineAndVolumeReduceParser':'T'
   }
 
   (parseDay, isNew,traceDay) = getParams()

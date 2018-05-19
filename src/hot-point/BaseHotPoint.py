@@ -279,15 +279,17 @@ td{
       #if len(data['bkList']) > matchNum and islp < 4.0 and islp !=0:
       #if data['basicInfo'][1] == '000568':
       #  print data['basicInfo'][2],islp,riseRiskRate,amplitudeRate
-      if (riskIndex < 4.0) and (riskIndex !=0) and (firmIndex > 0) and (strongIndex > 0.5):
+      if (riskIndex < 4.0) and (riskIndex !=0) and (firmIndex > 0) and (strongIndex > 0.5) and ('ST' not in data['basicInfo'][2]):
         matchedNum += 1
         trs +='<tr class="match">'
         #trs +='<tr>'
-        sel += data['basicInfo'][1]+','
         match = True
       else:
         trs +='<tr>'
       
+      
+      sel += data['basicInfo'][1]+','
+
       trs +='<td>'+str(index)+'</td>'
 
       # 代码
@@ -310,7 +312,7 @@ td{
       if riskIndex == 0:
         trs +='<td><font color="#aaa">-</font></td>'
       elif riskIndex < 4.0:
-        trs +='<td><font color="red" size=2><b>-'+str(riskIndex)+'%</b></font></td>'
+        trs +='<td><font color="#009ACD" size=2><b>-'+str(riskIndex)+'%</b></font></td>'
       else:
         trs +='<td><font color="#aaa">-'+str(riskIndex)+'%</font></td>'
 
@@ -375,7 +377,7 @@ td{
     path = Tools.getHotPointReportDirPath()+'/'+self._source+'-'+parseTime+'.html'
     open(path,'w').write(s)
 
-    selPath = Tools.getHotPointReportDirPath()+'/'+self._source+'-'+parseTime+'.sel'
+    selPath = Tools.getEnterListDirPath()+'/'+self._source+'-'+parseTime+'.sel'
     open(selPath,'w').write(sel)
 
     csvPath = Tools.getHotPointReportDirPath()+'/'+self._source+'-'+parseTime+'.csv'
