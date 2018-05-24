@@ -30,25 +30,27 @@ class TwoLimitsParser(BaseParser):
   def parse(self,res,parseDay,id=''):
     ret = False
 
-    dayList = BaseParser.getPastTradingDayList(parseDay,4)
+    dayList = BaseParser.getPastTradingDayList(parseDay,3)
 
-    startPrice = self.getEndPriceOfDay(res,dayList[2])
-    endPrice = self.getEndPriceOfDay(res,dayList[3])
-    growthRate =  (endPrice-startPrice)/startPrice
-    if growthRate < 0.09:
-      return False
-
+    # 当日板了
     startPrice = self.getEndPriceOfDay(res,dayList[1])
     endPrice = self.getEndPriceOfDay(res,dayList[2])
     growthRate =  (endPrice-startPrice)/startPrice
-    if growthRate < 0.09:
+    if growthRate < 0.095:
       return False
 
+    # 前一日板了
     startPrice = self.getEndPriceOfDay(res,dayList[0])
     endPrice = self.getEndPriceOfDay(res,dayList[1])
     growthRate =  (endPrice-startPrice)/startPrice
-
-    if growthRate > 0.03:
+    if growthRate < 0.095:
+      return False
+    
+    print id
+    if id == '300664':
+      print changeRate
+    changeRate = self.geChangeRateOfDay(res,parseDay)
+    if changeRate > 0.15:
       return False
 
     return True

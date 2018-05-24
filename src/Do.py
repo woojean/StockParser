@@ -271,7 +271,7 @@ if __name__ == '__main__':
   }
 
   parsers = {
-    'BaldRiseLineAndVolumeReduceParser':'T'
+    'TwoLimitsParser':'T'
   }
 
   (parseDay, isNew,traceDay) = getParams()

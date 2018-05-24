@@ -121,7 +121,7 @@ td{
   s += '<td class="table_header_counted">持股天数</td>'
   s += '<td class="table_header_counted">盈亏金额</td>'
   s += '<td class="table_header_counted">盈亏比</td>'
-
+  s += '<td>策略</td>'
   s += '<td>备注</td>'
   s += '</tr>'
 
@@ -201,9 +201,11 @@ td{
     else:
       tr += '<td class="lose">'+ str(profitAndLoss) +'%</td>'
 
+    # 策略
+    tr += '<td><font color="orange">'+ str(record[8]) +'</font></td>'
 
     # 备注
-    tr += '<td><font color="green">'+ str(record[8]) +'</font></td>'
+    tr += '<td><font color="orange">'+ str(record[9]) +'</font></td>'
     s += tr
   s += '</table>'
 
@@ -237,7 +239,7 @@ td{
     sumStr += '<td class="lose">'+str(winRate)+'%</td>'
 
   # 平均持股天数
-  sumStr += '<td>'+str(round(totalHoldDay/tradeNum,3))+'</td>'
+  sumStr += '<td>'+str(round(totalHoldDay*1.0/tradeNum,3))+'</td>'
 
   # 单笔交易平均盈利
   avgProfitAndLoss = round(totalProfitAndLoss/tradeNum,3)
@@ -266,8 +268,18 @@ td{
   os.system('open '+path)
 
 
+def filterRecordsByStrategies(recordList,strategies):
+  if not strategies:
+    return recordList
 
-def getAllTradeRecords():
+  filteredList = []
+  for record in recordList:
+    if strategies == record[8]:
+      filteredList.append(record)
+  return filteredList
+
+
+def getAllTradeRecords(strategies = False):
   recordList = []
   for root,dirs,files in os.walk(TRADE_RECORD_PATH):
     for f in files:
@@ -276,6 +288,7 @@ def getAllTradeRecords():
          s = open(path,'r').read()
          s = s.replace(' ','')
          records = eval(s)
+         records = filterRecordsByStrategies(records,strategies)
          recordList = recordList + records
       except Exception, e:
         pass
@@ -292,11 +305,12 @@ def getAllTradeRecords():
 
 # ============================================================================================
 
-TRADE_RECORD_PATH = '/Users/wujian/woojean/ThinkingInTrade/Data/Trades'
+TRADE_RECORD_PATH = '/Users/wujian/woojean/ThinkingInTrade/Trading-Records'
 
 if __name__ == '__main__':
   isHide = False if (len(sys.argv) <= 1) else ('hide' == sys.argv[1])
+  strategies = False if (len(sys.argv) <= 2) else (sys.argv[2])
 
-  recordList = getAllTradeRecords()
+  recordList = getAllTradeRecords(strategies)
   dumpReport(recordList,isHide)
 
