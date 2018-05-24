@@ -94,6 +94,10 @@ td{
   color:#aaa;
 }
 
+.summaryAll{
+  font-weight:bolder;
+}
+
 </style>
   '''
   s += '</head><body>'
@@ -209,10 +213,12 @@ td{
     s += tr
   s += '</table>'
 
-  today = time.strftime('%Y-%m-%d',time.localtime(time.time()))
 
+
+  # 汇总统计
   sumStr = '<table width="100%" cellspacing="0" cellpadding="0">'
   sumStr += '<tr class="table_header_counted">'
+  sumStr += '<td>策略</td>'
   sumStr += '<td>开始日期</td>'
   sumStr += '<td>结束日期</td>'
   sumStr += '<td>总交易数</td>'
@@ -224,45 +230,51 @@ td{
   sumStr += '<td>盈亏总金额</td>'
   sumStr += '</tr>'
 
-  sumStr += '<tr>'
-  sumStr += '<td>'+recordList[-1][0]+'</td>'
-  sumStr += '<td>'+recordList[0][0]+'</td>'
-  sumStr += '<td>'+str(tradeNum)+'</td>'
-  sumStr += '<td>'+str(winNum)+'</td>'
-  sumStr += '<td>'+str(tradeNum - winNum)+'</td>'
+  summaryData = getSummaryData(recordList)
+  for strategies,data in summaryData.items():
+    if 'ALL' == strategies:
+      sumStr += '<tr class = "summaryAll">'
+    else:
+      sumStr += '<tr>'
+    sumStr += '<td>'+strategies+'</td>'
+    sumStr += '<td>'+str(data['startDate'])+'</td>'
+    sumStr += '<td>'+str(data['endDate'])+'</td>'
+    sumStr += '<td>'+str(data['tradeNum'])+'</td>'
+    sumStr += '<td>'+str(data['winNum'])+'</td>'
+    sumStr += '<td>'+str(data['loseNum'])+'</td>'
 
-  # 胜率
-  winRate = 100.0*round(winNum*1.0/tradeNum,5)
-  if winRate > 50:
-    sumStr += '<td class="win">'+str(winRate)+'%</td>'
-  else:
-    sumStr += '<td class="lose">'+str(winRate)+'%</td>'
+    # 胜率
+    winRate = data['winRate']
+    if winRate > 50:
+      sumStr += '<td class="win">'+str(winRate)+'%</td>'
+    else:
+      sumStr += '<td class="lose">'+str(winRate)+'%</td>'
 
-  # 平均持股天数
-  sumStr += '<td>'+str(round(totalHoldDay*1.0/tradeNum,3))+'</td>'
+    sumStr += '<td>'+str(data['avgHoldDay'])+'</td>'
 
-  # 单笔交易平均盈利
-  avgProfitAndLoss = round(totalProfitAndLoss/tradeNum,3)
-  if avgProfitAndLoss > 0:
-    sumStr += '<td class="win">'+str(avgProfitAndLoss)+'%</td>'
-  else:
-    sumStr += '<td class="lose">'+str(avgProfitAndLoss)+'%</td>'
-   
-  # 总盈亏
-  if isHide:
-    sumStr += '<td class="hide">隐藏</td>'
-  elif totalEarn > 0:
-    sumStr += '<td class="win">'+str(totalEarn)+'</td>'
-  else:
-    sumStr += '<td class="lose">'+str(totalEarn)+'</td>'
+    # 单笔交易平均盈利
+    avgProfitAndLoss = data['avgProfitAndLoss']
+    if avgProfitAndLoss > 0:
+      sumStr += '<td class="win">'+str(avgProfitAndLoss)+'%</td>'
+    else:
+      sumStr += '<td class="lose">'+str(avgProfitAndLoss)+'%</td>'
 
-  
-  sumStr += '</tr>'
+    # 总盈亏
+    totalEarn = data['totalEarn']
+    if isHide:
+      sumStr += '<td class="hide">隐藏</td>'
+    elif totalEarn > 0:
+      sumStr += '<td class="win">'+str(totalEarn)+'</td>'
+    else:
+      sumStr += '<td class="lose">'+str(totalEarn)+'</td>'
+
+    sumStr += '</tr>'
   sumStr += '</table>'
   sumStr += '</br></br>'
 
   s = s.replace('SUM_UP',sumStr)
 
+  today = time.strftime('%Y-%m-%d',time.localtime(time.time()))
   path = Tools.getRootPath()+'/db/db-trade-history/Trade-History-'+today+'.html'
   open(path,'w').write(s)
   os.system('open '+path)
@@ -303,6 +315,77 @@ def getAllTradeRecords(strategies = False):
   return recordList
 
 
+def getSummaryDataOfStrategies(strategies):
+  ret = {}
+  tradeNum = 0 # 成交记录数
+  winNum = 0
+  totalEarn = 0.0 # 盈亏总额
+  totalHoldDay = 0
+  totalProfitAndLoss = 0.0
+  for record in recordList:
+    if len(record[0]) <1:
+      continue
+
+    if (strategies != record[8]) and ('ALL' != strategies):
+      continue
+
+    # 买入金额
+    buyAmount = record[3] * record[4]
+    winAmount = 0
+    if 0 != record[7]:  # 判断是否已卖出
+      tradeNum += 1
+      sellAmount = record[4] * record[7]
+      holdDays = getHoldDays(record[0],record[6])
+      totalHoldDay += holdDays
+      profitAndLoss = round((sellAmount - buyAmount)/buyAmount,5)*100.0
+      totalProfitAndLoss += profitAndLoss
+      totalEarn += (sellAmount - buyAmount)
+      winAmount = sellAmount - buyAmount
+    else:
+      sellAmount = 0
+      holdDays = 0
+      profitAndLoss = 0
+
+    if profitAndLoss>0:
+      winNum +=1
+  
+  if 0 == tradeNum:  # 尚无已完成的交易
+    return ret
+
+  ret['startDate'] = recordList[-1][0]
+  ret['endDate'] = recordList[0][0]
+  ret['tradeNum'] = tradeNum
+  ret['winNum'] = winNum
+  ret['loseNum'] = tradeNum - winNum
+  ret['winRate'] = 100.0*round(winNum*1.0/tradeNum,5)
+  ret['avgHoldDay'] = round(totalHoldDay*1.0/tradeNum,3)
+  ret['avgProfitAndLoss'] = round(totalProfitAndLoss/tradeNum,3)
+  ret['totalEarn'] = totalEarn
+
+  return ret
+  
+
+
+
+def getSummaryData(recordList):
+  ret = {
+    'ALL':{}
+  }
+
+  # 统计有哪些strategies
+  for record in recordList:
+    if len(record[0]) <1:
+      continue
+    strategies = str(record[8])
+    if not ret.has_key(strategies):
+      ret[strategies] = {}
+
+  # 统计各个strategies的数据
+  for k,v in ret.items():
+    ret[k] = getSummaryDataOfStrategies(k)
+  return ret
+
+
 # ============================================================================================
 
 TRADE_RECORD_PATH = '/Users/wujian/woojean/ThinkingInTrade/Trading-Records'
@@ -313,4 +396,14 @@ if __name__ == '__main__':
 
   recordList = getAllTradeRecords(strategies)
   dumpReport(recordList,isHide)
+  
+  #ret =  getSummaryData(recordList)
+  #print ret
+
+
+
+
+
+
+
 

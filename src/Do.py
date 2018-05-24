@@ -245,6 +245,8 @@ python src/Do.py 2018-03-26 x 2018-04-09
 '''
 
 if __name__ == '__main__':
+
+
   parsers = {
     'BaldRiseLineAndVolumeReduceParser':'秃阳线且缩量☆',
     'ContinuouslyBigRiseButNoRiseLimitParser':'连续大涨',
@@ -267,11 +269,16 @@ if __name__ == '__main__':
     'TwoLimitsParser':'二板',
     'VenusParser':'启明星',
     'VolumeMutationParser':'成交量突变',
-    'WJParser':'W'
+    'WJParser':'WJ'
   }
 
   parsers = {
-    'TwoLimitsParser':'T'
+    'BaldRiseLineAndVolumeReduceParser':'秃阳线且缩量☆',  # BALD
+    'PenetrateUpwardMa60Parser':'上穿60日线',  # MA60
+    'TriangularSupportParser':'均线三角托',  # TRI
+    'TweezersBottomParser':'镊形底',  # TW
+    'TwoLimitsParser':'二板', # TL
+    'WJParser':'WJ'  # WJ
   }
 
   (parseDay, isNew,traceDay) = getParams()
