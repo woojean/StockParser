@@ -228,7 +228,7 @@ def run(parseDay,parsers,isNew=False):
   if isNew:
     spiders = [
       'PriceSpider',
-      'MacdSpider',
+      #'MacdSpider',
       'BasicInfoSpider'
     ]
     runSpiders(spiders)
@@ -274,11 +274,7 @@ if __name__ == '__main__':
 
   parsers = {
     'BaldRiseLineAndVolumeReduceParser':'秃阳线且缩量☆',  # BALD
-    'PenetrateUpwardMa60Parser':'上穿60日线',  # MA60
-    'TriangularSupportParser':'均线三角托',  # TRI
     'TweezersBottomParser':'镊形底',  # TW
-    'TwoLimitsParser':'二板', # TL
-    'WJParser':'WJ'  # WJ
   }
 
   (parseDay, isNew,traceDay) = getParams()

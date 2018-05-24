@@ -644,9 +644,7 @@ class WJParser(BaseParser):
   # 解析
   # ================================================================================
   def parse(self,res,parseDay,id=''):
-    return True
     
-    '''
     # 趋势
     kLines = self.genKLines(res,parseDay)
     if not self.haveTrends(res,parseDay,kLines):
@@ -657,7 +655,6 @@ class WJParser(BaseParser):
       return False
 
     return True
-    '''
 
 
 
