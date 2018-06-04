@@ -228,7 +228,7 @@ def run(parseDay,parsers,isNew=False):
   if isNew:
     spiders = [
       'PriceSpider',
-      #'MacdSpider',
+      'MacdSpider',
       'BasicInfoSpider'
     ]
     runSpiders(spiders)
@@ -249,12 +249,12 @@ if __name__ == '__main__':
 
   parsers = {
     'BaldRiseLineAndVolumeReduceParser':'秃阳线且缩量☆',
-    'ContinuouslyBigRiseButNoRiseLimitParser':'连续大涨',
-    'FlatBottomParser':'平台',
+    # 'ContinuouslyBigRiseButNoRiseLimitParser':'连续大涨',
+    # 'FlatBottomParser':'平台',
     'GoldenPinBottomParser':'金针探底',
-    'MacdReverseParser':'MACD反转☆',
-    'MaConvergenceParser':'均线汇合',
-    'MaPenetrateParser':'均线穿透',
+    # 'MacdReverseParser':'MACD反转☆',
+    # 'MaConvergenceParser':'均线汇合',
+    # 'MaPenetrateParser':'均线穿透',
     'MaTrendParser':'MA短线趋势',
     'MaxPriceParser':'创新高',
     'MergedParser.py':'均线汇合',
@@ -265,14 +265,14 @@ if __name__ == '__main__':
     'SwallowUpParser':'向上吞没线',
     'ThreeLimitsParser':'三板',
     'TriangularSupportParser':'均线三角托',
-    'TweezersBottomParser':'镊形底',
+    # 'TweezersBottomParser':'镊形底',
     'TwoLimitsParser':'二板',
     'VenusParser':'启明星',
     'VolumeMutationParser':'成交量突变',
-    'WJParser':'WJ'
+    # 'WJParser':'WJ'
   }
 
-  parsers = {
+  parsers2 = {
     'BaldRiseLineAndVolumeReduceParser':'秃阳线且缩量☆',  # BALD
     'TweezersBottomParser':'镊形底',  # TW
   }

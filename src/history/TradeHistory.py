@@ -22,7 +22,39 @@ rootPath = sys.path[0][0:sys.path[0].index('StockParser')]+'StockParser'
 sys.path.append(rootPath+'/src') 
 from common import Tools
 
-
+'''
+[["2018-05-03","600703","三安光电",20.89,600,20.32,"2018-05-03",21.36,
+  "BK","2018年五一节后开始记录每一笔交易"],
+["2018-05-04","600645","中源协和",21.85,500,21.15,"2018-05-10",22.85,"BK",""],
+["2018-05-09","603776","永安行",58.49,200,57.14,"2018-05-14",57.29,"BK",""],
+["2018-05-10","002038","双鹭药业",46.15,300,44.85,"2018-05-11",44.85,"BK",""],
+["2018-05-10","600645","中源协和",23.21,500,22.75,"2018-05-14",21.74,
+  "BK","顶部上吊线进场；尾盘长上影线阴线触及止损价即反弹，未走，第二天大幅向下跳空低开"],
+["2018-05-15","600718","东软集团",14.7,800,14.25,"2018-05-18",14.27,"BK",""],
+["2018-05-16","002019","亿帆医药",20.54,500,20.0,"2018-05-18",19.99,"BK",""],
+["2018-05-18","000505","京粮控股",7.88,1300,7.8,"2018-05-21",7.89,"BK",""],
+["2018-05-18","600419","天润乳业",48.16,300,47.32,"2018-05-21",48.43,"BK",""],
+["2018-05-18","000525","红太阳",20.47,500,20.12,"2018-05-21",20.4,"BK",""],
+["2018-05-21","002923","润都股份",44.8,300,43.81,"",0,"DK",""],
+["2018-05-21","000565","渝三峡A",6.18,1700,6.03,"2018-05-24",6.25,"DK","操作失误：买入价偏高"],
+["2018-05-21","601002","晋亿实业",7.84,1300,7.65,"",0,"DK",""],
+["2018-05-21","300391","康跃科技",12.77,800,12.53,"",0,"DK",""],
+["2018-05-22","002172","澳洋科技",6.902,500,0,"2018-05-23",6.19,"TL",""],
+["2018-05-22","002930","宏川智慧",60.79,100,0,"2018-05-23",59.5,"TL",""],
+["2018-05-22","300084","海默科技",7.367,300,0,"2018-05-23",7.02,"TL",""],
+["2018-05-22","300135","宝利国际",3.821,700,0,"2018-05-23",3.34,"TL",""],
+["2018-05-22","300471","厚普股份",9.515,200,0,"2018-05-23",9.9,"TL",""],
+["2018-05-22","300644","南京聚隆",64.95,100,0,"2018-05-23",70.5,"TL",""],
+["2018-05-23","300666","江丰电子",67.13,200,64.4,"2018-05-25",64.02,"DK","前有三根大阴棒；即将到达阻力趋势线入场"],
+["2018-05-23","002299","圣农发展",16.32,700,15.63,"2018-05-24",15.63,"DK","日K回撤，周K镊形顶入场；止损卖不掉，换手率太低；"],
+["2018-05-24","601619","嘉泽新能",11.2,100,0,"2018-05-25",11.49,"TL",""],
+["2018-05-24","000760","斯太尔",5.18,100,0,"2018-05-25",4.9,"TL",""],
+["2018-05-24","002184","海得控制",15,800,14.7,"",0,"DK","即将到达阻力趋势线入场"],
+["2018-05-25","000890","法尔胜",6.7,2000,6.63,"",0,"KDJ",""],
+["2018-05-25","002237","恒邦股份",11.19,1000,11.84,"",0,"KDJ","操作失误：买入价偏高"],
+["","","",0,0,0,"",0,"",""]
+]
+'''
 
 def getAllTradeDayList(new= False):
   path = Tools.getRootPath()+'/data/price/000001'
@@ -232,6 +264,8 @@ td{
 
   summaryData = getSummaryData(recordList)
   for strategies,data in summaryData.items():
+    if not data:
+      continue
     if 'ALL' == strategies:
       sumStr += '<tr class = "summaryAll">'
     else:
@@ -296,15 +330,17 @@ def getAllTradeRecords(strategies = False):
   for root,dirs,files in os.walk(TRADE_RECORD_PATH):
     for f in files:
       try:
-         path = root + '/' + f
-         s = open(path,'r').read()
-         s = s.replace(' ','')
-         records = eval(s)
-         records = filterRecordsByStrategies(records,strategies)
-         recordList = recordList + records
+          if '.DS_Store' == f:
+            continue
+          path = root + '/' + f
+          s = open(path,'r').read()
+          s = s.replace(' ','')
+          records = eval(s)
+          records = filterRecordsByStrategies(records,strategies)
+          recordList = recordList + records
       except Exception, e:
         pass
-        #print repr(e)
+        print repr(e)
 
   # 删除非法元素
   for record in recordList:
@@ -361,7 +397,7 @@ def getSummaryDataOfStrategies(strategies):
   ret['avgHoldDay'] = round(totalHoldDay*1.0/tradeNum,3)
   ret['avgProfitAndLoss'] = round(totalProfitAndLoss/tradeNum,3)
   ret['totalEarn'] = totalEarn
-
+  
   return ret
   
 
@@ -379,7 +415,7 @@ def getSummaryData(recordList):
     strategies = str(record[8])
     if not ret.has_key(strategies):
       ret[strategies] = {}
-
+  
   # 统计各个strategies的数据
   for k,v in ret.items():
     ret[k] = getSummaryDataOfStrategies(k)
