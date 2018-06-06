@@ -355,6 +355,27 @@ class BaseParser:
         otherDayMinPrice = price
     return minPrice <= otherDayMinPrice
 
+
+  # 获取时间区间最低价
+  def getMinPriceOfDays(self,res,dayList):
+    minPrice = self.getMinPriceOfDay(res,dayList[0])
+    for d in dayList:
+      price = self.getMinPriceOfDay(res,d)
+      if price < minPrice: # 错误数据（交易日不连贯）
+        minPrice = price
+    return minPrice
+
+  # 获取时间区间最高价
+  def getMaxPriceOfDays(self,res,dayList):
+    maxPrice = self.getMaxPriceOfDay(res,dayList[0])
+    for d in dayList:
+      price = self.getMaxPriceOfDay(res,d)
+      if price > maxPrice: # 错误数据（交易日不连贯）
+        maxPrice = price
+    return maxPrice
+
+
+
   # 判断某一天是否是过去若干天的最高价
   def isMaxPriceOfDays(self,res,day,days):
     dayList = BaseParser.getPastTradingDayList(day,days)

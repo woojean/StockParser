@@ -272,9 +272,8 @@ if __name__ == '__main__':
     # 'WJParser':'WJ'
   }
 
-  parsers2 = {
+  parsers = {
     'BaldRiseLineAndVolumeReduceParser':'秃阳线且缩量☆',  # BALD
-    'TweezersBottomParser':'镊形底',  # TW
   }
 
   (parseDay, isNew,traceDay) = getParams()
