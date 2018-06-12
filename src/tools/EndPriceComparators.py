@@ -49,6 +49,7 @@ def getRes(code,parseDay):
   return res
 
 
+
 def compare(compareTo,compareList):
   ret = {}
   parseDay = time.strftime('%Y-%m-%d',time.localtime(time.time())) 
@@ -60,7 +61,7 @@ def compare(compareTo,compareList):
       endPrice1 = parser.getEndPriceOfDay(res1,day)
       res2 = getRes(code,parseDay)
       endPrice2 = parser.getEndPriceOfDay(res2,day)
-      rate = round(endPrice2/endPrice1,5)
+      rate = round(endPrice2/endPrice1,5)*100.0
       if not ret.has_key(code):
         ret[code] = [(day,rate)]
       else:
@@ -73,8 +74,12 @@ def compare(compareTo,compareList):
 compareDays = 60
 compareTo = '000001'
 compareList = [
-  '300584',
-  '603222',
+  '002123',
+  '002370',
+  '002668',
+  '600638',
+  '002686',
+  '600532',
 ]
 
 
