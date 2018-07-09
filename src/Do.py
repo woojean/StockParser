@@ -273,7 +273,7 @@ if __name__ == '__main__':
   }
 
   parsers = {
-    'BaldRiseLineAndVolumeReduceParser':'秃阳线且缩量☆',  # BALD
+    'TwoLimitsParser':'二板',
   }
 
   (parseDay, isNew,traceDay) = getParams()

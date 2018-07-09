@@ -18,6 +18,10 @@ from common import Tools
 from parsers import BaseParser
 
 
+'''
+个股与大盘比率的走势，用来判断走势是否强于大盘
+'''
+
 # ------------------------------------------------------------------------
 
 def dumpReport(ret):
