@@ -54,7 +54,7 @@ def compute(code,parseDay):
     e5 = (1 + gr5) * e4
     b = (1 + gr5 + 0.02) * e4 
     gr5 = round(gr5,4)
-    print 'GR5 = ' + str(gr5) + '，E5 = ' + str(e5) + '，B = ' + str(b)
+    print 'GR5 = ' + str(gr5*100.0) + '%，E5 = ' + str(e5) + '，B = ' + str(b)
 
 
 if __name__ == '__main__':
