@@ -52,9 +52,9 @@ def compute(code,parseDay):
   else:
     gr5 = s4/(4*e4) - 1
     e5 = (1 + gr5) * e4
-    b = (1 + gr5 + 0.03) * e4   # 最基本的技术常识：任何技术位置都有一个上下3%的允许空间。
+    b = (1 + gr5 + 0.01) * e4   
     gr5 = round(gr5,4)
-    print 'GR5 = ' + str(gr5*100.0) + '%，E5 = ' + str(e5) + '，B = ' + str(b)
+    print 'GR5 = ' + str(gr5*100.0) + '%，E5 = ' + str(e5) + '，B = ' + str(b) + '；'
 
 
 if __name__ == '__main__':
