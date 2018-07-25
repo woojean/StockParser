@@ -435,6 +435,7 @@ class BaseParser:
   #  inherit
   # ----------------------------------------------------------------------------------------
   def dumpIdList(self,idList):
+    print 'dumpIdList'
     enterListDirPath = Tools.getEnterListDirPath()
     #open('data/golden-pin-bottom/'+ confirmDay +'.sel','w').write(','.join(idList))
     open(enterListDirPath + '/' + self._parseDay + '-'+ self._tag+'.sel','w').write(','.join(idList))

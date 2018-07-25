@@ -26,6 +26,9 @@ def getParsersDirPath():
 def getTracersDirPath():
   return getRootPath()+'/src/tracers'  
 
+def getBackTestDirPath():
+  return getRootPath()+'/src/back-test'  
+
 def getTaogubaDataPath():
   return getRootPath()+'/data/taoguba'  
 

@@ -52,7 +52,7 @@ def compute(code,parseDay):
   else:
     gr5 = s4/(4*e4) - 1
     e5 = (1 + gr5) * e4
-    b = (1 + gr5 + 0.01) * e4   
+    b = (1 + gr5 + 0.005) * e4   
     gr5 = round(gr5,4)
     print 'GR5 = ' + str(gr5*100.0) + '%，E5 = ' + str(e5) + '，B = ' + str(b) + '；'
 
