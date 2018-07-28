@@ -22,12 +22,15 @@ from parsers import BaseParser
 
 if __name__ == '__main__':
   # 回测parser
-  parser = 'MinPriceMoreThanMaParser'
+  parser = 'TwoLimitsParser'
 
   # 起止日期
-  # 2018-06-20 25 2018-07-24 上证-0.08%
-  beginDate = '2018-06-20'  
-  testDays = 25
+  # 2018-06-20 24 2018-07-23 上证-0.08%
+  # beginDate = '2018-06-20'  
+  # testDays = 24
+  beginDate = '2016-11-10'  
+  # testDays = 400
+  testDays = 400
 
   isNew = False if (len(sys.argv) <= 1) else ('new' ==sys.argv[1])
   if isNew:

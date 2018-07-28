@@ -115,7 +115,6 @@ table {
     tables += '<td class="ar ah">名称</td>'
     tables += '<td class="ar ah">买入价</td>'
     tables += '<td class="ar ah">卖出价</td>'
-    tables += '<td class="ar ah">预期跌幅</td>'
     tables += '<td class="ar ah">收益率</td>'
     tables += '</tr>'
     
@@ -162,7 +161,6 @@ table {
       tables += '<td class="al">'+str(i['name'])+'</td>'
       tables += '<td class="al">'+str(i['inPrice'])+'</td>'
       tables += '<td class="al">'+str(i['outPrice'])+'</td>'
-      tables += '<td class="al">'+str(round(float(i['gr'])*100.0,3))+'%</td>'
       if gr > 0:
         tables += '<td class="al"><font color="red"><b>'+str(round(gr*100.0,3))+'%</b></font></td>'
       elif gr <= -0:

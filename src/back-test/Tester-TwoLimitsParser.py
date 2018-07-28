@@ -16,7 +16,7 @@ rootPath = sys.path[0][0:sys.path[0].index('StockParser')]+'/StockParser'
 sys.path.append(rootPath+'/src') 
 from common import Tools
 from parsers import BaseParser
-from parsers import MinPriceMoreThanMaParser
+from parsers import BaldRiseLineAndVolumeReduceParser
 
 def getEnterListFiles():
   enterListDirPath = Tools.getEnterListDirPath()
@@ -74,28 +74,23 @@ def traceEnterList(f):
 
 def trace(id,parseDay):
   print id,parseDay
-  parser = MinPriceMoreThanMaParser.MinPriceMoreThanMaParser(parseDay)
+  parser = BaldRiseLineAndVolumeReduceParser.BaldRiseLineAndVolumeReduceParser(parseDay)
   priceFile = Tools.getPriceDirPath()+'/'+str(id)
   res = open(priceFile,'r').read()
-
-  (gr5,buyPrice) = parser.computeGr(res,parseDay)
+  
   dayList = parser.getNextTradingDayList(parseDay,2)
   inDay = dayList[0]
   outDay = dayList[1]
-  inDayMinPrice = parser.getMinPriceOfDay(res,inDay)
 
-  if inDayMinPrice > buyPrice: # 未能买入
-    # print "Can't Buy"
-    return False
-
-  inDayStartPrice = parser.getStartPriceOfDay(res,inDay)
-  if 0==inDayStartPrice:
-    return False
-
-
-  inPrice = min(buyPrice,inDayStartPrice) # 买入
+  inPrice = parser.getStartPriceOfDay(res,inDay)
   outPrice = parser.getStartPriceOfDay(res,outDay)
+
+  if 0==inPrice:
+    print 1
+    return False
+
   if 0==outPrice:
+    print 2
     return False
 
   ret = {}
@@ -103,7 +98,6 @@ def trace(id,parseDay):
   ret['name'] = Tools.getNameById(id)
   ret['inPrice'] = inPrice
   ret['outPrice'] = outPrice
-  ret['gr'] = gr5
   return ret
 
 

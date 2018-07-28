@@ -22,14 +22,36 @@ sys.setdefaultencoding('utf-8')
 '''
 class MinPriceMoreThanMaParser(BaseParser):
   _tag = 'MinPriceMoreThanMaParser'
-  days = 3  # 连续n日
+  days = 1  # 连续n日
   maDays = 5  # n日均线
-  minGr = -0.01  # 最小跌幅
-  maxGr = -0.11  # 最大跌幅 
-  advance = 0.01 # 提前量
+  minGr = -0.00  # 最小跌幅
+  maxGr = -0.1  # 最大跌幅 
+  advance = 0.000 # 提前量
+  accurate = False # 是否精确要求
 
   def __init__(self,parseDay):
     BaseParser.__init__(self,parseDay) 
+
+
+  def isInMaTrend(self,res,day):
+    R = 5
+    G = 10
+    B = 20
+
+    dayList = self.getPastTradingDayList(day,R)
+    (v,v,maR) = self.getMAPrice(res,dayList)
+
+    dayList = self.getPastTradingDayList(day,G)
+    (v,v,maG) = self.getMAPrice(res,dayList)
+
+    dayList = self.getPastTradingDayList(day,B)
+    (v,v,maB) = self.getMAPrice(res,dayList)
+
+    if not ((maR > maG) and (maG > maB)):
+      return False
+
+    return True
+
 
 
   def computeGr(self,res,parseDay):
@@ -53,7 +75,24 @@ class MinPriceMoreThanMaParser(BaseParser):
 
   def parse(self,res,parseDay,id=''):
     ret = True
-    dayList = self.getPastTradingDayList(parseDay,self.days)
+    if not self.isInMaTrend(res,parseDay):
+      return False
+
+    dayList = self.getPastTradingDayList(parseDay,self.days+1)
+
+    preDay = dayList[0]
+    if self.accurate:
+      maDayList = self.getPastTradingDayList(preDay,self.maDays)
+      (v,v,ma) = self.getMAPrice(res,maDayList)
+      minPrice = self.getMinPriceOfDay(res,preDay)
+      if ma == -1:
+        return False
+      if minPrice == 0:
+        return False
+      if minPrice > ma:
+        return False
+
+    dayList = dayList[1:]
     for day in dayList:
       maDayList = self.getPastTradingDayList(day,self.maDays)
       (v,v,ma) = self.getMAPrice(res,maDayList)
@@ -70,9 +109,12 @@ class MinPriceMoreThanMaParser(BaseParser):
         ret = False
         break
 
-    (gr,b) = self.computeGr(res,parseDay)
+    (gr,b) = self.computeGr(res,parseDay) # 计算预期跌幅和预期买入价
     if (gr > self.minGr) or (gr < self.maxGr):
       ret = False
+
+    # if not ((-0.03 > gr > -0.04) or (-0.06 > gr > -0.07)):
+      # ret = False
     
     if ret:
       print id,str(gr*100.0)+"%",b    
