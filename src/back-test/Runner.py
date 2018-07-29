@@ -29,7 +29,6 @@ if __name__ == '__main__':
   # beginDate = '2018-06-20'  
   # testDays = 24
   beginDate = '2016-11-10'  
-  # testDays = 400
   testDays = 400
 
   isNew = False if (len(sys.argv) <= 1) else ('new' ==sys.argv[1])

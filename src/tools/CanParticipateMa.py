@@ -35,32 +35,56 @@ def getRes(code,parseDay):
   return res
 
 
-def compute(code,parseDay):
+def computeMaxMa(code,parseDay):
   res = getRes(code,parseDay)
   parser = BaseParser.BaseParser(parseDay)
   dayList = parser.getPastTradingDayList(parseDay,4)
-  print dayList
+  e1 = parser.getEndPriceOfDay(res,dayList[0])
+  e2 = parser.getEndPriceOfDay(res,dayList[1])
+  e3 = parser.getEndPriceOfDay(res,dayList[2])
+  e4 = parser.getEndPriceOfDay(res,dayList[3])
+  e5 = e4 * 1.1
+  
+  if 0 == e1*e2*e3*e4:
+    print 'End Price Error !'
+  else:
+    ma5 = round((e1+e2+e3+e4+e5)/5.0,4)
+    ma3 = round((e3+e4+e5)/3.0,4)
+    print 'Max MA5 = ' + str(ma5)
+    print 'Max MA3 = ' + str(ma3)
+
+
+
+def computeReboundMa(code,parseDay):
+  res = getRes(code,parseDay)
+  parser = BaseParser.BaseParser(parseDay)
+  dayList = parser.getPastTradingDayList(parseDay,4)
   e1 = parser.getEndPriceOfDay(res,dayList[0])
   e2 = parser.getEndPriceOfDay(res,dayList[1])
   e3 = parser.getEndPriceOfDay(res,dayList[2])
   e4 = parser.getEndPriceOfDay(res,dayList[3])
   s4 = e1 + e2 + e3 + e4
 
-  print e1,e2,e3,e4
   if 0 == e1*e2*e3*e4:
     print 'End Price Error !'
   else:
     gr5 = s4/(4*e4) - 1
     e5 = (1 + gr5) * e4
-    b = (1 + gr5 + 0.005) * e4   
+    # b = (1 + gr5 + 0.000) * e4   
     gr5 = round(gr5,4)
-    print 'GR5 = ' + str(gr5*100.0) + '%，E5 = ' + str(e5) + '，B = ' + str(b) + '；'
+    print 'Rebound MA5 = ' + str(e5) + '，GR5 = ' + str(gr5*100.0) + '%'
 
+    gr3 = (e3+e4)/(2*e4) - 1
+    e = (1 + gr3) * e4
+    # b = (1 + gr3 + 0.000) * e4   
+    gr3 = round(gr3,4)
+    print 'Rebound MA3 = ' + str(e) + '，GR3 = ' + str(gr3*100.0) + '%'
 
 if __name__ == '__main__':
   (code,parseDay) = getParams()
   print code,parseDay
-  compute(code,parseDay)
+  computeReboundMa(code,parseDay)
+  computeMaxMa(code,parseDay)
 
 
 

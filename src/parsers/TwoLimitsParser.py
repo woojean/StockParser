@@ -31,27 +31,53 @@ class TwoLimitsParser(BaseParser):
     ret = False
 
     dayList = BaseParser.getPastTradingDayList(parseDay,3)
-
-    # 当日板了
-    startPrice = self.getEndPriceOfDay(res,dayList[1])
-    endPrice = self.getEndPriceOfDay(res,dayList[2])
-    growthRate =  (endPrice-startPrice)/startPrice
-    if growthRate < 0.095:
+    day1 = dayList[0]
+    day2 = dayList[1]
+    day3 = dayList[2]
+    startPriceOfDay1 = self.getStartPriceOfDay(res,day1)
+    endPriceOfDay1 = self.getEndPriceOfDay(res,day1)
+    startPriceOfDay2 = self.getStartPriceOfDay(res,day2)
+    endPriceOfDay2 = self.getEndPriceOfDay(res,day2)
+    startPriceOfDay3 = self.getStartPriceOfDay(res,day3)
+    endPriceOfDay3 = self.getEndPriceOfDay(res,day3)
+    if 0==startPriceOfDay1 or  0== endPriceOfDay1:
       return False
+    if 0==startPriceOfDay2 or  0== endPriceOfDay2:
+      return False
+    if 0==startPriceOfDay3 or  0== endPriceOfDay3:
+      return False
+
+    # 0,   1,   2
+    # day1 day2 day3
+    # 当日非一字板
+    rate = (endPriceOfDay3 - startPriceOfDay3)/startPriceOfDay3
+    if rate  < 0.005:
+      return False
+
+
+    # 当日板了，day3即当日
+    gr2 =  (endPriceOfDay3-endPriceOfDay2)/endPriceOfDay2
+    if gr2 < 0.099:
+      return False
+
 
     # 前一日板了
-    startPrice = self.getEndPriceOfDay(res,dayList[0])
-    endPrice = self.getEndPriceOfDay(res,dayList[1])
-    growthRate =  (endPrice-startPrice)/startPrice
-    if growthRate < 0.095:
+    gr1 =  (endPriceOfDay2-endPriceOfDay1)/endPriceOfDay1
+    if gr1 < 0.099:
       return False
-    
-    print id
-    if id == '300664':
-      print changeRate
-    changeRate = self.geChangeRateOfDay(res,parseDay)
-    if changeRate > 0.15:
-      return False
+
+    # 仅二连板
+    # dayList = BaseParser.getPastTradingDayList(day1,2)
+    # endPriceOfDay0 = self.getEndPriceOfDay(res,dayList[0])
+    # if 0==endPriceOfDay0:
+    #   return False
+    # gr0 = (endPriceOfDay1-endPriceOfDay0)/endPriceOfDay0
+    # if gr0 > 0.099:
+    #   return False
+
+    # changeRate = self.geChangeRateOfDay(res,parseDay)
+    # if changeRate > 0.15:
+    #   return False
 
     return True
 
