@@ -50,8 +50,8 @@ def computeMaxMa(code,parseDay):
   else:
     ma5 = round((e1+e2+e3+e4+e5)/5.0,4)
     ma3 = round((e3+e4+e5)/3.0,4)
-    print 'Max MA5 = ' + str(ma5)
-    print 'Max MA3 = ' + str(ma3)
+    print '涨停5日线 MA5 = ' + str(ma5)
+    print '涨停3日线 MA3 = ' + str(ma3)
 
 
 
@@ -72,13 +72,13 @@ def computeReboundMa(code,parseDay):
     e5 = (1 + gr5) * e4
     # b = (1 + gr5 + 0.000) * e4   
     gr5 = round(gr5,4)
-    print 'Rebound MA5 = ' + str(e5) + '，GR5 = ' + str(gr5*100.0) + '%'
+    print '回踩5日线 MA5 = ' + str(e5) + '，GR5 = ' + str(gr5*100.0) + '%'
 
     gr3 = (e3+e4)/(2*e4) - 1
     e = (1 + gr3) * e4
     # b = (1 + gr3 + 0.000) * e4   
     gr3 = round(gr3,4)
-    print 'Rebound MA3 = ' + str(e) + '，GR3 = ' + str(gr3*100.0) + '%'
+    print '回踩3日线 MA3 = ' + str(e) + '，GR3 = ' + str(gr3*100.0) + '%'
 
 if __name__ == '__main__':
   (code,parseDay) = getParams()
