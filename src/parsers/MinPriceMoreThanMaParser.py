@@ -18,7 +18,7 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 '''
-“近n天最低价大于MA”
+“近n天最低价大于MA（这样才能“回踩”）”
 '''
 class MinPriceMoreThanMaParser(BaseParser):
   _tag = 'MinPriceMoreThanMaParser'

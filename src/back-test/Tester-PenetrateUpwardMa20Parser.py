@@ -16,7 +16,7 @@ rootPath = sys.path[0][0:sys.path[0].index('StockParser')]+'/StockParser'
 sys.path.append(rootPath+'/src') 
 from common import Tools
 from parsers import BaseParser
-from parsers import BaldRiseLineAndVolumeReduceParser
+from parsers import PenetrateUpwardMa20Parser
 
 def getEnterListFiles():
   enterListDirPath = Tools.getEnterListDirPath()
@@ -74,17 +74,29 @@ def traceEnterList(f):
 
 # 开盘价买入
 def trace(id,parseDay):
-  print id,parseDay
-  parser = BaldRiseLineAndVolumeReduceParser.BaldRiseLineAndVolumeReduceParser(parseDay)
+  parser = PenetrateUpwardMa20Parser.PenetrateUpwardMa20Parser(parseDay)
   priceFile = Tools.getPriceDirPath()+'/'+str(id)
   res = open(priceFile,'r').read()
   
-  dayList = parser.getNextTradingDayList(parseDay,2)
+  dayList = parser.getNextTradingDayList(parseDay,20)  # 最长持股时间不太可能超过20
   inDay = dayList[0]
-  outDay = dayList[1]
 
-  inPrice = parser.getStartPriceOfDay(res,inDay)  # 买入价为连板后第一天的开盘价
-  outPrice = parser.getStartPriceOfDay(res,outDay)  # 卖出价为买入后第二天的开盘价
+  inPrice = parser.getStartPriceOfDay(res,inDay)  # 买入价为信号日第二天的开盘价
+  slp = parser.getMinPriceOfDay(res,inDay)  # 初始止损价为买入当天的最低价
+  
+  outPrice = 0
+
+  dayList = dayList[1:] # 去掉买入日
+  for d in dayList: # 从第2天开始
+    minPrice = parser.getMinPriceOfDay(res,d)
+
+    if minPrice < slp: # 触发止损  要有大盘配合
+      outPrice = slp
+      break
+    
+    # 未止损的情况下，将止损位上调为当日最低价
+    slp = minPrice
+
 
   if 0==inPrice:
     return False # 不可参与
@@ -101,40 +113,40 @@ def trace(id,parseDay):
 
 
 # 回踩3日线买入
-def trace1(id,parseDay):
-  print id,parseDay
-  parser = BaldRiseLineAndVolumeReduceParser.BaldRiseLineAndVolumeReduceParser(parseDay)
-  priceFile = Tools.getPriceDirPath()+'/'+str(id)
-  res = open(priceFile,'r').read()
+# def trace1(id,parseDay):
+#   print id,parseDay
+#   parser = PenetrateUpwardMa20Parser.PenetrateUpwardMa20Parser(parseDay)
+#   priceFile = Tools.getPriceDirPath()+'/'+str(id)
+#   res = open(priceFile,'r').read()
   
-  dayList = parser.getNextTradingDayList(parseDay,2)
-  inDay = dayList[0]
-  outDay = dayList[1]
+#   dayList = parser.getNextTradingDayList(parseDay,2)
+#   inDay = dayList[0]
+#   outDay = dayList[1]
 
-  endPriceOfParseDay = parser.getEndPriceOfDay(res,parseDay)
-  minPrice = parser.getMinPriceOfDay(res,inDay)  # 买入价为连板后第一天的最低价，且低于“回踩3日线”
-  outPrice = parser.getStartPriceOfDay(res,outDay)  # 卖出价为买入后第二天的开盘价
+#   endPriceOfParseDay = parser.getEndPriceOfDay(res,parseDay)
+#   minPrice = parser.getMinPriceOfDay(res,inDay)  # 买入价为连板后第一天的最低价，且低于“回踩3日线”
+#   outPrice = parser.getStartPriceOfDay(res,outDay)  # 卖出价为买入后第二天的开盘价
 
-  if 0==endPriceOfParseDay or 0==minPrice or 0==outPrice:
-    return False
+#   if 0==endPriceOfParseDay or 0==minPrice or 0==outPrice:
+#     return False
 
-  orderPrice = endPriceOfParseDay*0.955
-  if orderPrice < minPrice:  # 预约价在最小价之下
-    return False  # 不可参与
+#   orderPrice = endPriceOfParseDay*0.955
+#   if orderPrice < minPrice:  # 预约价在最小价之下
+#     return False  # 不可参与
 
-  # inDayStartPrice = parser.getStartPriceOfDay(res,inDay)
-  # startPriceGr = (inDayStartPrice - endPriceOfParseDay)/endPriceOfParseDay
-  # if startPriceGr > 0.07:  # 高开低走的，撤单
-  #   return False
+#   # inDayStartPrice = parser.getStartPriceOfDay(res,inDay)
+#   # startPriceGr = (inDayStartPrice - endPriceOfParseDay)/endPriceOfParseDay
+#   # if startPriceGr > 0.07:  # 高开低走的，撤单
+#   #   return False
 
-  inPrice = orderPrice # 
+#   inPrice = orderPrice # 
 
-  ret = {}
-  ret['id'] = id
-  ret['name'] = Tools.getNameById(id)
-  ret['inPrice'] = inPrice
-  ret['outPrice'] = outPrice
-  return ret
+#   ret = {}
+#   ret['id'] = id
+#   ret['name'] = Tools.getNameById(id)
+#   ret['inPrice'] = inPrice
+#   ret['outPrice'] = outPrice
+#   return ret
 
 
 
