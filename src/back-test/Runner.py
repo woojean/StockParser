@@ -26,10 +26,12 @@ if __name__ == '__main__':
 
   # 起止日期
   # 2018-06-20 24 2018-07-23 上证-0.08%
-  beginDate = '2018-06-20'  
-  testDays = 20
-  # beginDate = '2016-11-10'  
-  # testDays = 400
+  # beginDate = '2018-06-20'  
+  # testDays = 20
+  beginDate = '2018-01-02'  # 上证-16%+
+  testDays = 150
+  # beginDate = '2018-07-02'  
+  # testDays = 1
 
   isNew = False if (len(sys.argv) <= 1) else ('new' ==sys.argv[1])
   if isNew:

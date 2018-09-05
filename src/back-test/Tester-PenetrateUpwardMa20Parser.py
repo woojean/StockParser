@@ -1,5 +1,10 @@
 #coding:utf-8
 #!/usr/bin/env python
+
+'''
+woojean@2018-08-29
+'''
+
 import os
 import re
 import requests,time
@@ -81,8 +86,16 @@ def trace(id,parseDay):
   dayList = parser.getNextTradingDayList(parseDay,20)  # 最长持股时间不太可能超过20
   inDay = dayList[0]
 
+  # 以信号日收盘价为买入价
+  # inDayMinPrice = parser.getMinPriceOfDay(res,inDay)
+  # parseDayEndPrice = parser.getEndPriceOfDay(res,parseDay)
+  # if inDayMinPrice > parseDayEndPrice:  # 买入日最低价高于信号日收盘价，无法参与
+  #   return False
+  # inPrice = parseDayEndPrice  # 买入价为信号日收盘价
+
+
   inPrice = parser.getStartPriceOfDay(res,inDay)  # 买入价为信号日第二天的开盘价
-  slp = parser.getMinPriceOfDay(res,inDay)  # 初始止损价为买入当天的最低价
+  slp = parser.getMinPriceOfDay(res,inDay)  # 初始止损价为买入日最低价
   
   outPrice = 0
 
@@ -93,15 +106,28 @@ def trace(id,parseDay):
     if minPrice < slp: # 触发止损  要有大盘配合
       outPrice = slp
       break
+
+    # 若当日收盘价在K线底部10%，则走
+    # endPrice = self.getEndPriceOfDay(res,d)
+    # minPrice = self.getMinPriceOfDay(res,d)
+    # maxPrice = self.getMaxPriceOfDay(res,d)
+    # if endPrice == minPrice:
+    #   outPrice = endPrice
+    #   break
+
+    # rate = (endPrice - minPrice)/(maxPrice - minPrice)
+    # if rate < 0.1:
+    #   outPrice = endPrice
+    #   break
     
     # 未止损的情况下，将止损位上调为当日最低价
     slp = minPrice
 
 
-  if 0==inPrice:
+  if 0 == inPrice:
     return False # 不可参与
 
-  if 0==outPrice:
+  if 0 == outPrice:
     return False
 
   ret = {}
@@ -111,42 +137,6 @@ def trace(id,parseDay):
   ret['outPrice'] = outPrice
   return ret
 
-
-# 回踩3日线买入
-# def trace1(id,parseDay):
-#   print id,parseDay
-#   parser = PenetrateUpwardMa20Parser.PenetrateUpwardMa20Parser(parseDay)
-#   priceFile = Tools.getPriceDirPath()+'/'+str(id)
-#   res = open(priceFile,'r').read()
-  
-#   dayList = parser.getNextTradingDayList(parseDay,2)
-#   inDay = dayList[0]
-#   outDay = dayList[1]
-
-#   endPriceOfParseDay = parser.getEndPriceOfDay(res,parseDay)
-#   minPrice = parser.getMinPriceOfDay(res,inDay)  # 买入价为连板后第一天的最低价，且低于“回踩3日线”
-#   outPrice = parser.getStartPriceOfDay(res,outDay)  # 卖出价为买入后第二天的开盘价
-
-#   if 0==endPriceOfParseDay or 0==minPrice or 0==outPrice:
-#     return False
-
-#   orderPrice = endPriceOfParseDay*0.955
-#   if orderPrice < minPrice:  # 预约价在最小价之下
-#     return False  # 不可参与
-
-#   # inDayStartPrice = parser.getStartPriceOfDay(res,inDay)
-#   # startPriceGr = (inDayStartPrice - endPriceOfParseDay)/endPriceOfParseDay
-#   # if startPriceGr > 0.07:  # 高开低走的，撤单
-#   #   return False
-
-#   inPrice = orderPrice # 
-
-#   ret = {}
-#   ret['id'] = id
-#   ret['name'] = Tools.getNameById(id)
-#   ret['inPrice'] = inPrice
-#   ret['outPrice'] = outPrice
-#   return ret
 
 
 
