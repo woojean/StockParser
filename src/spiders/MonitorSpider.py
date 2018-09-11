@@ -8,6 +8,7 @@ import requests
 import time
 import re
 import datetime
+import os
 
 from BaseSpider import BaseSpider
 
@@ -34,130 +35,194 @@ class MonitorSpider(BaseSpider):
       url += '1'
     url +='&type=m5k&authorityType=fa&cb=jsonp1536580250828'
     url = url.replace('$ID$',id)
+    # print url
     return url
   
-
-  def getPrevTime(self,parseTime):
-    prevTime = (datetime.datetime.strptime(parseTime, "%Y-%m-%d %H:%M")-datetime.timedelta(minutes=5)).strftime('%Y-%m-%d %H:%M')
-    return prevTime
-
-
-  # def getDataMap(self,res):
-  #   dataMap = {}
-  #   index = res.index('data')
-  #   res = res[index:]
-  #   index = res.index('flow')
-  #   res = res[:index]
-  #   print res
-  #   # itemList = re.findall(r'(\d{4}-\d{1,2}-\d{1,2})\S(.*?)",', res)
-  #   itemList = re.findall(r'"2018-09-10 10:40(.*?)",', res)
-  #   print itemList
-  #   for item in itemList:
-  #     arr = item[1].split(',') 
-  #     dataMap[item[0]+' '+arr[0]] = arr
-  #   return dataMap
-
-
-  def getTimeData(self,res,time):
-    '''
-                    0      0开    1收    2最高    3最低    4量   5额 
-    (u'2018-09-1', u'13:20,3.61,3.61,3.61,3.61,586,211436,0%')
-    '''
-    p = r'"'+time+',(.*?)",'
-    ret = re.findall(p, res)
-    return ret[0].split(',')
-
-
-  def isMutation(self,id,res):
-    print '.'
-    # 取参
-    date = parseTime[0:10]
-    t1 = date +' 09:35'
-    t2 = date +' 09:40'
-    t3 = date +' 09:45'
-    prevT = self.getPrevTime(parseTime) # 前一根
-    prevPrevT = self.getPrevTime(prevT) # 前前一根
-
-    data = self.getTimeData(res,parseTime)
-    t1data = self.getTimeData(res,t1)
-    t2data = self.getTimeData(res,t2)
-    t3data = self.getTimeData(res,t3)
-    prevTdata = self.getTimeData(res,prevT)
-    prevPrevTdata = self.getTimeData(res,prevPrevT)
-    
-    v = int(data[4])
-    v1 = int(t1data[4])
-    v2 = int(t2data[4])
-    v3 = int(t3data[4])
-    vp = int(prevTdata[4])
-    vpp = int(prevPrevTdata[4])
-    if v==0 or v1==0 or v2==0 or v3==0:
-      # print '参数错误'
-      return False
-    
-
-    # 当前量超过"前3个"量
-    if v<v1 or v<v2 or v<v3:
-      # print 'X 当前量超过前3个量'
-      return False
-
-
-    # 爆量
-    if v < vp:
-      return False
-
-    rate = v/vpp
-    if rate < 5:  
-      # print 'X 爆量'
-      return False
-
-    # 阳柱
-    startPrice = float(data[0])
-    endPrice = float(data[1])
-    if startPrice == 0 or endPrice == 0:
-      return False
-    
-    if endPrice <= startPrice:
-      return False
-
-    self.dumpId(id)
-    return True
-  
-  def dumpId(self,id):
-    monitorDirPath = Tools.getMonitorDirPath()
-    #open('data/golden-pin-bottom/'+ confirmDay +'.sel','w').write(','.join(idList))
-    open(monitorDirPath + '/' +id,'w').write(id)
-
-
   def run(self):
     for id in self._idList:
       idType = str(id)[0]
       if idType not in ['6','0','3']: # 只看A股 0 深，6 沪，3 创业板，5 基金权证， 1 深市基金
         continue
+      # if idExist(id): # id已存在
+      #   print "exists!"
+      #   continue
       try:
         url = self.genUrl(id)
-        print str(self._threadId) + ' ·-> ' +str(id)
+        # print str(self._threadId) + ' ·-> ' +str(id)
         res = requests.get(url,verify=False).text
         # res = ''
-        ret = self.isMutation(id,res)
+        ret = hasSignal(parseTime,id,res)
+
         if ret: # 发出信号
-          print str(id)
+          dumpId(id)
       except Exception, e:
         pass
         # print repr(e)
 
 
+# 开盘平静判断
+def isOpeningPeaceful(id,res,timeList,nowTime):
+  data = getTimeData(res,nowTime)
+  t1Data = getTimeData(res,timeList[0])
+  t2Data = getTimeData(res,timeList[1])
+  t3Data = getTimeData(res,timeList[2])
+    
+  v = int(data[4])
+  v1 = int(t1Data[4])
+  v2 = int(t2Data[4])
+  v3 = int(t3Data[4])
+  if v == 0 or v1 == 0 or v2 == 0 or v3 == 0:
+    return False
+  if v<v1 or v<v2 or v<v3:
+    return False
+  return True
+
+# 量突变判断
+def haveBigVolume(id,res,time1,time2,time3):
+  data1 = getTimeData(res,time1)
+  data2 = getTimeData(res,time2)
+  data3 = getTimeData(res,time3)
+  v1 = int(data1[4])
+  v2 = int(data2[4])
+  v3 = int(data3[4])
+  
+  # print res
+
+  # 当前量大于前一个量
+  if v2 > v3:
+    return False
+
+  # 当前量是前前量的5倍以上
+  rate = v3/v1
+  if rate < 5:
+    return False
+  return True
+
+
+# 阳柱判断
+def isUpWard(id,res,nowTime):
+  data = getTimeData(res,nowTime)
+  startPrice = float(data[0])
+  endPrice = float(data[1])
+  if startPrice == 0 or endPrice == 0:
+    return False
+  if endPrice <= startPrice:
+    return False
+  return True
+
+
+def isInTheRise(id,res,timeList,nowTime):
+  data1 = getTimeData(res,timeList[0])
+  endPrice1 = float(data1[1])
+  data = getTimeData(res,nowTime)
+  endPrice = float(data[1])
+  return endPrice > endPrice1
+
+
+def hasSignal(parseTime,id,res):
+  timeList = getTimeList(parseTime)
+  
+  ret = False
+  timeNums = len(timeList)
+  for i in xrange(5,timeNums-1): # i = 5，从10点开始
+    nowTime = timeList[i]
+    prevTime = timeList[i-1]
+    prevPrevTime = timeList[i-2]
+    
+    # 开盘走势相对平静
+    if not isOpeningPeaceful(id,res,timeList,nowTime):
+      # print "not isOpeningPeaceful"
+      continue
+
+    # 爆量
+    if not haveBigVolume(id,res,prevPrevTime,prevTime,nowTime):
+      # print "not haveBigVolume"
+      continue
+
+    # 阳柱
+    if not isUpWard(id,res,nowTime):
+      # print "not isUpWard"
+      continue
+
+    # 分时上涨中
+    if not isInTheRise(id,res,timeList,nowTime):
+      continue
+
+    ret = True
+    break
+  return ret
+
+  
+
+
+# ===================================================================================
+def idExist(id):
+  path = Tools.getMonitorDirPath()+'/'+id
+  return os.path.exists(path)
+
+def getTimeData(res,time):
+  '''
+               0      0开    1收    2最高    3最低    4量   5额 
+  (u'2018-09-1', u'13:20,3.61,3.61,3.61,3.61,586,211436,0%')
+  '''
+  p = r'"'+time+',(.*?)",'
+  ret = re.findall(p, res)
+  return ret[0].split(',')
+
+def dumpId(id):
+  print "dumpId:"+str(id)
+  monitorDirPath = Tools.getMonitorDirPath()
+  #open('data/golden-pin-bottom/'+ confirmDay +'.sel','w').write(','.join(idList))
+  open(monitorDirPath + '/' +id,'w').write(id)
+
+def getPrevTime(parseTime):
+    prevTime = (datetime.datetime.strptime(parseTime, "%Y-%m-%d %H:%M")-datetime.timedelta(minutes=5)).strftime('%Y-%m-%d %H:%M')
+    return prevTime
+
+def getNextTime(parseTime):
+    nextTime = (datetime.datetime.strptime(parseTime, "%Y-%m-%d %H:%M")+datetime.timedelta(minutes=5)).strftime('%Y-%m-%d %H:%M')
+    return nextTime
+
+
+def getTimeList(parseTime):
+  date = parseTime[0:10]
+  time = date +' 09:35'
+  l = []
+  while time < parseTime:
+    l.append(time)
+    time = getNextTime(time)
+
+  # 剔除午间休盘
+  time1 = date +' 11:31'
+  time2 = date +' 13:04'
+  timeList = []
+  for t in l:
+    if t > time1 and t < time2:
+      continue
+    timeList.append(t)
+  return timeList
+
+
 def getFilteredIdList(date):
   # http://quote.eastmoney.com/stocklist.html
   fp = Tools.getRootPath()+'/data/enterList/'+date+'-FilterParser.sel'
-  print fp
   f = open(fp,'r')
   data = f.read()
   idList = data.split(',')
+  if len(idList) < 1:
+    print "\n候选id列表为空！\n"
   return idList
 
 
+def getPrevTradingDay(today):
+  allDayList = Tools.getAllTradeDayList()
+  idx = allDayList.index(today)
+  allDayList = allDayList[:idx]
+  return allDayList[-1]
+
+
 def printTime(parseTime,filteredDate):
+  print "\n================================================\n"
   print "当前时间："+parseTime
   print "过滤文件日期："+filteredDate
   minutes = parseTime[11:]
@@ -174,38 +239,39 @@ def printTime(parseTime,filteredDate):
   print "实际解析时间："+ parseTime
 
 
+'''
+python src/Prepare.py
+python src/spiders/MonitorSpider.py
+python src/tools/MonitorIdList.py
+'''
 
 if __name__ == '__main__':
-  # config
+  # 取参
+  # ============================================================
+  Tools.initDir('monitor')
   parseTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+  filteredDate = getPrevTradingDay(parseTime[:10])  # 过滤文件
+
   
+  # 自定义参数
+  # ============================================================ 
+  # filteredDate = "2018-09-07"  # 过滤文件
+  # parseTime = "2018-09-10 10:30"  # 自定义时间
+  # threads = 1
+  # idList = ['300517'] 
 
-  filteredDate = "2018-09-07"  # 过滤文件
-  parseTime = "2018-09-10 11:10"  # 自定义时间
-
+  
+  # 执行
+  # ============================================================
   printTime(parseTime,filteredDate)
-  
   threads = 50 # 线程数（不能少于任务数）
   idList = getFilteredIdList(filteredDate)
-
-  # threads = 1
-  # idList = ['002076'] 
-
-  # MonitorSpider().initDir()
-  # Tools.initDir('monitor')
-  
-
   print "\n================================================\n"
   step = len(idList)/threads  # total > threads
   for threadId in xrange(1,threads+1):
     subIdList = idList[((threadId-1)*step):(threadId*step)]
     spider = MonitorSpider(subIdList,threadId)
     spider.start()
-
-  '''
-  http://pdfm.eastmoney.com/EM_UBG_PDTI_Fast/api/js?token=4f1862fc3b5e77c150a2b985b12db0fd&rtntype=6&id=0020762&type=m5k&authorityType=fa&cb=jsonp1536580250828
-  '''
-
   
 
 
