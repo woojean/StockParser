@@ -19,6 +19,7 @@ rootPath = sys.path[0][0:sys.path[0].index('StockParser')]+'/StockParser'
 sys.path.append(rootPath+'/src') 
 from common import Tools
 
+
 # ============================================================================================
 class MonitorSpider(BaseSpider):  
   _source = 'monitor'
@@ -48,16 +49,16 @@ class MonitorSpider(BaseSpider):
       #   continue
       try:
         url = self.genUrl(id)
-        # print str(self._threadId) + ' ·-> ' +str(id)
+        if log:
+          print str(self._threadId) + ' ·-> ' +str(id)
         res = requests.get(url,verify=False).text
         # res = ''
         ret = hasSignal(parseTime,id,res)
-
         if ret: # 发出信号
           dumpId(id)
       except Exception, e:
         pass
-        # print repr(e)
+        print repr(e)
 
 
 # 开盘平静判断
@@ -73,7 +74,7 @@ def isOpeningPeaceful(id,res,timeList,nowTime):
   v3 = int(t3Data[4])
   if v == 0 or v1 == 0 or v2 == 0 or v3 == 0:
     return False
-  if v<v1 or v<v2 or v<v3:
+  if v<=v1 or v<=v2 or v<=v3:
     return False
   return True
 
@@ -121,31 +122,36 @@ def isInTheRise(id,res,timeList,nowTime):
 
 def hasSignal(parseTime,id,res):
   timeList = getTimeList(parseTime)
-  
+
   ret = False
   timeNums = len(timeList)
-  for i in xrange(5,timeNums-1): # i = 5，从10点开始
+  for i in xrange(0,timeNums-1): 
     nowTime = timeList[i]
     prevTime = timeList[i-1]
     prevPrevTime = timeList[i-2]
     
     # 开盘走势相对平静
     if not isOpeningPeaceful(id,res,timeList,nowTime):
-      # print "not isOpeningPeaceful"
+      if log:
+        print "not isOpeningPeaceful"
       continue
 
     # 爆量
     if not haveBigVolume(id,res,prevPrevTime,prevTime,nowTime):
-      # print "not haveBigVolume"
+      if log:
+        print "not haveBigVolume"
       continue
 
     # 阳柱
     if not isUpWard(id,res,nowTime):
-      # print "not isUpWard"
+      if log:
+        print "not isUpWard"
       continue
 
     # 分时上涨中
     if not isInTheRise(id,res,timeList,nowTime):
+      if log:
+        print "not isInTheRise"
       continue
 
     ret = True
@@ -171,7 +177,7 @@ def getTimeData(res,time):
 
 def dumpId(id):
   print "dumpId:"+str(id)
-  monitorDirPath = Tools.getMonitorDirPath()
+  monitorDirPath = Tools.getMonitorIdListDirPath()
   #open('data/golden-pin-bottom/'+ confirmDay +'.sel','w').write(','.join(idList))
   open(monitorDirPath + '/' +id,'w').write(id)
 
@@ -226,10 +232,12 @@ def printTime(parseTime,filteredDate):
   print "当前时间："+parseTime
   print "过滤文件日期："+filteredDate
   minutes = parseTime[11:]
-  if minutes < '09:35':
+  if minutes <= '09:35':
     print "开盘时间不够！"
-  if minutes > '15:30':
+    os._exit()
+  if minutes >= '15:30':
     print "已收盘！"
+    os._exit()
 
   minute = parseTime[-1]
   if int(minute) < 5:
@@ -243,29 +251,33 @@ def printTime(parseTime,filteredDate):
 python src/Prepare.py
 python src/spiders/MonitorSpider.py
 python src/tools/MonitorIdList.py
+
+ps -ef |grep python |awk '{print $2}'|xargs kill -9
 '''
 
+log = True
 if __name__ == '__main__':
   # 取参
   # ============================================================
   Tools.initDir('monitor')
+  Tools.initDir('monitor-idList')
   parseTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
   filteredDate = getPrevTradingDay(parseTime[:10])  # 过滤文件
-
+  idList = getFilteredIdList(filteredDate)
+  threads = 32 # 线程数（不能少于任务数）
+  
   
   # 自定义参数
   # ============================================================ 
-  # filteredDate = "2018-09-07"  # 过滤文件
-  # parseTime = "2018-09-10 10:30"  # 自定义时间
+  filteredDate = "2018-09-07"  # 过滤文件
+  parseTime = "2018-09-10 10:01"  # 自定义时间
+  # idList = ['300076'] 
   # threads = 1
-  # idList = ['300517'] 
 
   
   # 执行
   # ============================================================
   printTime(parseTime,filteredDate)
-  threads = 50 # 线程数（不能少于任务数）
-  idList = getFilteredIdList(filteredDate)
   print "\n================================================\n"
   step = len(idList)/threads  # total > threads
   for threadId in xrange(1,threads+1):

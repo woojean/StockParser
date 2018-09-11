@@ -21,7 +21,7 @@ from parsers import BaseParser
 '''
 
 def getMonitorIdList():
-  dirPath = Tools.getMonitorDirPath()
+  dirPath = Tools.getMonitorIdListDirPath()
   idList = []
   for root,dirs,files in os.walk(dirPath):
     for f in files:
@@ -37,7 +37,7 @@ def getMonitorIdList():
 
 def genIdListFile(idList):
   s = ','.join(idList)
-  enterListDirPath = Tools.getEnterListDirPath()
+  enterListDirPath = Tools.getMonitorDirPath()
   open(enterListDirPath + '/monitor.sel','w').write(s)
 
 	

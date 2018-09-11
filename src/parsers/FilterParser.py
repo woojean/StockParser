@@ -32,18 +32,39 @@ class FilterParser(BaseParser):
   def __init__(self,parseDay):
     BaseParser.__init__(self,parseDay) 
 
-
-  def parse(self,res,parseDay,id=''):
-    # 当日非板
+  
+  def isUpwardLimit(self,res,parseDay):
     dayList = BaseParser.getPastTradingDayList(parseDay,2)
     endPriceOfDay1 = self.getEndPriceOfDay(res,dayList[0])
     endPriceOfDay2 = self.getEndPriceOfDay(res,dayList[1])
     if 0 == endPriceOfDay1 or  0 == endPriceOfDay2:
       return False
-
     gr =  (endPriceOfDay2-endPriceOfDay1)/endPriceOfDay1
     if gr > 0.09:
+      return True
+    return False
+
+  def isDownwardLimit(self,res,parseDay):
+    dayList = BaseParser.getPastTradingDayList(parseDay,2)
+    endPriceOfDay1 = self.getEndPriceOfDay(res,dayList[0])
+    endPriceOfDay2 = self.getEndPriceOfDay(res,dayList[1])
+    if 0 == endPriceOfDay1 or  0 == endPriceOfDay2:
       return False
+    gr =  (endPriceOfDay2-endPriceOfDay1)/endPriceOfDay1
+    if gr < -0.09:
+      return True
+    return False
+
+
+  def parse(self,res,parseDay,id=''):
+    # 近几日无涨停、跌停行情，排除基于获利和解套的
+    dayList = BaseParser.getPastTradingDayList(parseDay,5)
+    for day in dayList:
+      if self.isUpwardLimit(res,day):
+        return False
+      if self.isDownwardLimit(res,day):
+        return False
+
     
     # 流通市值小于50亿
     basicInfo = BaseParser.getBasicInfoById(id)
@@ -55,15 +76,15 @@ class FilterParser(BaseParser):
       return False
     
 
-    # 去掉ST
+    # 去掉ST，涨停有限
     name = Tools.getNameById(id)
     if 'st' in name or 'ST' in name:
       return False
 
-    # 换手率大于2%
+    # 换手率大于1%
     basicInfo = BaseParser.getBasicInfoById(id)
     changeRate = float(basicInfo[37])
-    if changeRate < 2.0:
+    if changeRate < 1.0:
       return False
       
 
