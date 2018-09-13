@@ -81,11 +81,10 @@ class FilterParser(BaseParser):
     if 'st' in name or 'ST' in name:
       return False
 
-    # 换手率大于1%
-    basicInfo = BaseParser.getBasicInfoById(id)
-    changeRate = float(basicInfo[37])
-    if changeRate < 1.0:
-      return False
+    # # 换手率大于1%
+    # changeRate = float(self.geChangeRateOfDay(res,parseDay))
+    # if changeRate < 1.0:
+    #   return False
       
 
     return True

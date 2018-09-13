@@ -57,26 +57,25 @@ class MonitorSpider(BaseSpider):
         if ret: # 发出信号
           dumpId(id)
       except Exception, e:
-        pass
-        print repr(e)
+        if log:
+          print repr(e)
 
 
 # 开盘平静判断
-def isOpeningPeaceful(id,res,timeList,nowTime):
-  data = getTimeData(res,nowTime)
-  t1Data = getTimeData(res,timeList[0])
-  t2Data = getTimeData(res,timeList[1])
-  t3Data = getTimeData(res,timeList[2])
-    
-  v = int(data[4])
-  v1 = int(t1Data[4])
-  v2 = int(t2Data[4])
-  v3 = int(t3Data[4])
-  if v == 0 or v1 == 0 or v2 == 0 or v3 == 0:
+def isVolumePeaceful(id,res,timeList,time):
+  v = int(getTimeData(res,time)[4])
+  sumV = 0
+  for t in timeList:
+    sumV += int(getTimeData(res,t)[4])
+  if v==0 or sumV ==0:
     return False
-  if v<=v1 or v<=v2 or v<=v3:
+  nums = len(timeList)
+  avgV = sumV/nums
+  rate = v/avgV
+  if rate > 0.5: # 成交量小于区间成交量均值的一半
     return False
   return True
+
 
 # 量突变判断
 def haveBigVolume(id,res,time1,time2,time3):
@@ -101,7 +100,7 @@ def haveBigVolume(id,res,time1,time2,time3):
 
 
 # 阳柱判断
-def isUpWard(id,res,nowTime):
+def isUpWardKLine(id,res,nowTime):
   data = getTimeData(res,nowTime)
   startPrice = float(data[0])
   endPrice = float(data[1])
@@ -112,16 +111,82 @@ def isUpWard(id,res,nowTime):
   return True
 
 
-def isInTheRise(id,res,timeList,nowTime):
-  data1 = getTimeData(res,timeList[0])
-  endPrice1 = float(data1[1])
-  data = getTimeData(res,nowTime)
-  endPrice = float(data[1])
-  return endPrice > endPrice1
+def isInTheRise(id,res,timeList):
+  startPrice = float(getTimeData(res,timeList[0])[0]) # 第一个K柱的开盘价
+  endPrice = float(getTimeData(res,timeList[-1])[1]) # 最后一个K柱的收盘价
+  return endPrice > startPrice
+
+
+def isNotRiseOver(id,res,time1,time2,rate=0.05):
+  data1 = getTimeData(res,time1) 
+  startPrice1 = float(data1[0])
+  data2 = getTimeData(res,time2)
+  endPrice2 = float(data2[1])
+  if startPrice1 == 0 or endPrice2 == 0:
+    return False
+  r = (endPrice2 - startPrice1)/startPrice1
+  return r < rate
+
+# 冲高回落判断
+def haveUpAndFallDown(id,res,timeList):
+  maxPriceTime = timeList[0]
+  maxPrice = float(getTimeData(res,timeList[0])[2])
+  for t in timeList:
+    p = float(getTimeData(res,t)[2])
+    if p > maxPrice:
+      maxPrice = p
+      maxPriceTime = t
+  maxNextTime = getNextTime(maxPriceTime)
+  maxNextEndPrice = float(getTimeData(res,maxNextTime)[1]) # 最高价K柱的后一根K柱的收盘价
+  lastEndPrice = float(getTimeData(res,timeList[-1])[1])
+  rate = abs(maxPrice-maxNextEndPrice)/abs(maxNextEndPrice-lastEndPrice)
+  print rate
+  print maxPrice,maxNextEndPrice,lastEndPrice
+  if rate > 1:
+    return True
+  return False
 
 
 def hasSignal(parseTime,id,res):
   timeList = getTimeList(parseTime)
+  
+  # 去掉当前涨幅过大的（涨幅已超过7%）
+  if not isNotRiseOver(id,res,timeList[0],timeList[-1],0.07):
+    if log:
+      print "not isNotRiseOver"
+      return False
+
+  
+  '''
+  人工判断 最后一步
+  '''
+  # # 去掉有“冲高回落”的
+  # if haveUpAndFallDown(id,res,timeList):
+  #   if log:
+  #     print "haveUpAndFallDown"
+  #   return False
+
+
+  # # 去掉开盘不平静的
+  # if not isVolumePeaceful(id,res,timeList,timeList[0]):
+  #   if log:
+  #     print "not isVolumePeaceful start"
+  #   return False
+
+
+  # # 去掉上午收盘不平静的
+  # if not isVolumePeaceful(id,res,timeList,timeList[-1]):
+  #   if log:
+  #     print "not isVolumePeaceful end"
+  #   return False
+
+
+  # # 上涨中
+  # if not isInTheRise(id,res,timeList):
+  #   if log:
+  #     print "not isInTheRise"
+  #   return False
+
 
   ret = False
   timeNums = len(timeList)
@@ -129,12 +194,9 @@ def hasSignal(parseTime,id,res):
     nowTime = timeList[i]
     prevTime = timeList[i-1]
     prevPrevTime = timeList[i-2]
-    
-    # 开盘走势相对平静
-    if not isOpeningPeaceful(id,res,timeList,nowTime):
-      if log:
-        print "not isOpeningPeaceful"
-      continue
+
+    if log:
+        print "Nowtime:" + nowTime
 
     # 爆量
     if not haveBigVolume(id,res,prevPrevTime,prevTime,nowTime):
@@ -143,16 +205,11 @@ def hasSignal(parseTime,id,res):
       continue
 
     # 阳柱
-    if not isUpWard(id,res,nowTime):
+    if not isUpWardKLine(id,res,nowTime):
       if log:
-        print "not isUpWard"
+        print "not isUpWardKLine"
       continue
 
-    # 分时上涨中
-    if not isInTheRise(id,res,timeList,nowTime):
-      if log:
-        print "not isInTheRise"
-      continue
 
     ret = True
     break
@@ -248,7 +305,9 @@ def printTime(parseTime,filteredDate):
 
 
 '''
-python src/Prepare.py
+python src/spiders/PriceSpider.py new
+python src/parsers/FilterParser.py
+
 python src/spiders/MonitorSpider.py
 python src/tools/MonitorIdList.py
 
@@ -269,9 +328,9 @@ if __name__ == '__main__':
   
   # 自定义参数
   # ============================================================ 
-  filteredDate = "2018-09-07"  # 过滤文件
-  parseTime = "2018-09-10 10:01"  # 自定义时间
-  # idList = ['300076'] 
+  filteredDate = "2018-09-11"  # 过滤文件
+  parseTime = "2018-09-12 11:32"  # 自定义时间
+  # idList = ['002927'] 
   # threads = 1
 
   

@@ -476,7 +476,7 @@ class BaseParser:
         parsedNum += 1
       except Exception, e:
         pass
-        # print repr(e)
+        print repr(e)
 
     if isDump:
       self.dumpIdList(idList)
