@@ -37,9 +37,11 @@ class UpWardLimitParser(BaseParser):
 
     # 排除一字板
     startPrice2 = self.getStartPriceOfDay(res,day2)
+    minPrice2 = self.getMinPriceOfDay(res,day2)
     maxPrice2 = self.getMaxPriceOfDay(res,day2)
-    if maxPrice2 == startPrice2:
+    if maxPrice2 == minPrice2:
       return False
+
 
     rate = (endPrice2 - endPrice1)/endPrice1
     if rate > 0.099:
@@ -61,13 +63,55 @@ class UpWardLimitParser(BaseParser):
     day5 = dayList[4]
     day6 = dayList[5]
 
-
+    
     # 当日涨停
     if self._limitNum == 0: # 今日是板就OK
-      if self.isUpwardLimit(res,day5,day6):
-        return True
-      else:
+      if not self.isUpwardLimit(res,day5,day6):
         return False
+      
+      # # 跳空涨停
+      # minPrice6 = self.getMinPriceOfDay(res,day6)
+      # maxPrice5 = self.getMaxPriceOfDay(res,day5)
+      # # print id,minPrice6,maxPrice5
+      # if minPrice6 <= maxPrice5:
+      #   return False
+
+      # endPrice5 = self.getEndPriceOfDay(res,day5)
+      # endPrice6 = self.getEndPriceOfDay(res,day6)
+
+      # # 10天内涨幅低于20%
+      # dayList = BaseParser.getPastTradingDayList(day6,10)
+      # endPrice1 = self.getEndPriceOfDay(res,dayList[0])
+      # if endPrice1 == 0:
+      #   return False
+      # rate = (endPrice6 - endPrice1)/endPrice1
+      # if rate >0.2:
+      #   return False
+
+
+      # # 当日上穿60日线
+      # dayList = BaseParser.getPastTradingDayList(day6,60)
+      # (v,v,ma) = self.getMAPrice(res,dayList)
+      # if not (endPrice5 < ma and endPrice6 > ma):
+      #   return False
+
+
+      # 收盘价为近55日内最高价
+      # if not self.isMaxPriceOfDays(res,parseDay,55):
+      #   return False
+        
+
+      # 如果收盘价在年线之下，距离年线距离在20%之上
+      # dayList = BaseParser.getPastTradingDayList(day6,250)
+      # (v,v,ma) = self.getMAPrice(res,dayList)
+      # if ma > endPrice6:
+      #   rate = (ma - endPrice6)/endPrice6
+      #   if rate <0.2:
+      #     return False
+
+
+      return True
+
     
     # 仅1板
     if self._limitNum == 1: 
@@ -112,7 +156,7 @@ class UpWardLimitParser(BaseParser):
     return True
 
 # ===========================================================
-limitNum = 1 # 0 无限制，1 仅限1板，2 仅限2板
+limitNum = 0 # 0 无限制，1 仅限1板，2 仅限2板
 
 
 if __name__ == '__main__':

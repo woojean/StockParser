@@ -23,7 +23,7 @@ class PriceSpider(BaseSpider):
       url += '2'
     else:
       url += '1'
-    url +='&TYPE=k&js=fsDataTeacma((x))&rtntype=5&isCR=false&fsDataTeacma=fsDataTeacma'
+    url +='&TYPE=k&js=fsDataTeacma((x))&rtntype=5&authorityType=fa&isCR=false&fsDataTeacma=fsDataTeacma'
     url = url.replace('$ID$',id)
     return url
 

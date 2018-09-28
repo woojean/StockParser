@@ -26,8 +26,8 @@ def calculate(r,m,n):
   return Pm
 
 if __name__ == '__main__':
-  r = 0.9
-  m = 100
+  r = 0.4
+  m = 200
   n = 10
   Pm = calculate(r,m,n)
   print Pm

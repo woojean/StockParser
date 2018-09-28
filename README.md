@@ -13,3 +13,4 @@ python src/Do.py 2018-03-09 new
 
 
 
+ps -ef |grep python |awk '{print $2}'|xargs kill -9

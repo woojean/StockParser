@@ -88,6 +88,28 @@ def getMacdDirPath():
   return getRootPath()+'/data/macd'
 
 
+def getIdListOfDir(d):
+  l = []
+  d = getRootPath()+'/config/'+d
+  for root,dirs,files in os.walk(d):
+    for f in files:
+      try:
+        path = root + '/' + f
+        s = open(path,'r').read()
+        l += s.split(',')
+      except Exception, e:
+        pass
+        print repr(e)
+  return list(set(l))
+
+def getIdListOfFile(f):
+  l = []
+  path = getRootPath()+'/config/'+f
+  s = open(path,'r').read()
+  l = s.split(',')
+  return l
+
+
 def getNameById(id):
   try:
     res = open(getRootPath()+'/data/price/'+str(id),'r').read()
