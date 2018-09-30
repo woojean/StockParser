@@ -53,7 +53,9 @@ class GeneralParser(BaseParser):
     endPrice = self.getEndPriceOfDay(res,parseDay)
     minPrice = self.getMinPriceOfDay(res,parseDay)
     maxPrice = self.getMaxPriceOfDay(res,parseDay)
-
+    
+    # 关头光脚阳线
+    # =================================================
     # 必须为阳线
     if endPrice <= startPrice:
       return False
@@ -66,7 +68,15 @@ class GeneralParser(BaseParser):
     if minPrice < startPrice:
       return False
 
+
+    # 剔除涨停
+    # =================================================
+    if self.isUpwardLimit(res,dayList[0],dayList[1]):
+      return False
+
+
     # # 相对前一日量
+    # =================================================
     dayList = self.getPastTradingDayList(parseDay,2)
     lastDay = dayList[0] # 前一日
     vOfParseDay = self.getVolumeOfDay(res,parseDay)
@@ -79,15 +89,11 @@ class GeneralParser(BaseParser):
       return False
 
 
-    # # 量小于5日平均
+    # # # 量小于5日平均
     # dayList = self.getPastTradingDayList(parseDay,5)
     # maVolume = self.getMaVolume(res,dayList)
     # if vOfParseDay>= maVolume:
     #   return False
-
-    # 剔除涨停
-    if self.isUpwardLimit(res,dayList[0],dayList[1]):
-      return False
 
     return True
 
