@@ -34,17 +34,17 @@ class MaConvergenceParser(BaseParser):
     endPrice = self.getEndPriceOfDay(res,parseDay)
 
     dayList5 = BaseParser.getPastTradingDayList(parseDay,5)
-    dayList15 = BaseParser.getPastTradingDayList(parseDay,15)
-    dayList30 = BaseParser.getPastTradingDayList(parseDay,30)
+    dayList10 = BaseParser.getPastTradingDayList(parseDay,10)
+    dayList20 = BaseParser.getPastTradingDayList(parseDay,20)
     dayList60 = BaseParser.getPastTradingDayList(parseDay,60)
 
     (v1,v2,ma5) = self.getMAPrice(res,dayList5)
-    (v1,v2,ma15) = self.getMAPrice(res,dayList15)
-    (v1,v2,ma30) = self.getMAPrice(res,dayList30)
+    (v1,v2,ma10) = self.getMAPrice(res,dayList10)
+    (v1,v2,ma20) = self.getMAPrice(res,dayList20)
     (v1,v2,ma60) = self.getMAPrice(res,dayList60)
 
-    minMa = min(ma5,ma15,ma30,ma60)
-    maxMa = max(ma5,ma15,ma30,ma60)
+    minMa = min(ma5,ma10,ma20,ma60)
+    maxMa = max(ma5,ma10,ma20,ma60)
 
     if minMa <= min(startPrice,endPrice):
       return False

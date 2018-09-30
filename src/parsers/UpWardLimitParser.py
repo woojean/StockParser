@@ -69,17 +69,17 @@ class UpWardLimitParser(BaseParser):
       if not self.isUpwardLimit(res,day5,day6):
         return False
       
-      # # 跳空涨停
+      # 跳空涨停
       # minPrice6 = self.getMinPriceOfDay(res,day6)
       # maxPrice5 = self.getMaxPriceOfDay(res,day5)
       # # print id,minPrice6,maxPrice5
       # if minPrice6 <= maxPrice5:
       #   return False
 
-      # endPrice5 = self.getEndPriceOfDay(res,day5)
-      # endPrice6 = self.getEndPriceOfDay(res,day6)
+      endPrice5 = self.getEndPriceOfDay(res,day5)
+      endPrice6 = self.getEndPriceOfDay(res,day6)
 
-      # # 10天内涨幅低于20%
+      # # # 10天内涨幅低于20%
       # dayList = BaseParser.getPastTradingDayList(day6,10)
       # endPrice1 = self.getEndPriceOfDay(res,dayList[0])
       # if endPrice1 == 0:
@@ -89,7 +89,7 @@ class UpWardLimitParser(BaseParser):
       #   return False
 
 
-      # # 当日上穿60日线
+      # 当日上穿60日线
       # dayList = BaseParser.getPastTradingDayList(day6,60)
       # (v,v,ma) = self.getMAPrice(res,dayList)
       # if not (endPrice5 < ma and endPrice6 > ma):
@@ -99,7 +99,17 @@ class UpWardLimitParser(BaseParser):
       # 收盘价为近55日内最高价
       # if not self.isMaxPriceOfDays(res,parseDay,55):
       #   return False
+
         
+      # 前一日最低价是近20日最低价
+      # if not self.haveMinPriceOfDays(res,day5,20):
+      #   return False
+
+
+      # 近5日最低价是近55日最低价
+      # if not self.intervalMinPriceOfDays(res,parseDay,5,55):
+      #   return False
+
 
       # 如果收盘价在年线之下，距离年线距离在20%之上
       # dayList = BaseParser.getPastTradingDayList(day6,250)
@@ -156,7 +166,7 @@ class UpWardLimitParser(BaseParser):
     return True
 
 # ===========================================================
-limitNum = 0 # 0 无限制，1 仅限1板，2 仅限2板
+limitNum = 1 # 0 无限制，1 仅限1板，2 仅限2板
 
 
 if __name__ == '__main__':

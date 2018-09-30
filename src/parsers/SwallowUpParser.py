@@ -53,7 +53,7 @@ class SwallowUpParser(BaseParser):
       return False
   
     # 第3天实体长度是第2天的2倍
-    if (entityOfDay2 != 0) and (entityOfDay3/entityOfDay2 < 2.618):
+    if (entityOfDay2 != 0) and (entityOfDay3/entityOfDay2 < 2):
       return False
 
     # 第3天开盘低于第2天收盘

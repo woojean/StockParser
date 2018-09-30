@@ -392,6 +392,41 @@ class BaseParser:
 
 
 
+  # 判断某一天的最低价是否为一段区间的最低价
+  def haveMinPriceOfDays(self,res,day,days):
+    dayList = BaseParser.getPastTradingDayList(day,days)
+    dayList = dayList[:-1]
+    minPrice = self.getMinPriceOfDay(res,day)
+
+    otherDayMinPrice = 10000000
+    for d in dayList:
+      # price = self.getEndPriceOfDay(res,d)
+      price = self.getMinPriceOfDay(res,d)
+      if price < otherDayMinPrice: 
+        otherDayMinPrice = price
+    # print minPrice,otherDayMinPrice
+    return minPrice < otherDayMinPrice
+
+  
+  def intervalMinPriceOfDays(self,res,parseDay,days1,days2):
+    minPriceOfInterval = 100000
+    dayList = BaseParser.getPastTradingDayList(parseDay,days1)
+    for d in dayList:
+      price = self.getMinPriceOfDay(res,d)
+      if price < minPriceOfInterval: 
+        minPriceOfInterval = price
+
+    dayList = BaseParser.getPastTradingDayList(parseDay,days2)
+    otherDayMinPrice = 10000000
+    for d in dayList:
+      # price = self.getEndPriceOfDay(res,d)
+      price = self.getMinPriceOfDay(res,d)
+      if price < otherDayMinPrice: 
+        otherDayMinPrice = price
+    # print minPrice,otherDayMinPrice
+    return minPriceOfInterval <= otherDayMinPrice
+
+
   '''
   dayList = getComputeDayList(day,5)
   (v1,v2,ma5) = computeMAPrice(res,dayList)
@@ -461,47 +496,16 @@ class BaseParser:
   
 
 
-  # def getParseResult(self,isDump=False):
-  #   idList = []
-  #   num = 0
-  #   parsedNum = 0
-  #   priceFileList = BaseParser.getPriceFileList()
-  #   total = len(priceFileList)
-  #   for f in priceFileList:
-  #     try:
-  #       self.printProcess(parsedNum,total)
-  #       id = f[-6:]
-  #       res = open(f,'r').read()
-  #       ret = self.parse(res,self._parseDay,id)
-  #       if ret:
-  #         idList.append(id)
-  #         num += 1
-  #         print str(num) + ' ↗'
-  #       parsedNum += 1
-  #     except Exception, e:
-  #       pass
-  #       # print repr(e)
-
-  #   if isDump:
-  #     self.dumpIdList(idList)
-
-  #   return idList
-
-
   def getParseResult(self,isDump=False):
-    print '***************************************************************************'
-    print 'In custom mode'
-    print '***************************************************************************'
-    idFile = 'upward-limit-20180102-20180831/'+self._parseDay+'-UpWardLimitParser.sel'
-    allIdList = Tools.getIdListOfFile(idFile)
     idList = []
     num = 0
     parsedNum = 0
-    total = len(allIdList)
-    for id in allIdList:
+    priceFileList = BaseParser.getPriceFileList()
+    total = len(priceFileList)
+    for f in priceFileList:
       try:
         self.printProcess(parsedNum,total)
-        f = Tools.getPriceDirPath()+'/'+id
+        id = f[-6:]
         res = open(f,'r').read()
         ret = self.parse(res,self._parseDay,id)
         if ret:
@@ -517,6 +521,40 @@ class BaseParser:
       self.dumpIdList(idList)
 
     return idList
+
+
+  # def getParseResult(self,isDump=False):
+  #   print '***************************************************************************'
+  #   print 'In custom mode'
+  #   print '***************************************************************************'
+  #   idFile = 'upward-limit-20180102-20180831/'+self._parseDay+'-UpWardLimitParser.sel'
+  #   allIdList = Tools.getIdListOfFile(idFile)
+  #   idList = []
+  #   num = 0
+  #   parsedNum = 0
+  #   total = len(allIdList)
+  #   for id in allIdList:
+  #     try:
+  #       self.printProcess(parsedNum,total)
+  #       f = Tools.getPriceDirPath()+'/'+id
+  #       res = open(f,'r').read()
+  #       ret = self.parse(res,self._parseDay,id)
+  #       if ret:
+  #         idList.append(id)
+  #         num += 1
+  #         print str(num) + ' ↗'
+  #       parsedNum += 1
+  #     except Exception, e:
+  #       pass
+  #       print repr(e)
+
+  #   if isDump:
+  #     self.dumpIdList(idList)
+
+  #   return idList
+
+
+
 
 
 

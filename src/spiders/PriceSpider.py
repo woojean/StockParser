@@ -10,6 +10,10 @@ from BaseSpider import BaseSpider
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
+rootPath = sys.path[0][0:sys.path[0].index('StockParser')]+'/StockParser'
+sys.path.append(rootPath+'/src') 
+from common import Tools
+
 # ============================================================================================
 class PriceSpider(BaseSpider):  
   _source = 'price'
@@ -32,6 +36,8 @@ if __name__ == '__main__':
 
   threads = 50 # 线程数（不能少于任务数）
   idList = BaseSpider.getIdList() 
+  # idList = Tools.get300IdList() 
+  print idList
 
   PriceSpider().initDir()
   step = len(idList)/threads  # total > threads

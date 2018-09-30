@@ -47,7 +47,7 @@ class GoldenPinBottomParser(BaseParser):
 
     # 下引线相对长度（按《日本蜡烛图技术》的定义，至少2倍，这里适度放松）
     rate = downLine/entity
-    if rate < 1.618:
+    if rate < 2:
       return False
     
     # 触及5日最低价（用于排除上吊线）

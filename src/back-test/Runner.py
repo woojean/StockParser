@@ -45,12 +45,14 @@ class Runner(threading.Thread):
 
 if __name__ == '__main__':
   # 回测parser
-  parser = 'UpWardLimitParser'
+  parser = 'GeneralParser'
 
   # 起止日期
   # 2018-06-20 24 2018-07-23 上证-0.08%
+  # beginDate = '2016-08-31'  
+  # testDays = 489
   beginDate = '2018-01-02'  
-  testDays = 168
+  testDays = 164
 
 
   # beginDate = '2016-09-09'  # 2016-09-09 ~ 2018-09-10 沪深300跌3.28%
@@ -65,28 +67,33 @@ if __name__ == '__main__':
     Tools.initDir('enterList')
   
   print parser,beginDate,testDays
+  print dayList
+  
+  for parseDay in dayList:
+    cmd = 'python '+Tools.getParsersDirPath() + '/'+ parser +'.py ' + parseDay
+    print cmd
+    os.system(cmd)
     
+
+  '''
   threads = 32 # 线程数（不能少于任务数）
   step = len(dayList)/threads  # total > threads
   for threadId in xrange(1,threads+1):
     subDayList = dayList[((threadId-1)*step):(threadId*step)]
-    runner = Runner(subDayList,threadId)
-    runner.start()
+    # runner = Runner(subDayList,threadId)
+    # runner.start()
+    print subDayList
+  '''
     
 
-  cmd = 'python '+ rootPath + '/src/back-test/Tester-UpWardLimitParser.py'
+  cmd = 'python '+ rootPath + '/src/back-test/Tester-GeneralParser.py'
   print cmd
   os.system(cmd)
 
-  cmd = 'python '+ rootPath + '/src/back-test/Reporter-UpWardLimitParser.py'
+  cmd = 'python '+ rootPath + '/src/back-test/Reporter-GeneralParser.py'
   print cmd
   os.system(cmd)
 
-  '''
-
-  l = Tools.getIdListOfDir('upward-limit-20180102-20180831')
-  print len(l)
-  '''
 
 
    

@@ -164,6 +164,15 @@ def getIdList():
 
 
 
+def get300IdList():
+  print '***************************************************************************'
+  print 'In get300IdList mode'
+  print '***************************************************************************'
+  # http://quote.eastmoney.com/stocklist.html
+  f = open(getRootPath()+'/config/300IdList','r')
+  idList = f.read().split(',')
+  return idList
+
 
 
 

@@ -27,10 +27,6 @@ class FlatBottomParser(BaseParser):
     BaseParser.__init__(self,parseDay) 
 
 
-  
-  
-
-
   def parse(self,res,parseDay,id=''):
     
     # 前期跌势当日MA60小于20日前MA60

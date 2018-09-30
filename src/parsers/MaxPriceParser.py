@@ -25,7 +25,7 @@ class MaxPriceParser(BaseParser):
   
   _days = 200
 
-  def __init__(self,parseDay,days = 200):
+  def __init__(self,parseDay,days = 55):
     self._days = days
     BaseParser.__init__(self,parseDay) 
 
@@ -43,7 +43,7 @@ class MaxPriceParser(BaseParser):
 if __name__ == '__main__':
   print 'MaxPriceParser'
 
-  days = 233
+  days = 55
 
   parseDay = BaseParser.getParseDay()
   print parseDay
