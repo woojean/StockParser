@@ -67,12 +67,6 @@ class BaldRiseLineAndVolumeReduceParser(BaseParser):
       return False
 
 
-    # 剔除涨停
-    # =================================================
-    if self.isUpwardLimit(res,dayList[0],dayList[1]):
-      return False
-
-
     # # 相对前一日量
     # =================================================
     dayList = self.getPastTradingDayList(parseDay,2)
@@ -87,6 +81,12 @@ class BaldRiseLineAndVolumeReduceParser(BaseParser):
       return False
 
 
+    # 剔除涨停
+    # =================================================
+    if self.isUpwardLimit(res,dayList[0],dayList[1]):
+      return False
+
+
     # # # 量小于5日平均
     # dayList = self.getPastTradingDayList(parseDay,5)
     # maVolume = self.getMaVolume(res,dayList)
@@ -96,7 +96,7 @@ class BaldRiseLineAndVolumeReduceParser(BaseParser):
     return True
 
 
-    
+
 
 
 if __name__ == '__main__':

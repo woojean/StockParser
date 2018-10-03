@@ -35,8 +35,8 @@ class PriceSpider(BaseSpider):
 if __name__ == '__main__':
 
   threads = 50 # 线程数（不能少于任务数）
-  idList = BaseSpider.getIdList() 
-  # idList = Tools.get300IdList() 
+  # idList = BaseSpider.getIdList() 
+  idList = Tools.get300IdList() 
   print idList
 
   PriceSpider().initDir()
