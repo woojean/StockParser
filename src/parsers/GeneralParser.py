@@ -26,148 +26,147 @@ from common import Tools
 '''
 '''
 class GeneralParser(BaseParser):
-  _tag = 'GeneralParser'
+  _limitNum = 0
   
   def __init__(self,parseDay,id=''):
     BaseParser.__init__(self,parseDay) 
 
 
-  
   def isUpwardLimit(self,res,day1,day2):
     endPrice1 = self.getEndPriceOfDay(res,day1)
     endPrice2 = self.getEndPriceOfDay(res,day2)
     if endPrice1 == 0 or endPrice2 ==0:
       return False
 
+    # 排除一字板
+    startPrice2 = self.getStartPriceOfDay(res,day2)
+    minPrice2 = self.getMinPriceOfDay(res,day2)
+    maxPrice2 = self.getMaxPriceOfDay(res,day2)
+    if maxPrice2 == minPrice2 and startPrice2 == minPrice2:
+      return False
+
+
     rate = (endPrice2 - endPrice1)/endPrice1
-    # if rate > 0.099:
-    if rate > 0.095:
+    if rate > 0.099:
       return True
     else:
       return False
 
-  def isRgbBear(self,res,day):
-    R = 5
-    G = 10
-    B = 20
-
-    dayList = self.getPastTradingDayList(day,R)
-    (v,v,maR) = self.getMAPrice(res,dayList)
-
-    dayList = self.getPastTradingDayList(day,G)
-    (v,v,maG) = self.getMAPrice(res,dayList)
-
-    dayList = self.getPastTradingDayList(day,B)
-    (v,v,maB) = self.getMAPrice(res,dayList)
-
-    if ((maR < maG) and (maG < maB)):
-      return True
-    return False
-
-
-  def challengeMaFailed(self,res,parseDay,maDays):
-    maxPrice = self.getMaxPriceOfDay(res,parseDay)
-    endPrice = self.getEndPriceOfDay(res,parseDay)
-    dayList = self.getPastTradingDayList(parseDay,maDays)
-    (v,v,ma) = self.getMAPrice(res,dayList)
-    if (maxPrice > ma) and (endPrice < ma):
-      return True
-    return False
 
 
   def parse(self,res,parseDay,id=''):
-    return True
+    ret = False
+    
+    # day1,day2,day3,day4,day5,day6
+    dayList = BaseParser.getPastTradingDayList(parseDay,6)
+    day1 = dayList[0]
+    day2 = dayList[1]
+    day3 = dayList[2]
+    day4 = dayList[3]
+    day5 = dayList[4]
+    day6 = dayList[5]
 
-    # 向上跳空
-    # =================================================
-    dayList = self.getPastTradingDayList(parseDay,2)
-    maxPrice1 = self.getMaxPriceOfDay(res,dayList[0])
-    minPrice2 = self.getMinPriceOfDay(res,dayList[1])
-    if minPrice2 == 0 or maxPrice1==0: # 剔除复牌股
-      return False
-    if minPrice2 <= maxPrice1:
-      return False
+    
+    # 当日涨停
+    if self._limitNum == 0: # 今日是板就OK
+      if not self.isUpwardLimit(res,day5,day6):
+        return False
+      
+      # 跳空涨停
+      # minPrice6 = self.getMinPriceOfDay(res,day6)
+      # maxPrice5 = self.getMaxPriceOfDay(res,day5)
+      # # print id,minPrice6,maxPrice5
+      # if minPrice6 <= maxPrice5:
+      #   return False
+
+      endPrice5 = self.getEndPriceOfDay(res,day5)
+      endPrice6 = self.getEndPriceOfDay(res,day6)
+
+      # # # 10天内涨幅低于20%
+      # dayList = BaseParser.getPastTradingDayList(day6,10)
+      # endPrice1 = self.getEndPriceOfDay(res,dayList[0])
+      # if endPrice1 == 0:
+      #   return False
+      # rate = (endPrice6 - endPrice1)/endPrice1
+      # if rate >0.2:
+      #   return False
 
 
-    # 剔除近5日内有过涨停板（涨幅大于9.5%），因为需要“沉闷”的行情
-    # =================================================
-    uLcDayList = self.getPastTradingDayList(parseDay,11)
-    l = len(uLcDayList)
-    for i in xrange(0,l-1):
-      if self.isUpwardLimit(res,uLcDayList[i],uLcDayList[i+1]):
+      # 当日上穿60日线
+      # dayList = BaseParser.getPastTradingDayList(day6,60)
+      # (v,v,ma) = self.getMAPrice(res,dayList)
+      # if not (endPrice5 < ma and endPrice6 > ma):
+      #   return False
+
+
+      # 收盘价为近55日内最高价
+      # if not self.isMaxPriceOfDays(res,parseDay,55):
+      #   return False
+
+        
+      # 前一日最低价是近20日最低价
+      # if not self.haveMinPriceOfDays(res,day5,20):
+      #   return False
+
+
+      # 近5日最低价是近55日最低价
+      # if not self.intervalMinPriceOfDays(res,parseDay,5,55):
+      #   return False
+
+
+      # 如果收盘价在年线之下，距离年线距离在20%之上
+      # dayList = BaseParser.getPastTradingDayList(day6,250)
+      # (v,v,ma) = self.getMAPrice(res,dayList)
+      # if ma > endPrice6:
+      #   rate = (ma - endPrice6)/endPrice6
+      #   if rate <0.2:
+      #     return False
+
+
+      return True
+
+    
+    # 仅1板
+    if self._limitNum == 1: 
+      if self.isUpwardLimit(res,day5,day6)\
+        and (not self.isUpwardLimit(res,day4,day5)):
+        return True
+      else:
         return False
 
-    # 剔除ST
-    # =================================================
-    name = Tools.getNameById(id)
-    if 'ST' in name:
-      return False
+    # 仅2板
+    if self._limitNum == 2: 
+      if self.isUpwardLimit(res,day5,day6)\
+        and self.isUpwardLimit(res,day4,day5)\
+        and (not self.isUpwardLimit(res,day3,day4)):
+        return True
+      else:
+        return False
 
-
-    # 剔除上引线长度超过总线长度3/4
-    # =================================================
-    startPrice = self.getStartPriceOfDay(res,parseDay)
-    endPrice = self.getEndPriceOfDay(res,parseDay)
-    minPrice = self.getMinPriceOfDay(res,parseDay)
-    maxPrice = self.getMaxPriceOfDay(res,parseDay)
-    upLine = abs(maxPrice - max(startPrice,endPrice))
-    totalLine = abs(maxPrice - minPrice)
-    if totalLine!=0:
-      rate = 1.0*upLine/totalLine
-      if rate > 0.75:
+    # 仅3板
+    if self._limitNum == 3: 
+      if self.isUpwardLimit(res,day5,day6) \
+        and self.isUpwardLimit(res,day4,day5)\
+        and self.isUpwardLimit(res,day3,day4)\
+        and (not self.isUpwardLimit(res,day2,day3)):
+        return True
+      else:
+        return False
+    
+    # 仅4板
+    if self._limitNum == 4: 
+      if self.isUpwardLimit(res,day5,day6) \
+        and self.isUpwardLimit(res,day4,day5)\
+        and self.isUpwardLimit(res,day3,day4)\
+        and self.isUpwardLimit(res,day2,day3)\
+        and (not self.isUpwardLimit(res,day1,day2)):
+        return True
+      else:
         return False
 
     
-    # 剔除K线大小超过前10日所有K线
-    # =================================================
-    minPrice = self.getMinPriceOfDay(res,parseDay)
-    maxPrice = self.getMaxPriceOfDay(res,parseDay)
-    kLineLength = abs(maxPrice - minPrice)
-    
-    total = 10
-    klDayList = self.getPastTradingDayList(parseDay,total+1)
-    klDayList = klDayList[:-1]
-    isLardgest = True
-    for d in klDayList:
-      minPrice = self.getMinPriceOfDay(res,d)
-      maxPrice = self.getMaxPriceOfDay(res,d)
-      lineLength = abs(maxPrice - minPrice)
-      if kLineLength < lineLength:
-        isLardgest = False
-        break
-    if isLardgest:
-      return False
-
-    # 剔除K线实体大小超过前10日所有K线实体大小
-    startPrice = self.getStartPriceOfDay(res,parseDay)
-    endPrice = self.getEndPriceOfDay(res,parseDay)
-    kLineEntityLength = abs(endPrice - startPrice)
-    isLardgest = True
-    for d in klDayList:
-      startPrice = self.getStartPriceOfDay(res,d)
-      endPrice = self.getEndPriceOfDay(res,d)
-      entityLength = abs(endPrice - startPrice)
-      if kLineEntityLength < entityLength:
-        isLardgest = False
-        break
-    if isLardgest:
-      return False
-
-    
-    # 剔除最高价在250日线之上，但收盘在250日线下
-    # =================================================
-    if self.challengeMaFailed(res,parseDay,250):
-      return False
-
-    if self.challengeMaFailed(res,parseDay,60):
-      return False
-
-    if self.challengeMaFailed(res,parseDay,20):
-      return False
 
     return True
-    
-
 
 
 if __name__ == '__main__':

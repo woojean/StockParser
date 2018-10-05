@@ -74,7 +74,7 @@ def traceEnterList(f):
 '''
 1日止损
 '''
-def trace1(id,parseDay):
+def trace(id,parseDay):
   print id,parseDay
   parser = GeneralParser.GeneralParser(parseDay,id)
   priceFile = Tools.getPriceDirPath()+'/'+str(id)
@@ -116,7 +116,7 @@ def trace1(id,parseDay):
 '''
 2日止损
 '''
-def trace(id,parseDay):
+def trace2(id,parseDay):
   print id,parseDay
   parser = GeneralParser.GeneralParser(parseDay,id)
   priceFile = Tools.getPriceDirPath()+'/'+str(id)
@@ -157,6 +157,34 @@ def trace(id,parseDay):
   ret['inPrice'] = inPrice
   ret['outPrice'] = outPrice
   return ret
+
+
+'''
+持有10日
+'''
+# def trace(id,parseDay):
+#   print id,parseDay
+#   parser = GeneralParser.GeneralParser(parseDay,id)
+#   priceFile = Tools.getPriceDirPath()+'/'+str(id)
+#   res = open(priceFile,'r').read()
+  
+#   dayList = parser.getNextTradingDayList(parseDay,10) # 
+#   inDay = dayList[0]
+#   inPrice = parser.getStartPriceOfDay(res,inDay)  # 买入价为板后第一天的开盘价
+#   if 0==inPrice:
+#     return False # 坏数据
+
+#   outDay = dayList[-1]
+#   outPrice = parser.getEndPriceOfDay(res,outDay)
+#   if 0==outPrice:
+#     return False # 坏数据
+  
+#   ret = {}
+#   ret['id'] = id
+#   ret['name'] = Tools.getNameById(id)
+#   ret['inPrice'] = inPrice
+#   ret['outPrice'] = outPrice
+#   return ret
 
 
 if __name__ == '__main__':
