@@ -26,7 +26,7 @@ from common import Tools
 '''
 '''
 class GeneralParser(BaseParser):
-  _limitNum = 0
+  _limitNum = 1
   
   def __init__(self,parseDay,id=''):
     BaseParser.__init__(self,parseDay) 
@@ -51,7 +51,19 @@ class GeneralParser(BaseParser):
       return True
     else:
       return False
+    
 
+  def isDownLimit(self,res,day1,day2):
+    endPrice1 = self.getEndPriceOfDay(res,day1)
+    endPrice2 = self.getEndPriceOfDay(res,day2)
+    if endPrice1 == 0 or endPrice2 ==0:
+      return False
+
+    rate = (endPrice2 - endPrice1)/endPrice1
+    if rate <= -0.099:
+      return True
+    else:
+      return False
 
 
   def parse(self,res,parseDay,id=''):
@@ -66,7 +78,30 @@ class GeneralParser(BaseParser):
     day5 = dayList[4]
     day6 = dayList[5]
 
+    # 最低价低于5日线
+    # maDayList = BaseParser.getPastTradingDayList(parseDay,5)
+    # (v,v,ma) = self.getMAPrice(res,maDayList)
+    # # minPrice = self.getMinPriceOfDay(res,parseDay)
+    # # if minPrice > ma:
+    # #   return False
+    # maxPrice = self.getMaxPriceOfDay(res,parseDay)
+    # if maxPrice > ma:
+    #   return False
+
     
+    # 近5日内有跌停
+    haveDownwardLimit = False
+    cDayList = BaseParser.getPastTradingDayList(parseDay,6)
+    total = len(cDayList)
+    for i in xrange(0,total-2):
+      if self.isDownLimit(res,cDayList[i],cDayList[i+1]):
+        haveDownwardLimit = True
+        break
+    if not haveDownwardLimit:
+      return False
+
+
+
     # 当日涨停
     if self._limitNum == 0: # 今日是板就OK
       if not self.isUpwardLimit(res,day5,day6):
