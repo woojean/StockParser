@@ -97,12 +97,34 @@ class KdjParser(BaseParser):
     v = 20
 
 
-    # D小于20，K金叉D
+    # 三线都小于20
+    if kOfParseDay >= v:
+      return False
+
     if dOfParseDay >= v:
       return False
 
+    if jOfParseDay >= v:
+      return False
+
+    # K金叉D
     if not((kOfLastDay < dOfParseDay) and (kOfParseDay > dOfParseDay)):
       return False
+
+    # J金叉D
+    if not((jOfLastDay < dOfParseDay) and (jOfParseDay > dOfParseDay)):
+      return False
+
+    # # K在D之下
+    # if kOfParseDay > dOfParseDay:
+    #   return False
+
+    # # J在D之上
+    # if jOfParseDay < dOfParseDay:
+    #   return False
+
+
+    
 
 
     # # D小于20且变大，K、J变大但小于D
