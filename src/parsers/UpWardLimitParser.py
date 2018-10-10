@@ -39,7 +39,7 @@ class UpWardLimitParser(BaseParser):
     startPrice2 = self.getStartPriceOfDay(res,day2)
     minPrice2 = self.getMinPriceOfDay(res,day2)
     maxPrice2 = self.getMaxPriceOfDay(res,day2)
-    if maxPrice2 == minPrice2:
+    if maxPrice2 == minPrice2 and startPrice2 == minPrice2:
       return False
 
 
@@ -48,7 +48,41 @@ class UpWardLimitParser(BaseParser):
       return True
     else:
       return False
+    
 
+  def isDownLimit(self,res,day1,day2):
+    endPrice1 = self.getEndPriceOfDay(res,day1)
+    endPrice2 = self.getEndPriceOfDay(res,day2)
+    if endPrice1 == 0 or endPrice2 ==0:
+      return False
+
+    rate = (endPrice2 - endPrice1)/endPrice1
+    if rate <= -0.099:
+      return True
+    else:
+      return False
+  
+
+  def isMaInBear(self,res,day):
+    R = 5
+    G = 10
+    B = 20
+
+    dayList = self.getPastTradingDayList(day,R)
+    (v,v,maR) = self.getMAPrice(res,dayList)
+
+    dayList = self.getPastTradingDayList(day,G)
+    (v,v,maG) = self.getMAPrice(res,dayList)
+
+    dayList = self.getPastTradingDayList(day,B)
+    (v,v,maB) = self.getMAPrice(res,dayList)
+
+    if maR == -1 or maG==-1 or maB == -1:
+      return False
+
+    if ((maR < maG) and (maG < maB)):
+      return True
+    return False
 
 
   def parse(self,res,parseDay,id=''):
@@ -63,7 +97,34 @@ class UpWardLimitParser(BaseParser):
     day5 = dayList[4]
     day6 = dayList[5]
 
+    # 最低价低于5日线
+    maDayList = BaseParser.getPastTradingDayList(parseDay,5)
+    (v,v,ma) = self.getMAPrice(res,maDayList)
+    # minPrice = self.getMinPriceOfDay(res,parseDay)
+    # if minPrice > ma:
+    #   return False
+    maxPrice = self.getMaxPriceOfDay(res,parseDay)
+    if maxPrice > ma:
+      return False
+
     
+    # 近5日内有跌停
+    # haveDownwardLimit = False
+    # cDayList = BaseParser.getPastTradingDayList(parseDay,6)
+    # total = len(cDayList)
+    # for i in xrange(0,total-2):
+    #   if self.isDownLimit(res,cDayList[i],cDayList[i+1]):
+    #     haveDownwardLimit = True
+    #     break
+    # if not haveDownwardLimit:
+    #   return False
+
+    
+    # 短线均线空头排列
+    if not self.isMaInBear(res,dayList[-2]):
+      return False
+
+
     # 当日涨停
     if self._limitNum == 0: # 今日是板就OK
       if not self.isUpwardLimit(res,day5,day6):

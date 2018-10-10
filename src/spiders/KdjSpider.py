@@ -1,6 +1,6 @@
 #coding:utf-8
 '''
-woojean@2018-01-06
+woojean@2018-10-10
 '''
 
 import sys
@@ -13,8 +13,8 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 # ============================================================================================
-class MacdSpider(BaseSpider):  
-  _source = 'macd'
+class KdjSpider(BaseSpider):  
+  _source = 'kdj'
 
   def __init__(self,idList=[],threadId=0): 
     BaseSpider.__init__(self,idList,threadId) 
@@ -22,9 +22,9 @@ class MacdSpider(BaseSpider):
   def genUrl(self,id):
     endTime = str(int(round(time.time() * 1000))) 
     url = 'http://pdfm2.eastmoney.com/EM_UBG_PDTI_Fast/api/js?id=$ID$1&TYPE='
-    if '3' == str(id)[0]:
+    if ('3' == str(id)[0])  or ('0' == str(id)[0]):
       url = 'http://pdfm2.eastmoney.com/EM_UBG_PDTI_Fast/api/js?id=$ID$2&TYPE='
-    url +='k&js=$FUN$((x))&rtntype=4&extend=macd&check=kte&authorityType=fa&$FUN$=$FUN$'
+    url +='k&js=$FUN$((x))&rtntype=4&extend=kdj&check=kte&authorityType=fa&$FUN$=$FUN$'
     url = url.replace('$ID$',id).replace('$FUN$','fsDataTeacma' + endTime)
     print url
     return url
@@ -35,12 +35,12 @@ if __name__ == '__main__':
   threads = 50 # 线程数（不能少于任务数）
   idList = BaseSpider.getIdList() 
 
-  MacdSpider().initDir()
+  KdjSpider().initDir()
 
   step = len(idList)/threads  # total > threads
   for threadId in xrange(1,threads+1):
     subIdList = idList[((threadId-1)*step):(threadId*step)]
-    spider = MacdSpider(subIdList,threadId)
+    spider = KdjSpider(subIdList,threadId)
     spider.start()
 
 

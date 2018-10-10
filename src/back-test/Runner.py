@@ -45,14 +45,18 @@ class Runner(threading.Thread):
 
 if __name__ == '__main__':
   # 回测parser
-  parser = 'GeneralParser'
+  parser = 'KdjParser'
 
   # 起止日期
   # 2018-06-20 24 2018-07-23 上证-0.08%
   # beginDate = '2016-08-31'  
   # testDays = 489
+  
   beginDate = '2018-01-02'  
   testDays = 164
+
+  # beginDate = '2018-08-02'  
+  # testDays = 2
 
 
   # beginDate = '2016-09-09'  # 2016-09-09 ~ 2018-09-10 沪深300跌3.28%
@@ -86,11 +90,11 @@ if __name__ == '__main__':
   '''
     
 
-  cmd = 'python '+ rootPath + '/src/back-test/Tester-GeneralParser.py'
+  cmd = 'python '+ rootPath + '/src/back-test/Tester-'+parser+'.py'
   print cmd
   os.system(cmd)
 
-  cmd = 'python '+ rootPath + '/src/back-test/Reporter-GeneralParser.py'
+  cmd = 'python '+ rootPath + '/src/back-test/Reporter-'+parser+'.py'
   print cmd
   os.system(cmd)
 

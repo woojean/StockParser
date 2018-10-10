@@ -70,6 +70,22 @@ class BaseParser:
           pass
           #print repr(e)
     return macdFileList
+  
+  @staticmethod
+  def getKdjFileList():
+    kdjFilePath = Tools.getKdjDirPath()
+    kdjFileList = []
+    for root,dirs,files in os.walk(kdjFilePath):
+      for f in files:
+        try:
+          if len(f) == 6:
+            id = f
+            path = root + '/' + id
+            kdjFileList.append(path)
+        except Exception, e:
+          pass
+          #print repr(e)
+    return kdjFileList
 
   @staticmethod
   def getBasicInfoById(id):
@@ -251,7 +267,7 @@ class BaseParser:
     return amplitude
 
   # 获取某一日的换手率
-  def geChangeRateOfDay(self,res,day):
+  def getChangeRateOfDay(self,res,day):
     try:
       rate = float((re.findall('"'+ day +',(.*?)"', res)[0]).split(',')[7])/100.0
     except Exception, e:

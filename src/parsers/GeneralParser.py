@@ -26,7 +26,7 @@ from common import Tools
 '''
 '''
 class GeneralParser(BaseParser):
-  _limitNum = 1
+  _limitNum = 0
   
   def __init__(self,parseDay,id=''):
     BaseParser.__init__(self,parseDay) 
@@ -64,6 +64,28 @@ class GeneralParser(BaseParser):
       return True
     else:
       return False
+  
+
+  def isMaInBear(self,res,day):
+    R = 5
+    G = 10
+    B = 20
+
+    dayList = self.getPastTradingDayList(day,R)
+    (v,v,maR) = self.getMAPrice(res,dayList)
+
+    dayList = self.getPastTradingDayList(day,G)
+    (v,v,maG) = self.getMAPrice(res,dayList)
+
+    dayList = self.getPastTradingDayList(day,B)
+    (v,v,maB) = self.getMAPrice(res,dayList)
+
+    if maR == -1 or maG==-1 or maB == -1:
+      return False
+
+    if ((maR < maG) and (maG < maB)):
+      return True
+    return False
 
 
   def parse(self,res,parseDay,id=''):
@@ -78,7 +100,7 @@ class GeneralParser(BaseParser):
     day5 = dayList[4]
     day6 = dayList[5]
 
-    # 最低价低于5日线
+    # # 最低价低于5日线
     # maDayList = BaseParser.getPastTradingDayList(parseDay,5)
     # (v,v,ma) = self.getMAPrice(res,maDayList)
     # # minPrice = self.getMinPriceOfDay(res,parseDay)
@@ -90,16 +112,20 @@ class GeneralParser(BaseParser):
 
     
     # 近5日内有跌停
-    haveDownwardLimit = False
-    cDayList = BaseParser.getPastTradingDayList(parseDay,6)
-    total = len(cDayList)
-    for i in xrange(0,total-2):
-      if self.isDownLimit(res,cDayList[i],cDayList[i+1]):
-        haveDownwardLimit = True
-        break
-    if not haveDownwardLimit:
-      return False
+    # haveDownwardLimit = False
+    # cDayList = BaseParser.getPastTradingDayList(parseDay,6)
+    # total = len(cDayList)
+    # for i in xrange(0,total-2):
+    #   if self.isDownLimit(res,cDayList[i],cDayList[i+1]):
+    #     haveDownwardLimit = True
+    #     break
+    # if not haveDownwardLimit:
+    #   return False
 
+    
+    # # 短线均线空头排列
+    # if not self.isMaInBear(res,dayList[-2]):
+    #   return False
 
 
     # 当日涨停

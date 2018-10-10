@@ -88,6 +88,10 @@ def getMacdDirPath():
   return getRootPath()+'/data/macd'
 
 
+def getKdjDirPath():
+  return getRootPath()+'/data/kdj'
+
+
 def getIdListOfDir(d):
   l = []
   d = getRootPath()+'/config/'+d
