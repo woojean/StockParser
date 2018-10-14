@@ -29,6 +29,12 @@ def getTracersDirPath():
 def getBackTestDirPath():
   return getRootPath()+'/src/back-test'  
 
+def getKdjWkDataPath():
+  return getRootPath()+'/data/kdjwk'  
+
+def getKdjDataPath():
+  return getRootPath()+'/data/kdj'  
+
 def getTaogubaDataPath():
   return getRootPath()+'/data/taoguba'  
 

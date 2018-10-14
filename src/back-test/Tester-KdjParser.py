@@ -16,7 +16,7 @@ rootPath = sys.path[0][0:sys.path[0].index('StockParser')]+'/StockParser'
 sys.path.append(rootPath+'/src') 
 from common import Tools
 from parsers import BaseParser
-from parsers import GeneralParser
+from parsers import KdjParser
 
 def getEnterListFiles():
   enterListDirPath = Tools.getEnterListDirPath()
@@ -77,7 +77,7 @@ def traceEnterList(f):
 '''
 def trace1(id,parseDay):
   print id,parseDay
-  parser = GeneralParser.GeneralParser(parseDay,id)
+  parser = KdjParser.KdjParser(parseDay,id)
   priceFile = Tools.getPriceDirPath()+'/'+str(id)
   res = open(priceFile,'r').read()
   
@@ -90,13 +90,16 @@ def trace1(id,parseDay):
   stopPrice = parser.getMinPriceOfDay(res,inDay) # 买入当天最低价做止损价
   outPrice = 0 
   dayList = dayList[1:]
+  holdDays = 0
   for day in dayList:
+    holdDays +=1
     minPrice = parser.getMinPriceOfDay(res,day)
     if minPrice == 0:
       outPrice = 0
       break
-    if minPrice < stopPrice:  # 阴线
+    if minPrice < stopPrice:
       outPrice = stopPrice
+      outDay = day
       break
     else:
       stopPrice = minPrice
@@ -109,7 +112,9 @@ def trace1(id,parseDay):
   ret['id'] = id
   ret['name'] = Tools.getNameById(id)
   ret['inPrice'] = inPrice
+  ret['outDay'] = outDay
   ret['outPrice'] = outPrice
+  ret['holdDays'] = holdDays
   return ret
 
 
@@ -120,7 +125,7 @@ def trace1(id,parseDay):
 '''
 def trace2(id,parseDay):
   print id,parseDay
-  parser = GeneralParser.GeneralParser(parseDay,id)
+  parser = KdjParser.KdjParser(parseDay,id)
   priceFile = Tools.getPriceDirPath()+'/'+str(id)
   res = open(priceFile,'r').read()
   
@@ -136,14 +141,17 @@ def trace2(id,parseDay):
   outPrice = 0 
   
   l = len(dayList)
+  holdDays = 0
   for i in xrange(1,l):
     day = dayList[i]
     minPrice = parser.getMinPriceOfDay(res,day)
     minPriceLastDay = parser.getMinPriceOfDay(res,dayList[i-1])
+    holdDays +=1
     if minPrice == 0:
       outPrice = 0
       break
     if minPrice < stopPrice:  # 触发止损
+      outDay = day
       outPrice = stopPrice
       break
     else:  # 未触发止损，上调止损价
@@ -157,7 +165,9 @@ def trace2(id,parseDay):
   ret['id'] = id
   ret['name'] = Tools.getNameById(id)
   ret['inPrice'] = inPrice
+  ret['outDay'] = outDay
   ret['outPrice'] = outPrice
+  ret['holdDays'] = holdDays
   return ret
 
 
@@ -165,9 +175,9 @@ def trace2(id,parseDay):
 '''
 持有10日
 '''
-def trace(id,parseDay):
+def trace10(id,parseDay):
   print id,parseDay
-  parser = GeneralParser.GeneralParser(parseDay,id)
+  parser = KdjParser.KdjParser(parseDay,id)
   priceFile = Tools.getPriceDirPath()+'/'+str(id)
   res = open(priceFile,'r').read()
   
@@ -186,8 +196,75 @@ def trace(id,parseDay):
   ret['id'] = id
   ret['name'] = Tools.getNameById(id)
   ret['inPrice'] = inPrice
+  ret['outDay'] = outDay
   ret['outPrice'] = outPrice
+  ret['holdDays'] = 10
   return ret
+
+
+
+'''
+持有5日
+'''
+def trace(id,parseDay):
+  print id,parseDay
+  parser = KdjParser.KdjParser(parseDay,id)
+  priceFile = Tools.getPriceDirPath()+'/'+str(id)
+  res = open(priceFile,'r').read()
+  
+  dayList = parser.getNextTradingDayList(parseDay,5) # 
+  inDay = dayList[0]
+  inPrice = parser.getStartPriceOfDay(res,inDay)  # 买入价为板后第一天的开盘价
+  if 0==inPrice:
+    return False # 坏数据
+
+  outDay = dayList[-1]
+  outPrice = parser.getEndPriceOfDay(res,outDay)
+  if 0==outPrice:
+    return False # 坏数据
+  
+  ret = {}
+  ret['id'] = id
+  ret['name'] = Tools.getNameById(id)
+  ret['inPrice'] = inPrice
+  ret['outDay'] = outDay
+  ret['outPrice'] = outPrice
+  ret['holdDays'] = 5
+  return ret
+
+# D顶部反转
+def tracex(id,parseDay):
+  print id,parseDay
+  parser = BaseParser.BaseParser(parseDay)
+  priceFile = Tools.getPriceDirPath()+'/'+str(id)
+  res = open(priceFile,'r').read()
+  dayList = parser.getNextTradingDayList(parseDay,50) # 
+  inDay = dayList[0]
+  inPrice = parser.getStartPriceOfDay(res,inDay)  # 买入价为板后第一天的开盘价
+  if 0==inPrice:
+    return False # 坏数据
+
+  kdjParser = KdjParser.KdjParser(parseDay,id)
+  kdjRes = kdjParser.getKdjResOfId(id)
+  holdDays = 0
+  for day in dayList:
+    holdDays +=1
+    if kdjParser.isDTopReversal(kdjRes,day):  # 发生顶部反转
+      outDay = day
+      outPrice = parser.getEndPriceOfDay(res,outDay)
+      break
+  if 0==outPrice:
+    return False # 坏数据
+  
+  ret = {}
+  ret['id'] = id
+  ret['name'] = Tools.getNameById(id)
+  ret['inPrice'] = inPrice
+  ret['outDay'] = outDay
+  ret['outPrice'] = outPrice
+  ret['holdDays'] = holdDays
+  return ret
+
 
 
 if __name__ == '__main__':

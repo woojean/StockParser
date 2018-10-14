@@ -45,7 +45,8 @@ class Runner(threading.Thread):
 
 if __name__ == '__main__':
   # 回测parser
-  parser = 'KdjParser'
+  # parser = 'MaxPriceUnderMaParser'
+  parser = 'MaxPriceUnderMaParser'
 
   # 起止日期
   # 2018-06-20 24 2018-07-23 上证-0.08%
@@ -54,13 +55,11 @@ if __name__ == '__main__':
   
   beginDate = '2018-01-02'  
   testDays = 164
+  # testDays = 183  # 9-28
 
-  # beginDate = '2018-08-02'  
-  # testDays = 2
+  # beginDate = '2018-02-06'  
+  # testDays = 1
 
-
-  # beginDate = '2016-09-09'  # 2016-09-09 ~ 2018-09-10 沪深300跌3.28%
-  # testDays = 488
 
   dayList = BaseParser.BaseParser.getNextTradingDayList(beginDate,testDays-1)
   dayList.insert(0,beginDate)

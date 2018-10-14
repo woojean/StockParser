@@ -28,7 +28,10 @@ class KdjSpider(BaseSpider):
     url = url.replace('$ID$',id).replace('$FUN$','fsDataTeacma' + endTime)
     print url
     return url
-
+    '''
+    http://pdfm.eastmoney.com/EM_UBG_PDTI_Fast/api/js?token=4f1862fc3b5e77c150a2b985b12db0fd&rtntype=6&id=0000022&type=wk&authorityType=fa&cb=jsonp1539234497088
+    http://pdfm2.eastmoney.com/EM_UBG_PDTI_Fast/api/js?id=0000022&TYPE=k&js=fsDataTeacma((x))&rtntype=4&extend=kdj&check=kte&authorityType=fa&fsDataTeacma=fsDataTeacma
+    '''
 
 if __name__ == '__main__':
 
