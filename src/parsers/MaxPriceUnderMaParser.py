@@ -96,23 +96,31 @@ class MaxPriceUnderMaParser(BaseParser):
     if endPrice <= startPrice:
       return False
 
-
     # 位于ma之下 = 最高价低于ma
     if maxPrice >= ma:
       return False
 
-
-    # 向上波幅大于7%
-    minP = min(endPriceOfLastDay,minPrice)  # 取昨日收盘价和今日最低价中的最小值
-    r = (maxPrice - minP)/minP
-    if (r <= 0.07):
+    # SLOWKD近期有死叉
+    if KdjParser.haveDeathCross(parseDay,id,5,5):
       return False
 
 
-    # SLOWKD近期有死叉
-    # if KdjParser.haveDeathCross(parseDay,id,5,5):
-      # return False
-    
+    # # 向上波幅大于7%
+    # minP = min(endPriceOfLastDay,minPrice)  # 取昨日收盘价和今日最低价中的最小值
+    # r = (maxPrice - minP)/minP
+    # if (r <= 0.07):
+    #   return False
+
+    # 振幅不小于7%
+    r = (maxPrice - minPrice)/minPrice
+    if (r < 0.07):
+      return False
+
+    # 涨幅不小于7%
+    # r = (endPrice - endPriceOfLastDay)/endPriceOfLastDay
+    # if (r < 0.07):
+    #   return False
+
 
     return True
 

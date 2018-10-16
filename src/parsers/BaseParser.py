@@ -519,47 +519,16 @@ class BaseParser:
   
 
 
-  # def getParseResult(self,isDump=False):
-  #   idList = []
-  #   num = 0
-  #   parsedNum = 0
-  #   priceFileList = BaseParser.getPriceFileList()
-  #   total = len(priceFileList)
-  #   for f in priceFileList:
-  #     try:
-  #       self.printProcess(parsedNum,total)
-  #       id = f[-6:]
-  #       res = open(f,'r').read()
-  #       ret = self.parse(res,self._parseDay,id)
-  #       if ret:
-  #         idList.append(id)
-  #         num += 1
-  #         print str(num) + ' ↗'
-  #       parsedNum += 1
-  #     except Exception, e:
-  #       pass
-  #       print repr(e)
-
-  #   if isDump:
-  #     self.dumpIdList(idList)
-
-  #   return idList
-
-
   def getParseResult(self,isDump=False):
-    print '***************************************************************************'
-    print 'In custom mode'
-    print '***************************************************************************'
-    idFile = 'MaxPriceUnderMaParser/'+self._parseDay+'-MaxPriceUnderMaParser.sel'
-    allIdList = Tools.getIdListOfFile(idFile)
     idList = []
     num = 0
     parsedNum = 0
-    total = len(allIdList)
-    for id in allIdList:
+    priceFileList = BaseParser.getPriceFileList()
+    total = len(priceFileList)
+    for f in priceFileList:
       try:
         self.printProcess(parsedNum,total)
-        f = Tools.getPriceDirPath()+'/'+id
+        id = f[-6:]
         res = open(f,'r').read()
         ret = self.parse(res,self._parseDay,id)
         if ret:
@@ -575,6 +544,37 @@ class BaseParser:
       self.dumpIdList(idList)
 
     return idList
+
+
+  # def getParseResult(self,isDump=False):
+  #   print '***************************************************************************'
+  #   print 'In custom mode'
+  #   print '***************************************************************************'
+  #   idFile = 'MaSupportParser/'+self._parseDay+'-MaSupportParser.sel'
+  #   allIdList = Tools.getIdListOfFile(idFile)
+  #   idList = []
+  #   num = 0
+  #   parsedNum = 0
+  #   total = len(allIdList)
+  #   for id in allIdList:
+  #     try:
+  #       self.printProcess(parsedNum,total)
+  #       f = Tools.getPriceDirPath()+'/'+id
+  #       res = open(f,'r').read()
+  #       ret = self.parse(res,self._parseDay,id)
+  #       if ret:
+  #         idList.append(id)
+  #         num += 1
+  #         print str(num) + ' ↗'
+  #       parsedNum += 1
+  #     except Exception, e:
+  #       pass
+  #       print repr(e)
+
+  #   if isDump:
+  #     self.dumpIdList(idList)
+
+  #   return idList
 
 
 

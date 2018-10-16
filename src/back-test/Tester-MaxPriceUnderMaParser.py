@@ -75,7 +75,7 @@ def traceEnterList(f):
 '''
 1日止损
 '''
-def trace1(id,parseDay):
+def trace(id,parseDay):
   print id,parseDay
   parser = MaxPriceUnderMaParser.MaxPriceUnderMaParser(parseDay,id)
   priceFile = Tools.getPriceDirPath()+'/'+str(id)
@@ -172,6 +172,39 @@ def trace2(id,parseDay):
 
 
 
+
+'''
+持有5日
+'''
+def trace5(id,parseDay):
+  print id,parseDay
+  parser = MaxPriceUnderMaParser.MaxPriceUnderMaParser(parseDay,id)
+  priceFile = Tools.getPriceDirPath()+'/'+str(id)
+  res = open(priceFile,'r').read()
+  
+  dayList = parser.getNextTradingDayList(parseDay,5) # 
+  inDay = dayList[0]
+  inPrice = parser.getStartPriceOfDay(res,inDay)  # 买入价为板后第一天的开盘价
+  if 0==inPrice:
+    return False # 坏数据
+
+  outDay = dayList[-1]
+  outPrice = parser.getEndPriceOfDay(res,outDay)
+  if 0==outPrice:
+    return False # 坏数据
+  
+  ret = {}
+  ret['id'] = id
+  ret['name'] = Tools.getNameById(id)
+  ret['inPrice'] = inPrice
+  ret['outDay'] = outDay
+  ret['outPrice'] = outPrice
+  ret['holdDays'] = 5
+  return ret
+
+
+
+
 '''
 持有10日
 '''
@@ -199,35 +232,6 @@ def trace10(id,parseDay):
   ret['outDay'] = outDay
   ret['outPrice'] = outPrice
   ret['holdDays'] = 10
-  return ret
-
-'''
-持有5日
-'''
-def trace(id,parseDay):
-  print id,parseDay
-  parser = MaxPriceUnderMaParser.MaxPriceUnderMaParser(parseDay,id)
-  priceFile = Tools.getPriceDirPath()+'/'+str(id)
-  res = open(priceFile,'r').read()
-  
-  dayList = parser.getNextTradingDayList(parseDay,5) # 
-  inDay = dayList[0]
-  inPrice = parser.getStartPriceOfDay(res,inDay)  # 买入价为板后第一天的开盘价
-  if 0==inPrice:
-    return False # 坏数据
-
-  outDay = dayList[-1]
-  outPrice = parser.getEndPriceOfDay(res,outDay)
-  if 0==outPrice:
-    return False # 坏数据
-  
-  ret = {}
-  ret['id'] = id
-  ret['name'] = Tools.getNameById(id)
-  ret['inPrice'] = inPrice
-  ret['outDay'] = outDay
-  ret['outPrice'] = outPrice
-  ret['holdDays'] = 5
   return ret
 
 
