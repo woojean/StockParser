@@ -115,6 +115,8 @@ def trace1(id,parseDay):
   ret['outDay'] = outDay
   ret['outPrice'] = outPrice
   ret['holdDays'] = holdDays
+  ret['minPrice'] = 1
+  ret['maxPrice'] = 1
   return ret
 
 
@@ -168,6 +170,8 @@ def trace2(id,parseDay):
   ret['outDay'] = outDay
   ret['outPrice'] = outPrice
   ret['holdDays'] = holdDays
+  ret['minPrice'] = 1
+  ret['maxPrice'] = 1
   return ret
 
 
@@ -199,6 +203,8 @@ def trace10(id,parseDay):
   ret['outDay'] = outDay
   ret['outPrice'] = outPrice
   ret['holdDays'] = 10
+  ret['minPrice'] = 1
+  ret['maxPrice'] = 1
   return ret
 
 
@@ -206,7 +212,7 @@ def trace10(id,parseDay):
 '''
 持有5日
 '''
-def trace(id,parseDay):
+def trace5(id,parseDay):
   print id,parseDay
   parser = KdjParser.KdjParser(parseDay,id)
   priceFile = Tools.getPriceDirPath()+'/'+str(id)
@@ -230,6 +236,8 @@ def trace(id,parseDay):
   ret['outDay'] = outDay
   ret['outPrice'] = outPrice
   ret['holdDays'] = 5
+  ret['minPrice'] = 1
+  ret['maxPrice'] = 1
   return ret
 
 # D顶部反转
@@ -263,7 +271,55 @@ def tracex(id,parseDay):
   ret['outDay'] = outDay
   ret['outPrice'] = outPrice
   ret['holdDays'] = holdDays
+  ret['minPrice'] = 1
+  ret['maxPrice'] = 1
   return ret
+
+
+
+'''
+持有N日
+'''
+def trace(id,parseDay):
+  N = 2
+  print id,parseDay
+  parser = KdjParser.KdjParser(parseDay,id)
+  priceFile = Tools.getPriceDirPath()+'/'+str(id)
+  res = open(priceFile,'r').read()
+  
+  dayList = parser.getNextTradingDayList(parseDay,N) # 
+  inDay = dayList[0]
+  inPrice = parser.getStartPriceOfDay(res,inDay)  # 买入价为板后第一天的开盘价
+  if 0==inPrice:
+    return False # 坏数据
+
+  outDay = dayList[-1]
+  outPrice = parser.getEndPriceOfDay(res,outDay)
+  if 0==outPrice:
+    return False # 坏数据
+
+  minPrice = 999999
+  maxPrice = 0  
+  for day in dayList:
+    maxP = parser.getMaxPriceOfDay(res,day)
+    minP = parser.getMinPriceOfDay(res,day)
+    if maxP > maxPrice:
+      maxPrice = maxP
+    if minP < minPrice:
+      minPrice = minP
+
+  ret = {}
+  ret['id'] = id
+  ret['name'] = Tools.getNameById(id)
+  ret['inPrice'] = inPrice
+  ret['outDay'] = outDay
+  ret['outPrice'] = outPrice
+  ret['holdDays'] = N
+  ret['minPrice'] = minPrice
+  ret['maxPrice'] = maxPrice
+  return ret
+
+
 
 
 

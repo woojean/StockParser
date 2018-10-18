@@ -517,6 +517,9 @@ class BaseParser:
       print s
 
   
+  def calcuR(self,idList,num):
+    return idList
+  
 
 
   def getParseResult(self,isDump=False):
@@ -540,6 +543,9 @@ class BaseParser:
         pass
         print repr(e)
 
+    # 根据打分结果过滤
+    idList = self.calcuR(idList,1)
+
     if isDump:
       self.dumpIdList(idList)
 
@@ -550,7 +556,7 @@ class BaseParser:
   #   print '***************************************************************************'
   #   print 'In custom mode'
   #   print '***************************************************************************'
-  #   idFile = 'MaSupportParser/'+self._parseDay+'-MaSupportParser.sel'
+  #   idFile = 'upward-limit-20180102-20180831/'+self._parseDay+'-UpWardLimitParser.sel'
   #   allIdList = Tools.getIdListOfFile(idFile)
   #   idList = []
   #   num = 0
@@ -570,6 +576,8 @@ class BaseParser:
   #     except Exception, e:
   #       pass
   #       print repr(e)
+      # 根据打分结果过滤
+      # idList = self.calcuR(idList,1)
 
   #   if isDump:
   #     self.dumpIdList(idList)

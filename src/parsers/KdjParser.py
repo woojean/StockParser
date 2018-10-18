@@ -41,6 +41,95 @@ class KdjParser(BaseParser):
       s += rate + ' %'
       print s
 
+  @staticmethod
+  def getMutationScore(id,parseDay):
+    path = Tools.getKdjDataPath()+'/' +id
+    res = open(path,'r').read()
+    dayList = BaseParser.getPastTradingDayList(parseDay,3)
+    kdjList = eval(res[26:-1])
+    dataOfDays = {}
+    for item in kdjList:
+      for d in dayList:
+        if d == item['time']:
+          dataOfDays[d] = eval(item['kdj'])
+
+    # 数据错误，当做下降处理
+    if (len(dataOfDays)<1) or (len(dayList) != len(dataOfDays)):  
+      return False
+
+    d1 = float(dataOfDays[dayList[-3]][1])
+    d2 = float(dataOfDays[dayList[-2]][1])
+    d3 = float(dataOfDays[dayList[-1]][1])
+    
+    if d1>d2:
+      return 0
+    if d3>d2:
+      return 0
+
+    # 陡：2日D增幅不小于2
+    dv = d2 - d1
+
+    # 急：拐弯急
+    v1 = d2-d1
+    v2 = d2-d3
+    if v1 == 0 :
+      return 0
+
+    r = v2/v1
+
+    # score = dv * r
+    score = dv * r
+    return score
+
+
+  @staticmethod
+  def isSpires(parseDay,id):
+    path = Tools.getKdjDataPath()+'/' +id
+    res = open(path,'r').read()
+    dayList = BaseParser.getPastTradingDayList(parseDay,3)
+    kdjList = eval(res[26:-1])
+    dataOfDays = {}
+    for item in kdjList:
+      for d in dayList:
+        if d == item['time']:
+          dataOfDays[d] = eval(item['kdj'])
+
+    # 数据错误，当做下降处理
+    if (len(dataOfDays)<1) or (len(dayList) != len(dataOfDays)):  
+      return False
+
+    d1 = float(dataOfDays[dayList[-3]][1])
+    d2 = float(dataOfDays[dayList[-2]][1])
+    d3 = float(dataOfDays[dayList[-1]][1])
+    
+
+    # d1 <= d2 >= d3
+    if d1>d2:
+      return False
+    if d3>d2:
+      return False
+
+    # score = dv * r
+
+    # 陡：2日D增幅不小于2
+    dv = d2 - d1
+    if dv < 2:   # <- 小于2的，走势不够陡，不够强势，不考虑
+      return False
+
+    # 急：拐弯急
+    v1 = d2-d1
+    v2 = d2-d3
+    r = v2/v1
+
+    # d低于某个值
+    # print r
+    # if r < 1:  # <- 小于1的不考虑
+    #   return False
+
+    return True
+
+  
+
 
   def getParseResult(self,isDump=False):
     idList = []
@@ -64,10 +153,65 @@ class KdjParser(BaseParser):
         pass
         # print repr(e)
 
+    # 打分
+    idList = self.calcuR(idList,1)
+
     if isDump:
       self.dumpIdList(idList)
 
     return idList
+
+
+
+  # def getParseResult(self,isDump=False):
+  #   idList = []
+  #   num = 0
+  #   parsedNum = 0
+  #   priceFileList = BaseParser.getPriceFileList()
+  #   total = len(priceFileList)
+  #   for f in priceFileList:
+  #     try:
+  #       self.printProcess(parsedNum,total)
+  #       id = f[-6:]
+  #       res = open(f,'r').read()
+  #       ret = self.parse(res,self._parseDay,id)
+  #       if ret:
+  #         idList.append(id)
+  #         num += 1
+  #         print str(num) + ' ↗'
+  #       parsedNum += 1
+  #     except Exception, e:
+  #       pass
+  #       print repr(e)
+
+  #   # 根据打分结果过滤
+  #   idList = self.calcuR(idList,1)
+
+  #   if isDump:
+  #     self.dumpIdList(idList)
+  #   return idList
+
+
+  # 打分
+  def calcuR(self,idList,num):
+    maDays = 10  # 均线
+    vList = []
+    for id in idList:
+      score = KdjParser.getMutationScore(id,parseDay)
+      vList.append((id,score))
+
+    # 排序
+    sList = sorted(vList,key=lambda x: -x[1]) # 倒序
+    print "sorted list:"
+    print sList
+    selectedList = sList[:num]
+
+    print "\nselected list:"
+    print selectedList
+    l = []
+    for item in selectedList:
+      l.append(item[0])
+    return l
 
 
   def isDBottomReversal(self,res,parseDay,id=''):
@@ -275,23 +419,101 @@ class KdjParser(BaseParser):
     if (len(dataOfDays)<1) or (len(dayList) != len(dataOfDays)):  
       return False
 
-    j1 = float(dataOfDays[dayList[-2]][2])
-    j2 = float(dataOfDays[dayList[-1]][2])
+    # D在20之下
+    # dayLimit = 20
+    # d = float(dataOfDays[dayList[-1]][1])
+    # if d > dayLimit or d < 1:  # d大于20，或d数据错误
+    #   return False
+
+    k1 = float(dataOfDays[dayList[-2]][0])
+    k2 = float(dataOfDays[dayList[-1]][0])
     d = float(dataOfDays[dayList[-1]][1])
 
-    if not((j1 < d) and (j2 > d)):
+    if not((k1 < d) and (k2 > d)):
+      return False
+
+    return True
+
+  # D低于某个值
+  @staticmethod
+  def isDLow(parseDay,id):
+    path = Tools.getKdjDataPath()+'/' +id
+    res = open(path,'r').read()
+    dayList = BaseParser.getPastTradingDayList(parseDay,2)
+    kdjList = eval(res[26:-1])
+    dataOfDays = {}
+    for item in kdjList:
+      for d in dayList:
+        if d == item['time']:
+          dataOfDays[d] = eval(item['kdj'])
+
+    # 数据错误
+    if (len(dataOfDays)<1) or (len(dayList) != len(dataOfDays)):  
+      return False
+
+    # D在指定值之下
+    dayLimit = 20
+    d = float(dataOfDays[dayList[-1]][1])
+    if d > dayLimit or d < 1:  # d大于20，或d数据错误
       return False
 
     return True
 
 
-  # D低于20，J金叉D
-  def parse(self,res,parseDay,id):
-    if KdjParser.haveDeathCross(parseDay,id,5,5):
-      return True
-    return False
-    '''
+
+  # J、K、D当日多头排列，且相对前一日都在上涨
+  @staticmethod
+  def isKdjBull(parseDay,id):
+    path = Tools.getKdjDataPath()+'/' +id
+    res = open(path,'r').read()
     dayList = BaseParser.getPastTradingDayList(parseDay,2)
+    kdjList = eval(res[26:-1])
+    dataOfDays = {}
+    for item in kdjList:
+      for d in dayList:
+        if d == item['time']:
+          dataOfDays[d] = eval(item['kdj'])
+
+    # 数据错误
+    if (len(dataOfDays)<1) or (len(dayList) != len(dataOfDays)):  
+      return False
+
+
+    k1 = float(dataOfDays[dayList[-2]][0])
+    k2 = float(dataOfDays[dayList[-1]][0])
+    d1 = float(dataOfDays[dayList[-2]][1])
+    d2 = float(dataOfDays[dayList[-1]][1])
+    j1 = float(dataOfDays[dayList[-2]][2])
+    j2 = float(dataOfDays[dayList[-1]][2])
+
+    # D在20之下
+    dayLimit = 20
+    if d2 > dayLimit or d2 < 1:  # d大于20，或d数据错误
+      return False
+
+    if (k2 <= k1) or (d2 <= d1) or (j2 <= j1):
+      return False
+
+    # J K D
+    if not ((j2 > k2) and (k2 > d2)):
+      return False
+
+    return True
+
+  
+  
+
+
+  def parse(self,res,parseDay,id):
+    if not self.isSpires(parseDay,id):
+      return False
+    return True
+
+
+  # D低于20，J金叉D
+  def parse3(self,res,parseDay,id):
+    # D空中加油
+    dayList = BaseParser.getPastTradingDayList(parseDay,20)
     kdjList = eval(res[26:-1])
     dataOfDays = {}
     for item in kdjList:
@@ -304,24 +526,65 @@ class KdjParser(BaseParser):
       # print 'len(dataOfDays)<1) or (len(dayList) != len(dataOfDays)'
       return False
 
-    dayLimit = 20
+    # d15 d14 d13 d12 d11 d10 d9 d8 d7 d6 d5 d4 d3 d2 d1
+    d1 = float(dataOfDays[dayList[-1]][1])
+    d2 = float(dataOfDays[dayList[-2]][1])
+    d3 = float(dataOfDays[dayList[-3]][1])
+    d10 = float(dataOfDays[dayList[-10]][1])
+    d15 = float(dataOfDays[dayList[-15]][1])
 
-    d = float(dataOfDays[dayList[-1]][1])
-    if d > dayLimit or d < 1:  # d大于20，或d数据错误
+    # d1 > d2
+    if not d1 > d2:
       return False
 
-    j1 = float(dataOfDays[dayList[-2]][2])
-    j2 = float(dataOfDays[dayList[-1]][2])
-    if not ((j1 < d) and (j2 > d)):
+    # d3 > d2
+    if not d3 > d2:
       return False
 
-    k1 = float(dataOfDays[dayList[-2]][0])
-    k2 = float(dataOfDays[dayList[-1]][0])
-    if not ((k1 < d) and (k2 > d)):
+    # d2 > d15
+    if not d2 > d15:
+      return False
+
+    # d10 > d15
+    if not d10 > d15:
       return False
 
     return True
-    '''
+
+    # D在20之下，K金叉D
+    # ------------------------------------------------------------------
+    # dayList = BaseParser.getPastTradingDayList(parseDay,2)
+    # kdjList = eval(res[26:-1])
+    # dataOfDays = {}
+    # for item in kdjList:
+    #   for d in dayList:
+    #     if d == item['time']:
+    #       dataOfDays[d] = eval(item['kdj'])
+
+    # # 坏数据：个股交易日未必连续        
+    # if (len(dataOfDays)<1) or (len(dayList) != len(dataOfDays)):
+    #   # print 'len(dataOfDays)<1) or (len(dayList) != len(dataOfDays)'
+    #   return False
+
+    # dayLimit = 20
+
+    # # D在20之下
+    # d = float(dataOfDays[dayList[-1]][1])
+    # if d > dayLimit or d < 1:  # d大于20，或d数据错误
+    #   return False
+
+    # # K金叉D
+    # # j1 = float(dataOfDays[dayList[-2]][2])
+    # # j2 = float(dataOfDays[dayList[-1]][2])
+    # # if not ((j1 < d) and (j2 > d)):
+    #   # return False
+
+    # k1 = float(dataOfDays[dayList[-2]][0])
+    # k2 = float(dataOfDays[dayList[-1]][0])
+    # if not ((k1 < d) and (k2 > d)):
+    #   return False
+
+    # return True
 
 
 
