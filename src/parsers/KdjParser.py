@@ -61,24 +61,34 @@ class KdjParser(BaseParser):
     d2 = float(dataOfDays[dayList[-2]][1])
     d3 = float(dataOfDays[dayList[-1]][1])
     
+    # 新股
+    if d1 >= 100 or d2 >= 100 or d3 >= 100:
+      return 0
+
+    # 有顶
     if d1>d2:
       return 0
     if d3>d2:
       return 0
 
     # 陡：2日D增幅不小于2
-    dv = d2 - d1
+    dv1 = d2 - d1
 
     # 急：拐弯急
-    v1 = d2-d1
-    v2 = d2-d3
-    if v1 == 0 :
-      return 0
+    dv2 = d2 - d3
 
-    r = v2/v1
+    # 高：当前成熟度
+    h = 100.0 - d3
 
-    # score = dv * r
-    score = dv * r
+    # 分
+    # score = (d2-d1)*(d2-d3)*(100-d3)
+    # score = dv1 * dv2 * (100.0 - d3)
+
+    # score = (d2-d1)*(d2-d3)*(10-d3/10)
+    score = dv1 * dv2 * (10 - d3/10.0)
+
+    # print score
+
     return score
 
 
@@ -102,56 +112,59 @@ class KdjParser(BaseParser):
     d2 = float(dataOfDays[dayList[-2]][1])
     d3 = float(dataOfDays[dayList[-1]][1])
     
+    if d1 >= 100 or d2 >= 100 or d3 >= 100:
+      print '-------------------------------------------------->'
+      return False
 
+    # 有顶
     # d1 <= d2 >= d3
     if d1>d2:
       return False
     if d3>d2:
       return False
 
-    # score = dv * r
+    # # score = dv * r
 
-    # 陡：2日D增幅不小于2
-    dv = d2 - d1
-    if dv < 2:   # <- 小于2的，走势不够陡，不够强势，不考虑
-      return False
+    # # 陡：2日D增幅不小于2
+    # dv1 = d2 - d1
 
-    # 急：拐弯急
-    v1 = d2-d1
-    v2 = d2-d3
-    r = v2/v1
+    # # 急：拐弯急
+    # dv2 = d2 - d3
 
-    # d低于某个值
-    # print r
-    # if r < 1:  # <- 小于1的不考虑
-    #   return False
+    # # 高：当前成熟度
+    # h = (100 - d)/10.0
+
+    # # 分
+    # score = dv1 * dv2 * h
 
     return True
 
-  
-
 
   def getParseResult(self,isDump=False):
+    print '***************************************************************************'
+    print 'In custom mode'
+    print '***************************************************************************'
+    idFile = 'd/'+self._parseDay+'-KdjParser.sel'
+    allIdList = Tools.getIdListOfFile(idFile)
     idList = []
     num = 0
-    kdjFileList = BaseParser.getKdjFileList()
     parsedNum = 0
-    total = len(kdjFileList)
-    for f in kdjFileList:
+    total = len(allIdList)
+    for id in allIdList:
       try:
-        id = f[-6:]
         self.printProcess(parsedNum,total)
+        f = Tools.getPriceDirPath()+'/'+id
         res = open(f,'r').read()
         ret = self.parse(res,self._parseDay,id)
         if ret:
           idList.append(id)
           num += 1
           print str(num) + ' ↗'
-          parsedNum += 1
-      except Exception, e:
         parsedNum += 1
+      except Exception, e:
         pass
-        # print repr(e)
+        print repr(e)
+
 
     # 打分
     idList = self.calcuR(idList,1)
@@ -160,6 +173,38 @@ class KdjParser(BaseParser):
       self.dumpIdList(idList)
 
     return idList
+  
+
+
+  # def getParseResult(self,isDump=False):
+  #   idList = []
+  #   num = 0
+  #   kdjFileList = BaseParser.getKdjFileList()
+  #   parsedNum = 0
+  #   total = len(kdjFileList)
+  #   for f in kdjFileList:
+  #     try:
+  #       id = f[-6:]
+  #       self.printProcess(parsedNum,total)
+  #       res = open(f,'r').read()
+  #       ret = self.parse(res,self._parseDay,id)
+  #       if ret:
+  #         idList.append(id)
+  #         num += 1
+  #         print str(num) + ' ↗'
+  #         parsedNum += 1
+  #     except Exception, e:
+  #       parsedNum += 1
+  #       pass
+  #       # print repr(e)
+
+  #   # 打分
+  #   # idList = self.calcuR(idList,1)
+
+  #   if isDump:
+  #     self.dumpIdList(idList)
+
+  #   return idList
 
 
 

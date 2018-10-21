@@ -32,50 +32,20 @@ class RelativeUpwardLimitParser(BaseParser):
     BaseParser.__init__(self,parseDay) 
 
 
-  def getParseResult(self,isDump=False):
-    print '***************************************************************************'
-    print 'In custom mode'
-    print '***************************************************************************'
-    idFile = 'upward-limit-20160831-20180831/'+self._parseDay+'-RelativeUpwardLimitParser.sel'
-    allIdList = Tools.getIdListOfFile(idFile)
-    idList = []
-    num = 0
-    parsedNum = 0
-    total = len(allIdList)
-    for id in allIdList:
-      try:
-        self.printProcess(parsedNum,total)
-        f = Tools.getPriceDirPath()+'/'+id
-        res = open(f,'r').read()
-        ret = self.parse(res,self._parseDay,id)
-        if ret:
-          idList.append(id)
-          num += 1
-          print str(num) + ' ↗'
-        parsedNum += 1
-      except Exception, e:
-        pass
-        print repr(e)
-
-    # 根据比较结果过滤
-    # idList = self.calcuR(idList,1)
-
-    if isDump:
-      self.dumpIdList(idList)
-
-    return idList
-
-
   # def getParseResult(self,isDump=False):
+  #   print '***************************************************************************'
+  #   print 'In custom mode'
+  #   print '***************************************************************************'
+  #   idFile = 'upward-limit-20160831-20180831/'+self._parseDay+'-RelativeUpwardLimitParser.sel'
+  #   allIdList = Tools.getIdListOfFile(idFile)
   #   idList = []
   #   num = 0
   #   parsedNum = 0
-  #   priceFileList = BaseParser.getPriceFileList()
-  #   total = len(priceFileList)
-  #   for f in priceFileList:
+  #   total = len(allIdList)
+  #   for id in allIdList:
   #     try:
   #       self.printProcess(parsedNum,total)
-  #       id = f[-6:]
+  #       f = Tools.getPriceDirPath()+'/'+id
   #       res = open(f,'r').read()
   #       ret = self.parse(res,self._parseDay,id)
   #       if ret:
@@ -92,7 +62,37 @@ class RelativeUpwardLimitParser(BaseParser):
 
   #   if isDump:
   #     self.dumpIdList(idList)
+
   #   return idList
+
+
+  def getParseResult(self,isDump=False):
+    idList = []
+    num = 0
+    parsedNum = 0
+    priceFileList = BaseParser.getPriceFileList()
+    total = len(priceFileList)
+    for f in priceFileList:
+      try:
+        self.printProcess(parsedNum,total)
+        id = f[-6:]
+        res = open(f,'r').read()
+        ret = self.parse(res,self._parseDay,id)
+        if ret:
+          idList.append(id)
+          num += 1
+          print str(num) + ' ↗'
+        parsedNum += 1
+      except Exception, e:
+        pass
+        print repr(e)
+
+    # 根据比较结果过滤
+    # idList = self.calcuR(idList,1)
+
+    if isDump:
+      self.dumpIdList(idList)
+    return idList
 
 
   # 振幅排名
