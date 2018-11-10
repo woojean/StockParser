@@ -69,22 +69,22 @@ class BaldRiseLineAndVolumeReduceParser(BaseParser):
 
     # # 相对前一日量
     # =================================================
-    dayList = self.getPastTradingDayList(parseDay,2)
-    lastDay = dayList[0] # 前一日
-    vOfParseDay = self.getVolumeOfDay(res,parseDay)
-    vOfLastDay = self.getVolumeOfDay(res,lastDay)
-    if 0 == vOfLastDay: # 前一日无量的排除，可能是未开板次新
-      return False
+    # dayList = self.getPastTradingDayList(parseDay,2)
+    # lastDay = dayList[0] # 前一日
+    # vOfParseDay = self.getVolumeOfDay(res,parseDay)
+    # vOfLastDay = self.getVolumeOfDay(res,lastDay)
+    # if 0 == vOfLastDay: # 前一日无量的排除，可能是未开板次新
+    #   return False
 
-    if vOfParseDay >= vOfLastDay: # 缩量
-    # if vOfParseDay <= vOfLastDay: # 放量
-      return False
+    # if vOfParseDay >= vOfLastDay: # 缩量
+    # # if vOfParseDay <= vOfLastDay: # 放量
+    #   return False
 
 
     # 剔除涨停
     # =================================================
-    if self.isUpwardLimit(res,dayList[0],dayList[1]):
-      return False
+    # if self.isUpwardLimit(res,dayList[0],dayList[1]):
+    #   return False
 
 
     # # # 量小于5日平均

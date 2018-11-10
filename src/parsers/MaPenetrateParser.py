@@ -34,8 +34,8 @@ class MaPenetrateParser(BaseParser):
     day2 = dayList[1]  # 第2天
     #day3 = dayList[2]  # 第3天
 
-    shortTerm = 13
-    longTerm = 34
+    shortTerm = 20
+    longTerm = 60
    
     # 第一天短线小于长线
     maLong = self.getMAPrice(res,BaseParser.getPastTradingDayList(day1,longTerm))

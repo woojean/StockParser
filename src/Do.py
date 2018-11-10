@@ -228,8 +228,10 @@ def run(parseDay,parsers,isNew=False):
   if isNew:
     spiders = [
       'PriceSpider',
-      'MacdSpider',
-      'BasicInfoSpider'
+      # 'KdjSpider',
+      # 'BiasSpider',
+      # 'MacdSpider',
+      # 'BasicInfoSpider'
     ]
     runSpiders(spiders)
     
@@ -248,38 +250,38 @@ if __name__ == '__main__':
 
 
   parsers = {
-    'BaldRiseLineAndVolumeReduceParser':'秃阳线且缩量☆',
     # 'ContinuouslyBigRiseButNoRiseLimitParser':'连续大涨',
     # 'FlatBottomParser':'平台',
-    'GoldenPinBottomParser':'金针探底',
+    # 'GoldenPinBottomParser':'金针探底',
     # 'MacdReverseParser':'MACD反转☆',
     # 'MaConvergenceParser':'均线汇合',
     # 'MaPenetrateParser':'均线穿透',
-    'MaTrendParser':'MA短线趋势',
-    'MaxPriceParser':'创新高',
-    'MergedParser.py':'均线汇合',
-    'OneLimitsParser':'一板',
-    'PenetrateUpwardMa60Parser':'上穿60日线',
-    'RgbParser':'短线多头',
-    'StandOn60Parser':'站稳60日均线',
-    'SwallowUpParser':'向上吞没线',
-    'ThreeLimitsParser':'三板',
-    'TriangularSupportParser':'均线三角托',
+    # 'MaTrendParser':'MA短线趋势',
+    # 'MaxPriceParser':'创新高',
+    # 'MergedParser.py':'均线汇合',
+    # 'OneLimitsParser':'一板',
+    # 'PenetrateUpwardMa60Parser':'上穿60日线',
+    # 'RgbParser':'短线多头',
+    # 'StandOn60Parser':'站稳60日均线',
+    # 'SwallowUpParser':'向上吞没线',
+    # 'ThreeLimitsParser':'三板',
+    # 'TriangularSupportParser':'均线三角托',
     # 'TweezersBottomParser':'镊形底',
-    'TwoLimitsParser':'二板',
-    'VenusParser':'启明星',
-    'VolumeMutationParser':'成交量突变',
+    # 'TwoLimitsParser':'二板',
+    # 'VenusParser':'启明星',
+    # 'VolumeMutationParser':'成交量突变',
     # 'WJParser':'WJ'
   }
 
   parsers = {
-    'TwoLimitsParser':'二板',
+    'DailyParser':'每日执行',
   }
 
   (parseDay, isNew,traceDay) = getParams()
 
   # ======================================================
   run(parseDay,parsers,isNew)
+
   report(parseDay,parsers,True,traceDay)
 
 

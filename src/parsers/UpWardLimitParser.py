@@ -98,14 +98,14 @@ class UpWardLimitParser(BaseParser):
     day6 = dayList[5]
 
     # 最低价低于5日线
-    maDayList = BaseParser.getPastTradingDayList(parseDay,5)
-    (v,v,ma) = self.getMAPrice(res,maDayList)
+    # maDayList = BaseParser.getPastTradingDayList(parseDay,5)
+    # (v,v,ma) = self.getMAPrice(res,maDayList)
     # minPrice = self.getMinPriceOfDay(res,parseDay)
     # if minPrice > ma:
     #   return False
-    maxPrice = self.getMaxPriceOfDay(res,parseDay)
-    if maxPrice > ma:
-      return False
+    # maxPrice = self.getMaxPriceOfDay(res,parseDay)
+    # if maxPrice > ma:
+    #   return False
 
     
     # 近5日内有跌停
@@ -121,8 +121,8 @@ class UpWardLimitParser(BaseParser):
 
     
     # 短线均线空头排列
-    if not self.isMaInBear(res,dayList[-2]):
-      return False
+    # if not self.isMaInBear(res,dayList[-2]):
+    #   return False
 
 
     # 当日涨停

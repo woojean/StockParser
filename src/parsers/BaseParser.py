@@ -94,6 +94,32 @@ class BaseParser:
     res = open(path,'r').read()
     return res
 
+
+  @staticmethod
+  def getBiasFileList():
+    biasFilePath = Tools.getBiasDirPath()
+    biasFileList = []
+    for root,dirs,files in os.walk(biasFilePath):
+      for f in files:
+        try:
+          if len(f) == 6:
+            id = f
+            path = root + '/' + id
+            biasFileList.append(path)
+        except Exception, e:
+          pass
+          #print repr(e)
+    return biasFileList
+
+  @staticmethod
+  def getBiasResOfId(id):
+    biasFileDir = Tools.getBiasDirPath()
+    path = biasFileDir + '/' +str(id)
+    res = open(path,'r').read()
+    return res
+
+
+
   @staticmethod
   def getBasicInfoById(id):
     '''
@@ -556,7 +582,7 @@ class BaseParser:
   #   print '***************************************************************************'
   #   print 'In custom mode'
   #   print '***************************************************************************'
-  #   idFile = 'upward-limit-20180102-20180831/'+self._parseDay+'-UpWardLimitParser.sel'
+  #   idFile = '555/'+self._parseDay+'-MaxPriceUnderMaParser.sel'
   #   allIdList = Tools.getIdListOfFile(idFile)
   #   idList = []
   #   num = 0
@@ -576,8 +602,9 @@ class BaseParser:
   #     except Exception, e:
   #       pass
   #       print repr(e)
-      # 根据打分结果过滤
-      # idList = self.calcuR(idList,1)
+        
+  #     # 根据打分结果过滤
+  #     idList = self.calcuR(idList,1)
 
   #   if isDump:
   #     self.dumpIdList(idList)

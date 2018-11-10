@@ -30,7 +30,9 @@ class PriceSpider(BaseSpider):
     url +='&TYPE=k&js=fsDataTeacma((x))&rtntype=5&authorityType=fa&isCR=false&fsDataTeacma=fsDataTeacma'
     url = url.replace('$ID$',id)
     return url
-
+  '''
+  http://pdfm2.eastmoney.com/EM_UBG_PDTI_Fast/api/js?id=0027982&TYPE=k&js=fsDataTeacma((x))&rtntype=5&authorityType=fa&isCR=false&fsDataTeacma=fsDataTeacma
+  '''
 
 if __name__ == '__main__':
 

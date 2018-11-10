@@ -35,6 +35,9 @@ def getKdjWkDataPath():
 def getKdjDataPath():
   return getRootPath()+'/data/kdj'  
 
+def getBiasDataPath():
+  return getRootPath()+'/data/bias'  
+
 def getTaogubaDataPath():
   return getRootPath()+'/data/taoguba'  
 
@@ -96,6 +99,9 @@ def getMacdDirPath():
 
 def getKdjDirPath():
   return getRootPath()+'/data/kdj'
+
+def getBiasDirPath():
+  return getRootPath()+'/data/bias'
 
 
 def getIdListOfDir(d):

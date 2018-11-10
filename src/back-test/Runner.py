@@ -45,20 +45,22 @@ class Runner(threading.Thread):
 
 if __name__ == '__main__':
   # 回测parser
-  parser = 'RelativeParser'
+  parser = 'MaxPriceUnderMaParser'
   # parser = 'MaSupportParser'
 
   # 起止日期
   # 2018-06-20 24 2018-07-23 上证-0.08%
-  beginDate = '2016-08-31'  
-  testDays = 489
+  # beginDate = '2016-08-31'  
+  # testDays = 489
   
-  # beginDate = '2018-01-02'  
+  beginDate = '2018-01-02'  
+  testDays = 201
   # testDays = 164
   # testDays = 183  # 9-28
+  # testDays = 60
 
   # beginDate = '2018-02-28'  
-  # beginDate = '2018-08-22'  
+  # beginDate = '2018-06-15'  
   # testDays = 10
 
 

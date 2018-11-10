@@ -85,81 +85,81 @@ class UpwardGapParser(BaseParser):
       return False
 
 
-    # 剔除近5日内有过涨停板（涨幅大于9.5%），因为需要“沉闷”的行情
-    # =================================================
-    uLcDayList = self.getPastTradingDayList(parseDay,11)
-    l = len(uLcDayList)
-    for i in xrange(0,l-1):
-      if self.isUpwardLimit(res,uLcDayList[i],uLcDayList[i+1]):
-        return False
+    # # 剔除近5日内有过涨停板（涨幅大于9.5%），因为需要“沉闷”的行情
+    # # =================================================
+    # uLcDayList = self.getPastTradingDayList(parseDay,11)
+    # l = len(uLcDayList)
+    # for i in xrange(0,l-1):
+    #   if self.isUpwardLimit(res,uLcDayList[i],uLcDayList[i+1]):
+    #     return False
 
-    # 剔除ST
-    # =================================================
-    name = Tools.getNameById(id)
-    if 'ST' in name:
-      return False
+    # # 剔除ST
+    # # =================================================
+    # name = Tools.getNameById(id)
+    # if 'ST' in name:
+    #   return False
 
 
-    # 剔除上引线长度超过总线长度3/4
-    # =================================================
-    startPrice = self.getStartPriceOfDay(res,parseDay)
-    endPrice = self.getEndPriceOfDay(res,parseDay)
-    minPrice = self.getMinPriceOfDay(res,parseDay)
-    maxPrice = self.getMaxPriceOfDay(res,parseDay)
-    upLine = abs(maxPrice - max(startPrice,endPrice))
-    totalLine = abs(maxPrice - minPrice)
-    if totalLine!=0:
-      rate = 1.0*upLine/totalLine
-      if rate > 0.75:
-        return False
-
-    
-    # 剔除K线大小超过前10日所有K线
-    # =================================================
-    minPrice = self.getMinPriceOfDay(res,parseDay)
-    maxPrice = self.getMaxPriceOfDay(res,parseDay)
-    kLineLength = abs(maxPrice - minPrice)
-    
-    total = 10
-    klDayList = self.getPastTradingDayList(parseDay,total+1)
-    klDayList = klDayList[:-1]
-    isLardgest = True
-    for d in klDayList:
-      minPrice = self.getMinPriceOfDay(res,d)
-      maxPrice = self.getMaxPriceOfDay(res,d)
-      lineLength = abs(maxPrice - minPrice)
-      if kLineLength < lineLength:
-        isLardgest = False
-        break
-    if isLardgest:
-      return False
-
-    # 剔除K线实体大小超过前10日所有K线实体大小
-    startPrice = self.getStartPriceOfDay(res,parseDay)
-    endPrice = self.getEndPriceOfDay(res,parseDay)
-    kLineEntityLength = abs(endPrice - startPrice)
-    isLardgest = True
-    for d in klDayList:
-      startPrice = self.getStartPriceOfDay(res,d)
-      endPrice = self.getEndPriceOfDay(res,d)
-      entityLength = abs(endPrice - startPrice)
-      if kLineEntityLength < entityLength:
-        isLardgest = False
-        break
-    if isLardgest:
-      return False
+    # # 剔除上引线长度超过总线长度3/4
+    # # =================================================
+    # startPrice = self.getStartPriceOfDay(res,parseDay)
+    # endPrice = self.getEndPriceOfDay(res,parseDay)
+    # minPrice = self.getMinPriceOfDay(res,parseDay)
+    # maxPrice = self.getMaxPriceOfDay(res,parseDay)
+    # upLine = abs(maxPrice - max(startPrice,endPrice))
+    # totalLine = abs(maxPrice - minPrice)
+    # if totalLine!=0:
+    #   rate = 1.0*upLine/totalLine
+    #   if rate > 0.75:
+    #     return False
 
     
-    # 剔除最高价在250日线之上，但收盘在250日线下
-    # =================================================
-    if self.challengeMaFailed(res,parseDay,250):
-      return False
+    # # 剔除K线大小超过前10日所有K线
+    # # =================================================
+    # minPrice = self.getMinPriceOfDay(res,parseDay)
+    # maxPrice = self.getMaxPriceOfDay(res,parseDay)
+    # kLineLength = abs(maxPrice - minPrice)
+    
+    # total = 10
+    # klDayList = self.getPastTradingDayList(parseDay,total+1)
+    # klDayList = klDayList[:-1]
+    # isLardgest = True
+    # for d in klDayList:
+    #   minPrice = self.getMinPriceOfDay(res,d)
+    #   maxPrice = self.getMaxPriceOfDay(res,d)
+    #   lineLength = abs(maxPrice - minPrice)
+    #   if kLineLength < lineLength:
+    #     isLardgest = False
+    #     break
+    # if isLardgest:
+    #   return False
 
-    if self.challengeMaFailed(res,parseDay,60):
-      return False
+    # # 剔除K线实体大小超过前10日所有K线实体大小
+    # startPrice = self.getStartPriceOfDay(res,parseDay)
+    # endPrice = self.getEndPriceOfDay(res,parseDay)
+    # kLineEntityLength = abs(endPrice - startPrice)
+    # isLardgest = True
+    # for d in klDayList:
+    #   startPrice = self.getStartPriceOfDay(res,d)
+    #   endPrice = self.getEndPriceOfDay(res,d)
+    #   entityLength = abs(endPrice - startPrice)
+    #   if kLineEntityLength < entityLength:
+    #     isLardgest = False
+    #     break
+    # if isLardgest:
+    #   return False
 
-    if self.challengeMaFailed(res,parseDay,20):
-      return False
+    
+    # # 剔除最高价在250日线之上，但收盘在250日线下
+    # # =================================================
+    # if self.challengeMaFailed(res,parseDay,250):
+    #   return False
+
+    # if self.challengeMaFailed(res,parseDay,60):
+    #   return False
+
+    # if self.challengeMaFailed(res,parseDay,20):
+    #   return False
       
     return True
 

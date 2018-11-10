@@ -258,18 +258,29 @@ class KdjParser(BaseParser):
       l.append(item[0])
     return l
 
-
-  def isDBottomReversal(self,res,parseDay,id=''):
-    dayList = BaseParser.getPastTradingDayList(parseDay,3)
-    kdjList = eval(res[26:-1])
-    dataOfDays = {}
-    for item in kdjList:
-      for d in dayList:
-        if d == item['time']:
-          dataOfDays[d] = eval(item['kdj'])
-    # 坏数据：个股交易日未必连续        
-    if (len(dataOfDays)<1) or (len(dayList) != len(dataOfDays)):
+  @staticmethod
+  def isDBottomReversal(parseDay,id=''):
+    try:
+      path = Tools.getKdjDataPath()+'/' +id
+      res = open(path,'r').read()
+      if len(res) < 50:
+        return False # 交由人工判断
+      dayList = BaseParser.getPastTradingDayList(parseDay,3)
+      kdjList = eval(res[26:-1])
+      dataOfDays = {}
+      for item in kdjList:
+        for d in dayList:
+          if d == item['time']:
+            dataOfDays[d] = eval(item['kdj'])
+    except Exception, e:
+      pass
+      print repr(e)
       return False
+
+    # 数据错误
+    if (len(dataOfDays)<1) or (len(dayList) != len(dataOfDays)):  
+      return False
+
     d1 = float(dataOfDays[dayList[0]][1])
     d2 = float(dataOfDays[dayList[1]][1])
     d3 = float(dataOfDays[dayList[2]][1])
@@ -356,27 +367,93 @@ class KdjParser(BaseParser):
 
     return True
 
+  # D上涨
+  @staticmethod
+  def isDUpward(parseDay,id):
+    path = Tools.getKdjDataPath()+'/' +id
+    try:
+      res = open(path,'r').read()
+      if len(res) < 50:
+        return False # 交由人工判断
+      dayList = BaseParser.getPastTradingDayList(parseDay,20)
+      kdjList = eval(res[26:-1])
+      dataOfDays = {}
+      for item in kdjList:
+        for d in dayList:
+          if d == item['time']:
+            dataOfDays[d] = eval(item['kdj'])
+    except Exception, e:
+      pass
+      # print repr(e)
+      return False
+
+    # 数据错误
+    if (len(dataOfDays)<1) or (len(dayList) != len(dataOfDays)):  
+      return False
+
+    # D在指定值之下
+    d1 = float(dataOfDays[dayList[-2]][1])
+    d2 = float(dataOfDays[dayList[-1]][1])
+
+    if d2 <= d1:
+      return False
+
+    return True
+
+  # D上涨
+  @staticmethod
+  def getD(parseDay,id):
+    path = Tools.getKdjDataPath()+'/' +id
+    try:
+      res = open(path,'r').read()
+      if len(res) < 50:
+        return 100 # 交由人工判断
+      dayList = BaseParser.getPastTradingDayList(parseDay,10)
+      kdjList = eval(res[26:-1])
+      dataOfDays = {}
+      for item in kdjList:
+        for d in dayList:
+          if d == item['time']:
+            dataOfDays[d] = eval(item['kdj'])
+    except Exception, e:
+      pass
+      # print repr(e)
+      return 100
+    
+    # 数据错误
+    if (len(dataOfDays)<1) or (len(dayList) != len(dataOfDays)):  
+      return 100
+
+    # D在指定值之下
+    d = float(dataOfDays[parseDay][1])
+    return d
 
   @staticmethod
-  def dIsLow(parseDay,id):
+  def isDLow(parseDay,id):
     path = Tools.getKdjDataPath()+'/' +id
-    res = open(path,'r').read()
-    dayList = BaseParser.getPastTradingDayList(parseDay,2)
-    kdjList = eval(res[26:-1])
-    dataOfDays = {}
-    for item in kdjList:
-      for d in dayList:
-        if d == item['time']:
-          dataOfDays[d] = eval(item['kdj'])
+    try:
+      res = open(path,'r').read()
+      if len(res) < 50:
+        return False # 交由人工判断
+      dayList = BaseParser.getPastTradingDayList(parseDay,20)
+      kdjList = eval(res[26:-1])
+      dataOfDays = {}
+      for item in kdjList:
+        for d in dayList:
+          if d == item['time']:
+            dataOfDays[d] = eval(item['kdj'])
+    except Exception, e:
+      pass
+      # print repr(e)
+      return False
 
-    # 数据错误，当做下降处理
+    # 数据错误，人工判断
     if (len(dataOfDays)<1) or (len(dayList) != len(dataOfDays)):  
       return False
 
     d = float(dataOfDays[dayList[-1]][1])
-
     # d低于某个值
-    if d > 20:
+    if d > 5:
       return False
 
     return True
@@ -412,14 +489,21 @@ class KdjParser(BaseParser):
   @staticmethod
   def haveDeathCross(parseDay,id,days,maDays):
     path = Tools.getKdjDataPath()+'/' +id
-    res = open(path,'r').read()
-    dayList = BaseParser.getPastTradingDayList(parseDay,20)
-    kdjList = eval(res[26:-1])
-    dataOfDays = {}
-    for item in kdjList:
-      for d in dayList:
-        if d == item['time']:
-          dataOfDays[d] = eval(item['kdj'])
+    try:
+      res = open(path,'r').read()
+      if len(res) < 50:
+        return False # 交由人工判断
+      dayList = BaseParser.getPastTradingDayList(parseDay,20)
+      kdjList = eval(res[26:-1])
+      dataOfDays = {}
+      for item in kdjList:
+        for d in dayList:
+          if d == item['time']:
+            dataOfDays[d] = eval(item['kdj'])
+    except Exception, e:
+      pass
+      # print repr(e)
+      return False
 
     # 数据错误，当做无死叉，人工判断
     if (len(dataOfDays)<1) or (len(dayList) != len(dataOfDays)):  
@@ -444,6 +528,8 @@ class KdjParser(BaseParser):
       return True
 
     return False
+
+
 
 
 
@@ -479,30 +565,35 @@ class KdjParser(BaseParser):
 
     return True
 
-  # D低于某个值
-  @staticmethod
-  def isDLow(parseDay,id):
-    path = Tools.getKdjDataPath()+'/' +id
-    res = open(path,'r').read()
-    dayList = BaseParser.getPastTradingDayList(parseDay,2)
-    kdjList = eval(res[26:-1])
-    dataOfDays = {}
-    for item in kdjList:
-      for d in dayList:
-        if d == item['time']:
-          dataOfDays[d] = eval(item['kdj'])
+  
+  
 
-    # 数据错误
-    if (len(dataOfDays)<1) or (len(dayList) != len(dataOfDays)):  
-      return False
 
-    # D在指定值之下
-    dayLimit = 20
-    d = float(dataOfDays[dayList[-1]][1])
-    if d > dayLimit or d < 1:  # d大于20，或d数据错误
-      return False
 
-    return True
+  # # D低于某个值
+  # @staticmethod
+  # def isDLow(parseDay,id):
+  #   path = Tools.getKdjDataPath()+'/' +id
+  #   res = open(path,'r').read()
+  #   dayList = BaseParser.getPastTradingDayList(parseDay,2)
+  #   kdjList = eval(res[26:-1])
+  #   dataOfDays = {}
+  #   for item in kdjList:
+  #     for d in dayList:
+  #       if d == item['time']:
+  #         dataOfDays[d] = eval(item['kdj'])
+
+  #   # 数据错误
+  #   if (len(dataOfDays)<1) or (len(dayList) != len(dataOfDays)):  
+  #     return False
+
+  #   # D在指定值之下
+  #   dayLimit = 20
+  #   d = float(dataOfDays[dayList[-1]][1])
+  #   if d > dayLimit or d < 1:  # d大于20，或d数据错误
+  #     return False
+
+  #   return True
 
 
 
