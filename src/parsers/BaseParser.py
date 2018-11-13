@@ -308,6 +308,18 @@ class BaseParser:
       #print repr(e)
     return rate
 
+
+  # 获取某一日的成交额
+  def getDealAmount(self,res,day):
+    try:
+      amount = float((re.findall('"'+ day +',(.*?)"', res)[0]).split(',')[5])
+    except Exception, e:
+      amount = 0
+      #print repr(e)
+    return amount
+
+
+
   # 获取某一日的开盘价
   def getStartPriceOfDay(self,res,day):
     try:
@@ -364,7 +376,20 @@ class BaseParser:
       maVolume = 0
     return maVolume
 
+  # 获取量比
+  def getVolumeRatioOfDays(self,res,day,days):
+    dayList = BaseParser.getPastTradingDayList(day,days)
+    dayList = dayList[:-1]
+    parseDayVolume = self.getVolumeOfDay(res,day)
 
+    sumVolume = 0
+    for d in dayList:
+      volume = self.getVolumeOfDay(res,d)
+      sumVolume += volume
+    maVolume = sumVolume/days
+    ratio = parseDayVolume/maVolume
+
+    return ratio
 
 
   # 判断某一天是否是过去若干天的最大成交量
@@ -379,6 +404,20 @@ class BaseParser:
       if volume > otherDayMaxVolume: # 错误数据（交易日不连贯）
         otherDayMaxVolume = volume
     return maxVolume > otherDayMaxVolume
+
+
+  # 判断某一天是否是过去若干天的最小成交量
+  def isMinVolumeOfDays(self,res,day,days):
+    dayList = BaseParser.getPastTradingDayList(day,days)
+    dayList = dayList[:-1]
+    minVolume = self.getVolumeOfDay(res,day)
+
+    otherDayMinVolume = 99999999999
+    for d in dayList:
+      volume = self.getVolumeOfDay(res,d)
+      if volume < otherDayMinVolume: # 错误数据（交易日不连贯）
+        otherDayMinVolume = volume
+    return minVolume < otherDayMinVolume
 
 
   # 获取某一日的振幅

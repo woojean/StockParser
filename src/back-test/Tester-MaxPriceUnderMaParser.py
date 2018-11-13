@@ -366,8 +366,8 @@ def traceYYY(id,parseDay):
 '''
 持有N日
 '''
-def trace(id,parseDay):
-  N = 2
+def traceN(id,parseDay):
+  N = 5
   print id,parseDay
   parser = MaxPriceUnderMaParser.MaxPriceUnderMaParser(parseDay,id)
   priceFile = Tools.getPriceDirPath()+'/'+str(id)
@@ -570,6 +570,65 @@ def trace1(id,parseDay):
   ret['maxPrice'] = 0
   return ret
 
+
+
+
+'''
+最高价低于信号日最低价，区间表现统计
+'''
+def trace(id,parseDay):
+  print id,parseDay
+  parser = MaxPriceUnderMaParser.MaxPriceUnderMaParser(parseDay,id)
+  priceFile = Tools.getPriceDirPath()+'/'+str(id)
+  res = open(priceFile,'r').read()
+  
+  dayList = parser.getNextTradingDayList(parseDay,20) # 
+  inDay = dayList[0]
+  inPrice = parser.getStartPriceOfDay(res,inDay)  # 买入价为板后第一天的开盘价
+  stopPrice = parser.getMinPriceOfDay(res,parseDay) # 信号日（阳线）最低价为底线
+  if 0==inPrice or 0 == stopPrice:
+    return False # 坏数据
+
+  outDay = ''
+  outPrice = 0
+  holdDays = 0
+  minPrice = 9999
+  maxPrice = 0
+
+  for day in dayList:
+    holdDays +=1
+    minP = parser.getMinPriceOfDay(res,day)
+    maxP = parser.getMaxPriceOfDay(res,day)
+    endP = parser.getEndPriceOfDay(res,day)
+    # if endP == 0 or maxP ==0 or minP==0:
+      # outPrice = 0
+      # break
+    if maxP > maxPrice:
+      maxPrice = maxP
+    if minP < minPrice:
+      minPrice = minP
+    if maxP < stopPrice: # 最高价低于底线（进入下一个箱体）
+      outPrice = endP # 尾盘走
+      outDay = day
+      break
+
+  
+  if outPrice == 0:
+    outPrice = parser.getEndPriceOfDay(res,dayList[-1])  # 默认按到期后的收盘价为卖出价
+    outDay = dayList[-1]
+    if outPrice == 0:
+      return False
+
+  ret = {}
+  ret['id'] = id
+  ret['name'] = Tools.getNameById(id)
+  ret['inPrice'] = inPrice
+  ret['outDay'] = outDay
+  ret['outPrice'] = outPrice
+  ret['holdDays'] = holdDays
+  ret['minPrice'] = minPrice
+  ret['maxPrice'] = maxPrice
+  return ret
 
 
 

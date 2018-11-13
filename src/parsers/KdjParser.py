@@ -453,7 +453,7 @@ class KdjParser(BaseParser):
 
     d = float(dataOfDays[dayList[-1]][1])
     # d低于某个值
-    if d > 5:
+    if d > 20:
       return False
 
     return True

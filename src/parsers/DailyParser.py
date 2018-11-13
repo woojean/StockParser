@@ -102,18 +102,18 @@ class DailyParser(BaseParser):
 
     ###############################################################
     # 阳线
-    if endPrice <= startPrice:
-      return False
+    # if endPrice <= startPrice:
+    #   return False
 
     # 最高价位于ma之下
     if maxPrice >= ma:
       return False
 
-    # 向上波幅 大于n%
-    minP = min(endPriceOfLastDay,minPrice)  # 取昨日收盘价和今日最低价中的最小值
-    r = (maxPrice - minP)/minP
-    if (r < 0.05):
-      return False
+    # 振幅大于n%
+    # minP = minPrice  # 取昨日收盘价和今日最低价中的最小值
+    # r = (maxPrice - minP)/minP
+    # if (r < 0.05):
+    #   return False
 
 
     return True

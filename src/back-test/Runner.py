@@ -96,9 +96,9 @@ if __name__ == '__main__':
   print cmd
   os.system(cmd)
 
-  cmd = 'python '+ rootPath + '/src/back-test/Reporter-'+parser+'.py'
-  print cmd
-  os.system(cmd)
+  # cmd = 'python '+ rootPath + '/src/back-test/Reporter-'+parser+'.py'
+  # print cmd
+  # os.system(cmd)
 
 
 

@@ -32,10 +32,27 @@ NUM_ICON = {
 }
 
 def getParams():
-  parseDay = time.strftime('%Y-%m-%d',time.localtime(time.time())) if (len(sys.argv) <= 1) else sys.argv[1]
-  isNew = False if (len(sys.argv) <= 2) else ('new' ==sys.argv[2])
-  traceDay = '' if (len(sys.argv) <= 3) else sys.argv[3]
+  isNew = False
+  parseDay = ''
+  traceDay = ''
+
+  dayList = []
+
+  for item in sys.argv:
+    if 'new' == item:
+      isNew = True
+    if 10 == len(item):
+      dayList.append(item)
+
+  if len(dayList) < 1:
+    parseDay = time.strftime('%Y-%m-%d',time.localtime(time.time())) 
+  elif len(dayList) < 2:
+    parseDay = dayList[0]
+  else:
+    parseDay = min(dayList[0],dayList[1])
+    traceDay = max(dayList[0],dayList[1])
   return (parseDay, isNew,traceDay)
+
 
 def getLinkById(id):
   link = '#'

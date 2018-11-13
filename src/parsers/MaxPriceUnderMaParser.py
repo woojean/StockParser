@@ -54,9 +54,11 @@ class MaxPriceUnderMaParser(BaseParser):
       except Exception, e:
         pass
         print repr(e)
-        
-      # 根据打分结果过滤
-      # idList = self.calcuR(idList,1)
+      
+    print idList
+
+    # 根据打分结果过滤
+    idList = self.calcuR(idList,5)
 
     if isDump:
       self.dumpIdList(idList)
@@ -140,15 +142,65 @@ class MaxPriceUnderMaParser(BaseParser):
       return True
     return False
   
-  def calcuR1(self,idList,num):
-    maDays = 10  # 均线
+  # def calcuR1(self,idList,num):
+  #   maDays = 10  # 均线
+  #   vList = []
+  #   for id in idList:
+  #     score = KdjParser.getD(parseDay,id)
+  #     vList.append((id,score))
+
+  #   # 排序
+  #   sList = sorted(vList,key=lambda x: x[1]) 
+  #   print "sorted list:"
+  #   print sList
+  #   selectedList = sList[:num]
+
+  #   print "\nselected list:"
+  #   print selectedList
+  #   l = []
+  #   for item in selectedList:
+  #     l.append(item[0])
+  #   return l
+
+
+  # 量比倒序
+  # def calcuR(self,idList,num):
+  #   vList = []
+  #   for id in idList:
+  #     path = Tools.getPriceDirPath()+'/'+str(id)
+  #     res = open(path,'r').read()
+  #     score = self.getVolumeRatioOfDays(res,parseDay,5)
+  #     vList.append((id,score))
+
+  #   # 排序
+  #   sList = sorted(vList,key=lambda x: -x[1]) 
+  #   print "sorted list:"
+  #   print sList
+  #   selectedList = sList[:num]
+
+  #   print "\nselected list:"
+  #   print selectedList
+  #   l = []
+  #   for item in selectedList:
+  #     l.append(item[0])
+  #   return l
+
+  # 振幅
+  def calcuR(self,idList,num):
     vList = []
     for id in idList:
-      score = KdjParser.getD(parseDay,id)
+      path = Tools.getPriceDirPath()+'/'+str(id)
+      res = open(path,'r').read()
+
+      minPrice = self.getMinPriceOfDay(res,parseDay)
+      maxPrice = self.getMaxPriceOfDay(res,parseDay)
+      minP = minPrice
+      score = (maxPrice - minP)/minP
+
       vList.append((id,score))
 
     # 排序
-    sList = sorted(vList,key=lambda x: x[1]) 
+    sList = sorted(vList,key=lambda x: -x[1]) 
     print "sorted list:"
     print sList
     selectedList = sList[:num]
@@ -191,17 +243,46 @@ class MaxPriceUnderMaParser(BaseParser):
     if maxPrice >= ma:
       return False
 
+    # 光头
+    # if endPrice < maxPrice:
+      # return False
+
+    # 量为n日最高
+    # if not self.isMaxVolumeOfDays(res,parseDay,5):
+    #   return False
+
+    # 量为n日最低
+    # if not self.isMinVolumeOfDays(res,parseDay,5):
+    #  return False
+   
+
+    # 振幅大于n%
+    # minP = minPrice
+    # r = (maxPrice - minP)/minP
+    # if (r < 0.05):
+    #   return False
+
+
     # 向上波幅 大于n%
-    minP = min(endPriceOfLastDay,minPrice)  # 取昨日收盘价和今日最低价中的最小值
-    r = (maxPrice - minP)/minP
-    if (r < 0.05):
-      return False
+    # minP = min(endPriceOfLastDay,minPrice)  # 取昨日收盘价和今日最低价中的最小值
+    # r = (maxPrice - minP)/minP
+    # if (r < 0.05):
+    #   return False
 
 
     # 排除SLOWKD近3日有死叉
     # if KdjParser.haveDeathCross(parseDay,id,4,5):
     #   return False
 
+    # 流通值小于100亿
+    # cr = self.getChangeRateOfDay(res,parseDay)
+    # amout = self.getDealAmount(res,parseDay)
+    # marketValue = amout/cr
+    # marketValue = marketValue/100000000.0
+    # # print id,marketValue
+    # if marketValue>100.0:
+    #   print 'Tooooooo big'
+    #   return False
 
     # D低于20
     # if not KdjParser.isDLow(parseDay,id):
@@ -214,7 +295,7 @@ class MaxPriceUnderMaParser(BaseParser):
 
     # D底部反转
     # if not KdjParser.isDBottomReversal(parseDay,id):
-      # return False
+    #   return False
 
     # BIAS为负
     # if not BiasParser.isBiasNegative(parseDay,id):
@@ -222,7 +303,7 @@ class MaxPriceUnderMaParser(BaseParser):
 
     # 前一日BIAS新低
     # if not BiasParser.isBiasMinOfDays(dayList[-2],20,id):
-    #   return False
+      # return False
 
 
     return True
