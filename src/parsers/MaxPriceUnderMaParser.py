@@ -30,40 +30,40 @@ class MaxPriceUnderMaParser(BaseParser):
     BaseParser.__init__(self,parseDay) 
   
 
-  def getParseResult(self,isDump=False):
-    print '***************************************************************************'
-    print 'In custom mode'
-    print '***************************************************************************'
-    idFile = '555/'+self._parseDay+'-MaxPriceUnderMaParser.sel'
-    allIdList = Tools.getIdListOfFile(idFile)
-    idList = []
-    num = 0
-    parsedNum = 0
-    total = len(allIdList)
-    for id in allIdList:
-      try:
-        self.printProcess(parsedNum,total)
-        f = Tools.getPriceDirPath()+'/'+id
-        res = open(f,'r').read()
-        ret = self.parse(res,self._parseDay,id)
-        if ret:
-          idList.append(id)
-          num += 1
-          print str(num) + ' ↗'
-        parsedNum += 1
-      except Exception, e:
-        pass
-        print repr(e)
+  # def getParseResult(self,isDump=False):
+  #   print '***************************************************************************'
+  #   print 'In custom mode'
+  #   print '***************************************************************************'
+  #   idFile = '555/'+self._parseDay+'-MaxPriceUnderMaParser.sel'
+  #   allIdList = Tools.getIdListOfFile(idFile)
+  #   idList = []
+  #   num = 0
+  #   parsedNum = 0
+  #   total = len(allIdList)
+  #   for id in allIdList:
+  #     try:
+  #       self.printProcess(parsedNum,total)
+  #       f = Tools.getPriceDirPath()+'/'+id
+  #       res = open(f,'r').read()
+  #       ret = self.parse(res,self._parseDay,id)
+  #       if ret:
+  #         idList.append(id)
+  #         num += 1
+  #         print str(num) + ' ↗'
+  #       parsedNum += 1
+  #     except Exception, e:
+  #       pass
+  #       print repr(e)
       
-    print idList
+  #   print idList
 
-    # 根据打分结果过滤
-    idList = self.calcuR(idList,5)
+  #   # 根据打分结果过滤
+  #   # idList = self.calcuR(idList,3)
 
-    if isDump:
-      self.dumpIdList(idList)
+  #   if isDump:
+  #     self.dumpIdList(idList)
 
-    return idList
+  #   return idList
 
 
   def isMaxPriceUnderMa(self,res,day,days):
@@ -141,35 +141,53 @@ class MaxPriceUnderMaParser(BaseParser):
     if r > 0.33:
       return True
     return False
-  
-  # def calcuR1(self,idList,num):
-  #   maDays = 10  # 均线
-  #   vList = []
-  #   for id in idList:
-  #     score = KdjParser.getD(parseDay,id)
-  #     vList.append((id,score))
-
-  #   # 排序
-  #   sList = sorted(vList,key=lambda x: x[1]) 
-  #   print "sorted list:"
-  #   print sList
-  #   selectedList = sList[:num]
-
-  #   print "\nselected list:"
-  #   print selectedList
-  #   l = []
-  #   for item in selectedList:
-  #     l.append(item[0])
-  #   return l
 
 
-  # 量比倒序
+  def isLongDownLine(self,res,parseDay):
+    startPrice = self.getStartPriceOfDay(res,parseDay)
+    endPrice = self.getEndPriceOfDay(res,parseDay)
+    minPrice = self.getMinPriceOfDay(res,parseDay)
+    maxPrice = self.getMaxPriceOfDay(res,parseDay)
+    totalLine = maxPrice - minPrice
+    downLine = min(startPrice,endPrice) - minPrice
+    if totalLine == 0 :
+      return False
+    r = downLine/totalLine
+    if r < 0.5:
+      return False
+    return True
+
+
+
   # def calcuR(self,idList,num):
   #   vList = []
   #   for id in idList:
   #     path = Tools.getPriceDirPath()+'/'+str(id)
   #     res = open(path,'r').read()
-  #     score = self.getVolumeRatioOfDays(res,parseDay,5)
+
+  #     # 振幅
+  #     minPrice = self.getMinPriceOfDay(res,parseDay)
+  #     maxPrice = self.getMaxPriceOfDay(res,parseDay)
+  #     minP = minPrice
+  #     score = (maxPrice - minP)/minP
+
+  #     # 换手率
+  #     # score = self.getChangeRateOfDay(res,parseDay)
+
+  #     # 5日量比
+  #     # dayList = BaseParser.getPastTradingDayList(parseDay,5)
+  #     # mv5 = self.getMv(res,dayList)
+  #     # v = self.getVolumeOfDay(res,parseDay)
+  #     # score = v/mv5
+
+  #     # 市值最小
+  #     # cr = self.getChangeRateOfDay(res,parseDay)
+  #     # amout = self.getDealAmount(res,parseDay)
+  #     # marketValue = amout/cr
+  #     # marketValue = marketValue/100000000.0
+  #     # score = marketValue
+
+
   #     vList.append((id,score))
 
   #   # 排序
@@ -185,39 +203,13 @@ class MaxPriceUnderMaParser(BaseParser):
   #     l.append(item[0])
   #   return l
 
-  # 振幅
-  def calcuR(self,idList,num):
-    vList = []
-    for id in idList:
-      path = Tools.getPriceDirPath()+'/'+str(id)
-      res = open(path,'r').read()
-
-      minPrice = self.getMinPriceOfDay(res,parseDay)
-      maxPrice = self.getMaxPriceOfDay(res,parseDay)
-      minP = minPrice
-      score = (maxPrice - minP)/minP
-
-      vList.append((id,score))
-
-    # 排序
-    sList = sorted(vList,key=lambda x: -x[1]) 
-    print "sorted list:"
-    print sList
-    selectedList = sList[:num]
-
-    print "\nselected list:"
-    print selectedList
-    l = []
-    for item in selectedList:
-      l.append(item[0])
-    return l
-
 
 
   def parse(self,res,parseDay,id=''):
     # 取参
     dayList = BaseParser.getPastTradingDayList(parseDay,5) # 5日线
-    (v,v,ma) = self.getMAPrice(res,dayList)
+    lastDay = dayList[-2]
+    # (v,v,ma5) = self.getMAPrice(res,dayList)
     startPrice = self.getStartPriceOfDay(res,parseDay)
     endPrice = self.getEndPriceOfDay(res,parseDay)
     minPrice = self.getMinPriceOfDay(res,parseDay)
@@ -230,8 +222,8 @@ class MaxPriceUnderMaParser(BaseParser):
     # 参数校验
     if startPrice ==0 or endPrice ==0 or minPrice ==0 or maxPrice ==0:
       return False
-    if ma < 0:
-      return False
+    # if ma5 < 0:
+    #   return False
 
     ###############################################################
 
@@ -240,8 +232,53 @@ class MaxPriceUnderMaParser(BaseParser):
       return False
 
     # 最高价位于ma之下
-    if maxPrice >= ma:
-      return False
+    # if maxPrice >= ma5:
+    #   return False
+
+    # 量在5日均量线上
+    # mv5 = self.getMv(res,dayList)
+    # if mv5 == -1:
+    #   return False
+    # v = self.getVolumeOfDay(res,parseDay)
+    # if v < mv5:
+    #   return False
+
+
+    
+    # 近3日有向下跳空缺口
+    # cDayList = BaseParser.getPastTradingDayList(parseDay,3)
+    # haveDownwardGap = False
+    # for day in cDayList:
+    #   if self.isDownwardGap(res,day):
+    #     haveDownwardGap = True
+    #     break
+    # if not haveDownwardGap:
+    #   return False
+
+
+    # 不搭在60日线上
+    # onMa60 = False
+    # onMa250 = False
+    # maDayList = BaseParser.getPastTradingDayList(parseDay,60) 
+    # (v,v,ma60) = self.getMAPrice(res,maDayList)
+    # if (minPrice <= ma60) and (maxPrice >= ma60):
+    #   onMa60 = True
+    
+
+    # # 不搭在250日线上
+    # maDayList = BaseParser.getPastTradingDayList(parseDay,250) 
+    # (v,v,ma250) = self.getMAPrice(res,maDayList)
+    # if (minPrice <= ma250) and (maxPrice >= ma250):
+    #   onMa250 = True
+
+    # if (not onMa60) and (not onMa250):
+    #   return False
+
+
+    # 大长腿
+    # if not self.isLongDownLine(res,parseDay):
+      # return False
+
 
     # 光头
     # if endPrice < maxPrice:
@@ -257,10 +294,10 @@ class MaxPriceUnderMaParser(BaseParser):
    
 
     # 振幅大于n%
-    # minP = minPrice
-    # r = (maxPrice - minP)/minP
-    # if (r < 0.05):
-    #   return False
+    minP = minPrice
+    r = (maxPrice - minP)/minP
+    if (r < 0.07):
+      return False
 
 
     # 向上波幅 大于n%
@@ -286,7 +323,7 @@ class MaxPriceUnderMaParser(BaseParser):
 
     # D低于20
     # if not KdjParser.isDLow(parseDay,id):
-      # return False
+    #   return False
 
     # 剔除ST
     # name = Tools.getNameById(id)
@@ -305,6 +342,23 @@ class MaxPriceUnderMaParser(BaseParser):
     # if not BiasParser.isBiasMinOfDays(dayList[-2],20,id):
       # return False
 
+    
+    #######################################################################
+    # 昨日是5日线下阳线
+    # startPriceOfLastDay = self.getStartPriceOfDay(res,lastDay)
+    # endPriceOfLastDay = self.getEndPriceOfDay(res,lastDay)
+    # minPriceOfLastDay = self.getMinPriceOfDay(res,lastDay)
+    # maxPriceOfLastDay = self.getMaxPriceOfDay(res,lastDay)
+    # if endPriceOfLastDay <= startPriceOfLastDay:
+    #   return False
+    # dayListOfLastDay = BaseParser.getPastTradingDayList(lastDay,5) 
+    # (v,v,maOfLastDay) = self.getMAPrice(res,dayListOfLastDay)
+    # if maxPriceOfLastDay >= maOfLastDay:
+    #   return False
+
+    # # 当日阴线
+    # if endPrice >= startPrice:
+    #   return False
 
     return True
 

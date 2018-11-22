@@ -408,7 +408,7 @@ class KdjParser(BaseParser):
       res = open(path,'r').read()
       if len(res) < 50:
         return 100 # 交由人工判断
-      dayList = BaseParser.getPastTradingDayList(parseDay,10)
+      dayList = [parseDay]
       kdjList = eval(res[26:-1])
       dataOfDays = {}
       for item in kdjList:
@@ -427,6 +427,7 @@ class KdjParser(BaseParser):
     # D在指定值之下
     d = float(dataOfDays[parseDay][1])
     return d
+
 
   @staticmethod
   def isDLow(parseDay,id):
@@ -533,37 +534,7 @@ class KdjParser(BaseParser):
 
 
 
-
-  @staticmethod
-  def isKdj(parseDay,id):
-    path = Tools.getKdjDataPath()+'/' +id
-    res = open(path,'r').read()
-    dayList = BaseParser.getPastTradingDayList(parseDay,2)
-    kdjList = eval(res[26:-1])
-    dataOfDays = {}
-    for item in kdjList:
-      for d in dayList:
-        if d == item['time']:
-          dataOfDays[d] = eval(item['kdj'])
-
-    # 数据错误，当做未金叉处理
-    if (len(dataOfDays)<1) or (len(dayList) != len(dataOfDays)):  
-      return False
-
-    # D在20之下
-    # dayLimit = 20
-    # d = float(dataOfDays[dayList[-1]][1])
-    # if d > dayLimit or d < 1:  # d大于20，或d数据错误
-    #   return False
-
-    k1 = float(dataOfDays[dayList[-2]][0])
-    k2 = float(dataOfDays[dayList[-1]][0])
-    d = float(dataOfDays[dayList[-1]][1])
-
-    if not((k1 < d) and (k2 > d)):
-      return False
-
-    return True
+  
 
   
   
@@ -832,6 +803,101 @@ class KdjParser(BaseParser):
       return False
 
     print wd1,maWD1,wd2,maWD2
+
+    return True
+
+
+  
+  @staticmethod
+  def isDDeclineDeceleration(parseDay,id):
+    path = Tools.getKdjDataPath()+'/' +id
+    try:
+      res = open(path,'r').read()
+      if len(res) < 50:
+        return False # 交由人工判断
+      dayList = BaseParser.getPastTradingDayList(parseDay,3)
+      kdjList = eval(res[26:-1])
+      dataOfDays = {}
+      for item in kdjList:
+        for d in dayList:
+          if d == item['time']:
+            dataOfDays[d] = eval(item['kdj'])
+    except Exception, e:
+      pass
+      # print repr(e)
+      return False
+
+    # 数据错误，人工判断
+    if (len(dataOfDays)<1) or (len(dayList) != len(dataOfDays)):  
+      return False
+
+    d1 = float(dataOfDays[dayList[-3]][1])
+    d2 = float(dataOfDays[dayList[-2]][1])
+    d3 = float(dataOfDays[dayList[-1]][1])
+    
+
+    # D位置
+    # if d2 <= 70:
+    if d2 >= 10:
+      return False
+    
+
+    if not ((d2<d1) and (d2<d3)):
+      return False
+
+    return True
+
+  
+  # =====================================================================================================
+  # APIs
+  # =====================================================================================================
+  @staticmethod
+  def getKDJData(parseDay,id,days):
+    path = Tools.getKdjDataPath()+'/' +id
+    try:
+      res = open(path,'r').read()
+      if len(res) < 50:
+        return False 
+      dayList = BaseParser.getPastTradingDayList(parseDay,days)
+      kdjList = eval(res[26:-1])
+      dataOfDays = {}
+      for item in kdjList:
+        for d in dayList:
+          if d == item['time']:
+            dataOfDays[d] = eval(item['kdj'])
+    except Exception, e:
+      # pass
+      # print repr(e)
+      return False
+
+    # 数据错误，当做无死叉，人工判断
+    if (len(dataOfDays)<1) or (len(dayList) != len(dataOfDays)):  
+      return False
+    return dataOfDays
+
+
+
+  # KD金叉
+  @staticmethod
+  def isKdGoldCross(parseDay,id):
+    days = 2
+    dayList = BaseParser.getPastTradingDayList(parseDay,days)
+    dataOfDays = KdjParser.getKDJData(parseDay,id,days)
+    if False == dataOfDays:
+      return False
+
+    # D在20之下
+    # dayLimit = 20
+    # d = float(dataOfDays[dayList[-1]][1])
+    # if d > dayLimit or d < 1:  # d大于20，或d数据错误
+    #   return False
+   
+    k1 = float(dataOfDays[dayList[-2]][0])
+    k2 = float(dataOfDays[dayList[-1]][0])
+    d = float(dataOfDays[dayList[-1]][1])
+    
+    if not((k1 < d) and (k2 > d)):
+      return False
 
     return True
 

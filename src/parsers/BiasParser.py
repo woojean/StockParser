@@ -202,7 +202,7 @@ class BiasParser(BaseParser):
     try:
       res = open(path,'r').read()
       if len(res) < 50:
-        return True # 交由人工判断
+        return False # 交由人工判断
 
       dayList = BaseParser.getPastTradingDayList(parseDay,2)
       biasList = eval(res[26:-1])
@@ -214,12 +214,12 @@ class BiasParser(BaseParser):
     except Exception, e:
       pass
       # print repr(e)
-      return True
+      return False
 
     # 坏数据：个股交易日未必连续        
     if (len(dataOfDays)<1) or (len(dayList) != len(dataOfDays)):
       # print 'len(dataOfDays)<1) or (len(dayList) != len(dataOfDays)'
-      return True  # 交由人工判断
+      return False  # 交由人工判断
 
 
     # bias n日最低
@@ -231,6 +231,9 @@ class BiasParser(BaseParser):
       return False
 
     return True
+
+
+
 
 
   def parse(self,res,parseDay,id):

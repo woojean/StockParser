@@ -31,18 +31,17 @@ class UpwardGapParser(BaseParser):
     BaseParser.__init__(self,parseDay) 
   
 
-  def isUpwardLimit(self,res,day1,day2):
-    endPrice1 = self.getEndPriceOfDay(res,day1)
-    endPrice2 = self.getEndPriceOfDay(res,day2)
-    if endPrice1 == 0 or endPrice2 ==0:
+  def isUpwardLimit(self,res,parseDay):
+    dayList = BaseParser.getPastTradingDayList(parseDay,2)
+    endPrice1 = self.getEndPriceOfDay(res,dayList[-2])
+    endPrice2 = self.getEndPriceOfDay(res,dayList[-1])
+    if endPrice1 == 0 or  endPrice2 == 0:
       return False
+    r = (endPrice2 - endPrice1)/endPrice1
+    if r < 0.095:
+      return False
+    return True
 
-    rate = (endPrice2 - endPrice1)/endPrice1
-    # if rate > 0.099:
-    if rate > 0.09:
-      return True
-    else:
-      return False
 
   def isRgbBear(self,res,day):
     R = 5
@@ -84,20 +83,23 @@ class UpwardGapParser(BaseParser):
     if minPrice2 <= maxPrice1:
       return False
 
+    # 非涨停
+    if self.isUpwardLimit(res,parseDay):
+      return False
 
     # # 剔除近5日内有过涨停板（涨幅大于9.5%），因为需要“沉闷”的行情
     # # =================================================
-    # uLcDayList = self.getPastTradingDayList(parseDay,11)
+    # uLcDayList = self.getPastTradingDayList(parseDay,5)
     # l = len(uLcDayList)
     # for i in xrange(0,l-1):
     #   if self.isUpwardLimit(res,uLcDayList[i],uLcDayList[i+1]):
     #     return False
 
-    # # 剔除ST
+    # # 剔除ST，ST的涨停不一样
     # # =================================================
-    # name = Tools.getNameById(id)
-    # if 'ST' in name:
-    #   return False
+    name = Tools.getNameById(id)
+    if 'ST' in name:
+      return False
 
 
     # # 剔除上引线长度超过总线长度3/4

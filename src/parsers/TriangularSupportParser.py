@@ -42,8 +42,8 @@ class TriangularSupportParser(BaseParser):
     if not ((ma5 > ma20) and (ma20 > ma10)):
       return False
 
-    if abs(ma20-ma5) < abs(ma20-ma10):
-      return False
+    # if abs(ma20-ma5) < abs(ma20-ma10):
+    #   return False
 
     dayList = BaseParser.getPastTradingDayList(parseDay,2)
     parseDay = dayList[0]

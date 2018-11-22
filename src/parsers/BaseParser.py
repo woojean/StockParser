@@ -533,7 +533,20 @@ class BaseParser:
     lastDayEndPrice = self.getEndPriceOfDay(res,dayList[-1])
     return (lastDayStartPrice,lastDayEndPrice,maPrice)
 
+
+  def getMv(self,res,dayList):
+    days = len(dayList)
+    sumV = 0.0
+    for day in dayList:
+      v = self.getVolumeOfDay(res,day)
+      if v == 0: # 错误数据（交易日不连贯）
+        sumV = -1
+        break  # 非周末的节假日
+      sumV += v
+    mv = sumV / days
+    return mv
   
+
   def isRgb(self,id,parseDay):
     path = Tools.getPriceDirPath()+'/'+str(id)
     res = open(path,'r').read()
@@ -606,7 +619,7 @@ class BaseParser:
         parsedNum += 1
       except Exception, e:
         pass
-        print repr(e)
+        # print repr(e)
 
     # 根据打分结果过滤
     idList = self.calcuR(idList,1)

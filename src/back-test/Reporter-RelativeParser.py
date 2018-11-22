@@ -23,6 +23,54 @@ from parsers import BaseParser
 买入日 代码 名称 买入价 卖出价 收益率
 '''
 
+
+
+def fillGr(d,v):
+  if v < -0.2:
+    d['A[,-20%)'] += 1
+  elif -0.2 <= v < -0.18:
+    d['B[-20%,-18%)'] += 1
+  elif -0.18 <= v < -0.16:
+    d['C[-18%,-16%)'] += 1
+  elif -0.16 <= v < -0.14:
+    d['D[-16%,-14%)'] += 1
+  elif -0.14 <= v < -0.12:
+    d['E[-14%,-12%)'] += 1
+  elif -0.12 <= v < -0.10:
+    d['F[-12%,-10%)'] += 1
+  elif -0.1 <= v < -0.08:
+    d['G[-10%,-8%)'] += 1
+  elif -0.08 <= v < -0.06:
+    d['H[-8%,-6%)'] += 1
+  elif -0.06 <= v < -0.04:
+    d['I[-6%,-4%)'] += 1
+  elif -0.04 <= v < -0.02:
+    d['J[-4%,-2%)'] += 1
+  elif -0.02 <= v < 0:
+    d['K[-2%,0%)'] += 1
+  elif 0 <= v < 0.02:
+    d['L[0%,2%)'] += 1
+  elif 0.02 <= v < 0.04:
+    d['M[2%,4%)'] += 1
+  elif 0.04 <= v < 0.06:
+    d['N[4%,6%)'] += 1
+  elif 0.06 <= v < 0.08:
+    d['O[6%,8%)'] += 1
+  elif 0.08 <= v < 0.1:
+    d['P[8%,10%)'] += 1
+  elif 0.1 <= v < 0.12:
+    d['Q[10%,12%)'] += 1
+  elif 0.12 <= v < 0.14:
+    d['R[12%,14%)'] += 1
+  elif 0.14 <= v < 0.16:
+    d['S[14%,16%)'] += 1
+  elif 0.16 <= v < 0.18:
+    d['T[16%,18%)'] += 1
+  elif 0.18 <= v < 0.2:
+    d['U[18%,20%)'] += 1
+  elif 0.2 <= v:
+    d['V[20%,)'] += 1
+
 if __name__ == '__main__':
   s = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />'
   s += '''
@@ -91,6 +139,7 @@ table {
   endDate = data[-1]['parseDay'] 
   
   totalDays = 0
+  totalTradeDays = 0
 
   totalTradeNum = 0  # 交易总数
   totalGrowthRate = 0 # 总收益率（总盈利 + 总亏损）
@@ -102,6 +151,55 @@ table {
   totalLoseRate = 0  # 总亏损
   
   totalDayAvgGrowthRate = 0
+
+  minMap = {
+    'A[,-20%)':0,
+    'B[-20%,-18%)':0,
+    'C[-18%,-16%)':0,
+    'D[-16%,-14%)':0,
+    'E[-14%,-12%)':0,
+    'F[-12%,-10%)':0,
+    'G[-10%,-8%)':0,
+    'H[-8%,-6%)':0,
+    'I[-6%,-4%)':0,
+    'J[-4%,-2%)':0,
+    'K[-2%,0%)':0,
+    'L[0%,2%)':0,
+    'M[2%,4%)':0,
+    'N[4%,6%)':0,
+    'O[6%,8%)':0,
+    'P[8%,10%)':0,
+    'Q[10%,12%)':0,
+    'R[12%,14%)':0,
+    'S[14%,16%)':0,
+    'T[16%,18%)':0,
+    'U[18%,20%)':0,
+    'V[20%,)':0
+  }
+  maxMap = {
+    'A[,-20%)':0,
+    'B[-20%,-18%)':0,
+    'C[-18%,-16%)':0,
+    'D[-16%,-14%)':0,
+    'E[-14%,-12%)':0,
+    'F[-12%,-10%)':0,
+    'G[-10%,-8%)':0,
+    'H[-8%,-6%)':0,
+    'I[-6%,-4%)':0,
+    'J[-4%,-2%)':0,
+    'K[-2%,0%)':0,
+    'L[0%,2%)':0,
+    'M[2%,4%)':0,
+    'N[4%,6%)':0,
+    'O[6%,8%)':0,
+    'P[8%,10%)':0,
+    'Q[10%,12%)':0,
+    'R[12%,14%)':0,
+    'S[14%,16%)':0,
+    'T[16%,18%)':0,
+    'U[18%,20%)':0,
+    'V[20%,)':0
+  }
 
   tables = ''
   for item in data: # 按天遍历
@@ -163,6 +261,9 @@ table {
       minGr = (float(i['minPrice']) - inPrice)/inPrice
       maxGr = (float(i['maxPrice']) - inPrice)/inPrice
 
+      fillGr(minMap,minGr)
+      fillGr(maxMap,maxGr)
+
       tables += '<tr>'
       tables += '<td class="al">'+str(parseDay)+'</td>'
       tables += '<td class="al">'+str(i['id'])+'</td>'
@@ -171,7 +272,6 @@ table {
       tables += '<td class="al">'+str(i['outDay'])+'</td>'
       tables += '<td class="al">'+str(i['outPrice'])+'</td>'
       tables += '<td class="al">'+str(i['holdDays'])+'</td>'
-      
       tables += '<td class="al">'+str(i['minPrice'])+'</td>'
       tables += '<td class="al">'+str(i['maxPrice'])+'</td>'
 
@@ -195,6 +295,7 @@ table {
     tables += '</table>'
     if 0!= dayTotalTradeNum:
       totalDayAvgGrowthRate += dayTotalGrowthRate/dayTotalTradeNum
+      totalTradeDays += 1
 
   #if dayTotalTradeNum!=0: # 若当日无交易，则不参与统计
   #  totalDayAvgGrowthRate += dayTotalGrowthRate/dayTotalTradeNum
@@ -238,14 +339,31 @@ table {
 
   s += '<td class="ar">'+str(round(winTradeAvgGr*100.0,3))+'%</td>'
   s += '<td class="ar">'+str(round(loseTradeAvgGr*100.0,3))+'%</td>'
-  s += '<td class="ar">'+str(round(totalDayAvgGrowthRate*100.0/totalDays,3))+'%</td>'
+  s += '<td class="ar">'+str(round(totalDayAvgGrowthRate*100.0/totalTradeDays,3))+'%</td>'
   s += '<td class="ar">'+str(round(totalGrowthRate*100.0/totalTradeNum,3))+'%</td>'
   s += '</tr>'
   s += '</table>'
-  # ================================================================================
-  
 
-  s += tables
+
+
+  # ================================================================================
+  countTable = '<table>'
+  for k,v in minMap.items():
+    countTable += '<tr>'
+    countTable += '<td>' + str(k) + '</td><td>' + str(v) + '</td>'
+    countTable += '</tr>'
+  countTable += '</table>'
+  
+  countTable += '<table>'
+  for k,v in maxMap.items():
+    countTable += '<tr>'
+    countTable += '<td>' + str(k) + '</td><td>' + str(v) + '</td>'
+    countTable += '</tr>'
+  countTable += '</table>'
+  
+  s += countTable
+
+  # s += tables
 
   s += '</body></html>'
   path = Tools.getReportDirPath()+'/trace-report.html'

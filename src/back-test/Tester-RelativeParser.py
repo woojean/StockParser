@@ -77,7 +77,7 @@ def traceEnterList(f):
 持有N日
 '''
 def trace(id,parseDay):
-  N = 2
+  N = 20
   print id,parseDay
   parser = RelativeParser.RelativeParser(parseDay,id)
   priceFile = Tools.getPriceDirPath()+'/'+str(id)
@@ -85,7 +85,7 @@ def trace(id,parseDay):
   
   dayList = parser.getNextTradingDayList(parseDay,N) # 
   inDay = dayList[0]
-  inPrice = parser.getStartPriceOfDay(res,inDay)  # 买入价为板后第一天的开盘价
+  inPrice = parser.getStartPriceOfDay(res,inDay)  # 开盘价买入
   if 0==inPrice:
     return False # 坏数据
 
@@ -116,179 +116,6 @@ def trace(id,parseDay):
   return ret
 
 
-'''
-1日止损
-'''
-def trace1(id,parseDay):
-  print id,parseDay
-  parser = RelativeParser.RelativeParser(parseDay,id)
-  priceFile = Tools.getPriceDirPath()+'/'+str(id)
-  res = open(priceFile,'r').read()
-  
-  dayList = parser.getNextTradingDayList(parseDay,20) # 
-  inDay = dayList[0]
-  inPrice = parser.getStartPriceOfDay(res,inDay)  # 买入价为板后第一天的开盘价
-  if 0==inPrice:
-    return False # 坏数据
-
-  stopPrice = parser.getMinPriceOfDay(res,inDay) # 买入当天最低价做止损价
-  outPrice = 0 
-  dayList = dayList[1:]
-  holdDays = 0
-  for day in dayList:
-    holdDays +=1
-    minPrice = parser.getMinPriceOfDay(res,day)
-    if minPrice == 0:
-      outPrice = 0
-      break
-    if minPrice < stopPrice:
-      outPrice = stopPrice
-      outDay = day
-      break
-    else:
-      stopPrice = minPrice
-      
-  if outPrice == 0:
-    return False
-
-
-  ret = {}
-  ret['id'] = id
-  ret['name'] = Tools.getNameById(id)
-  ret['inPrice'] = inPrice
-  ret['outDay'] = outDay
-  ret['outPrice'] = outPrice
-  ret['holdDays'] = holdDays
-  ret['minPrice'] = 0
-  ret['maxPrice'] = 0
-  return ret
-
-
-
-
-'''
-2日止损
-'''
-def trace2(id,parseDay):
-  print id,parseDay
-  parser = RelativeParser.RelativeParser(parseDay,id)
-  priceFile = Tools.getPriceDirPath()+'/'+str(id)
-  res = open(priceFile,'r').read()
-  
-  dayList = parser.getNextTradingDayList(parseDay,50) # 
-  inDay = dayList[0]
-  inPrice = parser.getStartPriceOfDay(res,inDay)  # 买入价为板后第一天的开盘价
-  if 0==inPrice:
-    return False # 坏数据
-
-  minPriceOfParseDay = parser.getMinPriceOfDay(res,parseDay)
-  minPriceOfInDay = parser.getMinPriceOfDay(res,inDay)
-  stopPrice = min(minPriceOfParseDay,minPriceOfInDay) # 买入当天最低价做止损价
-  outPrice = 0 
-  
-  l = len(dayList)
-  holdDays = 0
-  for i in xrange(1,l):
-    day = dayList[i]
-    minPrice = parser.getMinPriceOfDay(res,day)
-    minPriceLastDay = parser.getMinPriceOfDay(res,dayList[i-1])
-    holdDays +=1
-    if minPrice == 0:
-      outPrice = 0
-      break
-    if minPrice < stopPrice:  # 触发止损
-      outDay = day
-      outPrice = stopPrice
-      break
-    else:  # 未触发止损，上调止损价
-      stopPrice = min(minPriceLastDay,minPrice)
-      
-  if outPrice == 0:
-    return False
-
-
-  ret = {}
-  ret['id'] = id
-  ret['name'] = Tools.getNameById(id)
-  ret['inPrice'] = inPrice
-  ret['outDay'] = outDay
-  ret['outPrice'] = outPrice
-  ret['holdDays'] = holdDays
-  ret['minPrice'] = 0
-  ret['maxPrice'] = 0
-  return ret
-
-
-
-
-'''
-持有5日
-'''
-def trace5(id,parseDay):
-  print id,parseDay
-  parser = RelativeParser.RelativeParser(parseDay,id)
-  priceFile = Tools.getPriceDirPath()+'/'+str(id)
-  res = open(priceFile,'r').read()
-  
-  dayList = parser.getNextTradingDayList(parseDay,5) # 
-  inDay = dayList[0]
-  inPrice = parser.getStartPriceOfDay(res,inDay)  # 买入价为板后第一天的开盘价
-  if 0==inPrice:
-    return False # 坏数据
-
-  outDay = dayList[-1]
-  outPrice = parser.getEndPriceOfDay(res,outDay)
-  if 0==outPrice:
-    return False # 坏数据
-  
-  ret = {}
-  ret['id'] = id
-  ret['name'] = Tools.getNameById(id)
-  ret['inPrice'] = inPrice
-  ret['outDay'] = outDay
-  ret['outPrice'] = outPrice
-  ret['holdDays'] = 5
-  ret['minPrice'] = 0
-  ret['maxPrice'] = 0
-  return ret
-
-
-
-
-'''
-持有10日
-'''
-def trace10(id,parseDay):
-  print id,parseDay
-  parser = RelativeParser.RelativeParser(parseDay,id)
-  priceFile = Tools.getPriceDirPath()+'/'+str(id)
-  res = open(priceFile,'r').read()
-  
-  dayList = parser.getNextTradingDayList(parseDay,10) # 
-  inDay = dayList[0]
-  inPrice = parser.getStartPriceOfDay(res,inDay)  # 买入价为板后第一天的开盘价
-  if 0==inPrice:
-    return False # 坏数据
-
-  outDay = dayList[-1]
-  outPrice = parser.getEndPriceOfDay(res,outDay)
-  if 0==outPrice:
-    return False # 坏数据
-  
-  ret = {}
-  ret['id'] = id
-  ret['name'] = Tools.getNameById(id)
-  ret['inPrice'] = inPrice
-  ret['outDay'] = outDay
-  ret['outPrice'] = outPrice
-  ret['holdDays'] = 10
-  ret['minPrice'] = 0
-  ret['maxPrice'] = 0
-  return ret
-
-
-
-
 
 
 
@@ -308,7 +135,10 @@ if __name__ == '__main__':
   
   path = Tools.getTracerDirPath()+'/trace_report.data'
   open(path,'w').write(str(ret))
-
+  
+  cmd = 'python '+ rootPath + '/src/back-test/Reporter-RelativeParser.py'
+  print cmd
+  os.system(cmd)
   
 
 

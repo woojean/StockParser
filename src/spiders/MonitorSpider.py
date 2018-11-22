@@ -26,7 +26,9 @@ class MonitorSpider(BaseSpider):
 
   def __init__(self,idList=[],threadId=0): 
     BaseSpider.__init__(self,idList,threadId) 
-    
+  
+
+  # http://pdfm.eastmoney.com/EM_UBG_PDTI_Fast/api/js?token=4f1862fc3b5e77c150a2b985b12db0fd&rtntype=6&id=000001&type=m5k&authorityType=fa&cb=jsonp1536580250828
   def genUrl(self,id):
     endTime = str(int(round(time.time() * 1000))) 
     url = 'http://pdfm.eastmoney.com/EM_UBG_PDTI_Fast/api/js?token=4f1862fc3b5e77c150a2b985b12db0fd&rtntype=6&id=$ID$'

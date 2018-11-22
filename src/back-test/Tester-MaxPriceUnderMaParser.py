@@ -155,7 +155,7 @@ def traceO(id,parseDay):
 '''
 限制时间，止损、止盈
 '''
-def traceXXX(id,parseDay):
+def traceZY(id,parseDay):
   print id,parseDay
 
   maxDays = 20 # 最长持股时间
@@ -167,7 +167,8 @@ def traceXXX(id,parseDay):
   
   dayList = parser.getNextTradingDayList(parseDay,maxDays) # 
   inDay = dayList[0]
-  inPrice = parser.getStartPriceOfDay(res,inDay)  # 买入价为信号日后一天的开盘价
+  # inPrice = parser.getStartPriceOfDay(res,inDay)  # 买入价为信号日后一天的开盘价
+  inPrice = parser.getMinPriceOfDay(res,inDay) 
   if 0==inPrice:
     return False # 坏数据
 
@@ -196,7 +197,7 @@ def traceXXX(id,parseDay):
       outDay = day
       break
     
-    #止损
+    # 止损
     # sp = parser.getMinPriceOfDay(res,day) 
     # if sp < stopPrice:
     #   outPrice = stopPrice
@@ -367,7 +368,7 @@ def traceYYY(id,parseDay):
 持有N日
 '''
 def traceN(id,parseDay):
-  N = 5
+  N = 2
   print id,parseDay
   parser = MaxPriceUnderMaParser.MaxPriceUnderMaParser(parseDay,id)
   priceFile = Tools.getPriceDirPath()+'/'+str(id)
@@ -407,56 +408,6 @@ def traceN(id,parseDay):
 
 
 
-'''
-最低价1日止损
-'''
-def trace1(id,parseDay):
-  print id,parseDay
-  parser = MaxPriceUnderMaParser.MaxPriceUnderMaParser(parseDay,id)
-  priceFile = Tools.getPriceDirPath()+'/'+str(id)
-  res = open(priceFile,'r').read()
-  
-  dayList = parser.getNextTradingDayList(parseDay,20) # 
-  inDay = dayList[0]
-  inPrice = parser.getStartPriceOfDay(res,inDay)  # 买入价为板后第一天的开盘价
-  if 0==inPrice:
-    return False # 坏数据
-
-  # 确定止损价
-  sp1 = parser.getMinPriceOfDay(res,parseDay) 
-  sp2 = parser.getMinPriceOfDay(res,inDay) 
-  stopPrice = min(sp1,sp2)
-  
-  outPrice = 0 
-  dayList = dayList[1:]
-  holdDays = 0
-  for day in dayList:
-    holdDays +=1
-    minPrice = parser.getMinPriceOfDay(res,day)
-    if minPrice == 0:
-      outPrice = 0
-      break
-    if minPrice < stopPrice:
-      outPrice = stopPrice
-      outDay = day
-      break
-    else:
-      stopPrice = minPrice
-      
-  if outPrice == 0:
-    return False
-
-
-  ret = {}
-  ret['id'] = id
-  ret['name'] = Tools.getNameById(id)
-  ret['inPrice'] = inPrice
-  ret['outDay'] = outDay
-  ret['outPrice'] = outPrice
-  ret['holdDays'] = holdDays
-  ret['minPrice'] = 0
-  ret['maxPrice'] = 0
-  return ret
 
 
 
@@ -530,6 +481,7 @@ def trace1(id,parseDay):
   dayList = parser.getNextTradingDayList(parseDay,20) # 
   inDay = dayList[0]
   inPrice = parser.getStartPriceOfDay(res,inDay)  # 买入价为板后第一天的开盘价
+  # inPrice = parser.getMinPriceOfDay(res,inDay)  # 
   if 0==inPrice:
     return False # 坏数据
 
@@ -574,7 +526,62 @@ def trace1(id,parseDay):
 
 
 '''
-最高价低于信号日最低价，区间表现统计
+最低价1日止损
+'''
+def trace11(id,parseDay):
+  print id,parseDay
+  parser = MaxPriceUnderMaParser.MaxPriceUnderMaParser(parseDay,id)
+  priceFile = Tools.getPriceDirPath()+'/'+str(id)
+  res = open(priceFile,'r').read()
+  
+  dayList = parser.getNextTradingDayList(parseDay,20) # 
+  inDay = dayList[0]
+  # inPrice = parser.getStartPriceOfDay(res,inDay)  # 买入价为板后第一天的开盘价
+  inPrice = parser.getMinPriceOfDay(res,inDay)  # 买入价为板后第一天的开盘价
+  if 0==inPrice:
+    return False # 坏数据
+
+  # 确定止损价
+  sp1 = parser.getMinPriceOfDay(res,parseDay) 
+  sp2 = parser.getMinPriceOfDay(res,inDay) 
+  stopPrice = min(sp1,sp2)
+  
+  outPrice = 0 
+  dayList = dayList[1:]
+  holdDays = 0
+  for day in dayList:
+    holdDays +=1
+    minPrice = parser.getMinPriceOfDay(res,day)
+    if minPrice == 0:
+      outPrice = 0
+      break
+    if minPrice < stopPrice:
+      outPrice = stopPrice
+      outDay = day
+      break
+    else:
+      stopPrice = minPrice
+      
+  if outPrice == 0:
+    return False
+
+
+  ret = {}
+  ret['id'] = id
+  ret['name'] = Tools.getNameById(id)
+  ret['inPrice'] = inPrice
+  ret['outDay'] = outDay
+  ret['outPrice'] = outPrice
+  ret['holdDays'] = holdDays
+  ret['minPrice'] = 0
+  ret['maxPrice'] = 0
+  return ret
+
+
+
+
+'''
+最高价低于信号日最低价，区间表现统计 ☆
 '''
 def trace(id,parseDay):
   print id,parseDay
@@ -584,7 +591,8 @@ def trace(id,parseDay):
   
   dayList = parser.getNextTradingDayList(parseDay,20) # 
   inDay = dayList[0]
-  inPrice = parser.getStartPriceOfDay(res,inDay)  # 买入价为板后第一天的开盘价
+  inPrice = parser.getStartPriceOfDay(res,inDay)  # 开盘价买入
+  # inPrice = parser.getMinPriceOfDay(res,inDay)  # 最低价买入（理想情况）
   stopPrice = parser.getMinPriceOfDay(res,parseDay) # 信号日（阳线）最低价为底线
   if 0==inPrice or 0 == stopPrice:
     return False # 坏数据
