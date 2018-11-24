@@ -400,33 +400,7 @@ class KdjParser(BaseParser):
 
     return True
 
-  # D上涨
-  @staticmethod
-  def getD(parseDay,id):
-    path = Tools.getKdjDataPath()+'/' +id
-    try:
-      res = open(path,'r').read()
-      if len(res) < 50:
-        return 100 # 交由人工判断
-      dayList = [parseDay]
-      kdjList = eval(res[26:-1])
-      dataOfDays = {}
-      for item in kdjList:
-        for d in dayList:
-          if d == item['time']:
-            dataOfDays[d] = eval(item['kdj'])
-    except Exception, e:
-      pass
-      # print repr(e)
-      return 100
-    
-    # 数据错误
-    if (len(dataOfDays)<1) or (len(dayList) != len(dataOfDays)):  
-      return 100
-
-    # D在指定值之下
-    d = float(dataOfDays[parseDay][1])
-    return d
+  
 
 
   @staticmethod
@@ -900,6 +874,79 @@ class KdjParser(BaseParser):
       return False
 
     return True
+
+
+  # J向上反转
+  @staticmethod
+  def isJUpwardReverse(parseDay,id=''):
+    days = 3
+    dayList = BaseParser.getPastTradingDayList(parseDay,days)
+    dataOfDays = KdjParser.getKDJData(parseDay,id,days)
+    if False == dataOfDays:
+      return False
+
+    j1 = float(dataOfDays[dayList[0]][2])
+    j2 = float(dataOfDays[dayList[1]][2])
+    j3 = float(dataOfDays[dayList[2]][2])
+    if not ( ( j2 < j1 )and( j2 < j3 ) ):
+      return False
+    return True
+
+
+  # J形成向上N形
+  @staticmethod
+  def isJN(parseDay,id=''):
+    days = 4
+    dayList = BaseParser.getPastTradingDayList(parseDay,days)
+    dataOfDays = KdjParser.getKDJData(parseDay,id,days)
+    if False == dataOfDays:
+      return False
+    
+    '''
+    N
+    '''
+    j1 = float(dataOfDays[dayList[0]][2])
+    j2 = float(dataOfDays[dayList[1]][2])
+    j3 = float(dataOfDays[dayList[2]][2])
+    j4 = float(dataOfDays[dayList[3]][2])
+    if not ( ( j4 > j3 )and( j3 < j2 ) and (j2 > j1)):
+      return False
+    return True
+
+  # J形成向上W形
+  @staticmethod
+  def isJW(parseDay,id=''):
+    days = 5
+    dayList = BaseParser.getPastTradingDayList(parseDay,days)
+    dataOfDays = KdjParser.getKDJData(parseDay,id,days)
+    if False == dataOfDays:
+      return False
+    
+    '''
+    W
+    '''
+    j1 = float(dataOfDays[dayList[0]][2])
+    j2 = float(dataOfDays[dayList[1]][2])
+    j3 = float(dataOfDays[dayList[2]][2])
+    j4 = float(dataOfDays[dayList[3]][2])
+    j5 = float(dataOfDays[dayList[4]][2])
+    if not ( ( j5 > j4 )and( j4 < j3 ) and (j3 > j2) and (j2 < j1)):
+      return False
+    return True
+    
+
+  # 获取D值
+  @staticmethod
+  def getD(parseDay,id):
+    days = 1
+    dayList = BaseParser.getPastTradingDayList(parseDay,days)
+    dataOfDays = KdjParser.getKDJData(parseDay,id,days)
+    if False == dataOfDays:
+      return False
+    
+    # D在指定值之下
+    d = float(dataOfDays[parseDay][1])
+    return d
 
 
 

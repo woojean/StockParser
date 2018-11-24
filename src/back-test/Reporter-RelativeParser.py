@@ -347,23 +347,24 @@ table {
 
 
   # ================================================================================
+  intervalMap = sorted(minMap.keys())
   countTable = '<table>'
-  for k,v in minMap.items():
+  for k in intervalMap:
     countTable += '<tr>'
-    countTable += '<td>' + str(k) + '</td><td>' + str(v) + '</td>'
+    countTable += '<td>' + str(k) + '</td><td>' + str(minMap[k]) + '</td>'
     countTable += '</tr>'
   countTable += '</table>'
   
   countTable += '<table>'
-  for k,v in maxMap.items():
+  for k in intervalMap:
     countTable += '<tr>'
-    countTable += '<td>' + str(k) + '</td><td>' + str(v) + '</td>'
+    countTable += '<td>' + str(k) + '</td><td>' + str(maxMap[k]) + '</td>'
     countTable += '</tr>'
   countTable += '</table>'
   
   s += countTable
 
-  # s += tables
+  s += tables
 
   s += '</body></html>'
   path = Tools.getReportDirPath()+'/trace-report.html'

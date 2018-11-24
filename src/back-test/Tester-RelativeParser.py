@@ -104,6 +104,9 @@ def trace(id,parseDay):
     if minP < minPrice:
       minPrice = minP
 
+  # if outPrice/inPrice > 0.8:
+    # return False
+
   ret = {}
   ret['id'] = id
   ret['name'] = Tools.getNameById(id)
