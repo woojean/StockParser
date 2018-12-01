@@ -13,6 +13,7 @@ import threading
 import time
 import datetime
 from BaseParser import BaseParser
+from common import Tools
  
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -25,49 +26,111 @@ class SwallowUpParser(BaseParser):
   
   def __init__(self,parseDay):
     BaseParser.__init__(self,parseDay) 
+  
+
+
+  def getParseResult(self,isDump=False):
+    print '***************************************************************************'
+    print 'In custom mode'
+    print '***************************************************************************'
+    idFile = '吞没线/'+self._parseDay+'-SwallowUpParser.sel'
+    allIdList = Tools.getIdListOfFile(idFile)
+    idList = []
+    num = 0
+    parsedNum = 0
+    total = len(allIdList)
+    for id in allIdList:
+      try:
+        self.printProcess(parsedNum,total)
+        f = Tools.getPriceDirPath()+'/'+id
+        res = open(f,'r').read()
+        ret = self.parse(res,self._parseDay,id)
+        if ret:
+          idList.append(id)
+          num += 1
+          print str(num) + ' ↗'
+        parsedNum += 1
+      except Exception, e:
+        pass
+        print repr(e)
+      
+    print idList
+
+    # 根据打分结果过滤
+    # idList = self.calcuR(idList,1)
+
+    if isDump:
+      self.dumpIdList(idList)
+
+    return idList
+
+
+  def calcuR(self,idList,num):
+    vList = []
+    for id in idList:
+      path = Tools.getPriceDirPath()+'/'+str(id)
+      res = open(path,'r').read()
+      
+      # am = self.getEntityAm(res,parseDay)
+      # d = KdjParser.getD(parseDay,id)
+
+      # r = am/d
+      # r = d
+
+      dayList = BaseParser.getPastTradingDayList(parseDay,5) 
+      (v,v,ma) = self.getMAPrice(res,dayList)
+      endPrice = self.getEndPriceOfDay(res,parseDay)
+
+      r = ma/endPrice
+
+      vList.append((id,r))
+
+    # 排序
+    sList = sorted(vList,key=lambda x: -x[1]) 
+    # sList = sorted(vList,key=lambda x: x[1]) 
+    print "sorted list:"
+    print sList
+    selectedList = sList[:num]
+
+    print "\nselected list:"
+    print selectedList
+    l = []
+    for item in selectedList:
+      l.append(item[0])
+    return l
+
 
 
   def parse(self,res,parseDay,id=''):
-    ret = False
-    dayList = BaseParser.getPastTradingDayList(parseDay,3)
-    day1 = dayList[0]  # 第一天
-    day2 = dayList[1]  # 第二天
-    day3 = dayList[2]  # 第二天
-    
-    startPriceOfDay1 = self.getStartPriceOfDay(res,day1)
-    endPriceOfDay1 = self.getEndPriceOfDay(res,day1)
-    entityOfDay1 = abs(startPriceOfDay1 - endPriceOfDay1)
-    startPriceOfDay2 = self.getStartPriceOfDay(res,day2)
-    endPriceOfDay2 = self.getEndPriceOfDay(res,day2)
-    entityOfDay2 = abs(startPriceOfDay2 - endPriceOfDay2)
-    startPriceOfDay3 = self.getStartPriceOfDay(res,day3)
-    endPriceOfDay3 = self.getEndPriceOfDay(res,day3)
-    entityOfDay3 = abs(startPriceOfDay2 - endPriceOfDay3)
-
-    # 第2天阴线
-    if endPriceOfDay2 > startPriceOfDay2:
+    dayList = BaseParser.getPastTradingDayList(parseDay,5) # 5日线
+    lastDay = dayList[-2]
+    startPriceOfLastDay = self.getStartPriceOfDay(res,lastDay)
+    endPriceOfLastDay = self.getEndPriceOfDay(res,lastDay)
+    startPrice = self.getStartPriceOfDay(res,parseDay)
+    endPrice = self.getEndPriceOfDay(res,parseDay)
+    if startPrice == 0 or startPriceOfLastDay == 0:
       return False
 
-    # 第3天阳线
-    if endPriceOfDay3 <= startPriceOfDay3:
-      return False
-  
-    # 第3天实体长度是第2天的2倍
-    if (entityOfDay2 != 0) and (entityOfDay3/entityOfDay2 < 2):
+
+    # 吞没线
+    # -----------------------------------------------------------------------------
+    # 第一天非阳线
+    if endPriceOfLastDay > startPriceOfLastDay:
       return False
 
-    # 第3天开盘低于第2天收盘
-    if endPriceOfDay2 < startPriceOfDay3:
+    # 第二天阳线
+    if endPrice <= startPrice:
       return False
 
-    # 第3天收盘大于第2天开盘
-    if endPriceOfDay3 <= startPriceOfDay2:
+    # 第二天吞没第一天
+    if not ((startPrice < endPriceOfLastDay) and (endPrice > startPriceOfLastDay)):
       return False
-   
-    # 第3天同时吞没第1天
-    if min(startPriceOfDay3,endPriceOfDay3) >= min(startPriceOfDay1,endPriceOfDay1):
-      return False
-    if max(startPriceOfDay3,endPriceOfDay3) <= max(startPriceOfDay1,endPriceOfDay1):
+
+
+    # 第二天收盘价低于5日线
+    # -----------------------------------------------------------------------------
+    (v,v,ma5) = self.getMAPrice(res,dayList)
+    if endPrice >= ma5:
       return False
 
     return True

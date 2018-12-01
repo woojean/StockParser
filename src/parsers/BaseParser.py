@@ -176,6 +176,18 @@ class BaseParser:
       #print repr(e)
     return rate
 
+
+  def isMaUpward(self,res,parseDay,maDays):
+    dayList = self.getPastTradingDayList(parseDay,maDays+1)
+    day1 = dayList[0]
+    day2 = dayList[-1]
+    endPrice1 = self.getEndPriceOfDay(res,day1)
+    endPrice2 = self.getEndPriceOfDay(res,day2)
+    if endPrice2 <= endPrice1:
+      return False
+    return True
+
+
   # 判断是否处在上升趋势中（今日的ma60大于5天前的ma60）
   def isInRiseTrend(self,id,parseDay):
     try:
@@ -196,6 +208,30 @@ class BaseParser:
       isRise = None
       #print repr(e)
     return isRise
+
+  # 是否跌停
+  def isDownwardLimit(self,res,parseDay):
+    dayList = BaseParser.getPastTradingDayList(parseDay,2)
+    endPriceOfDay1 = self.getEndPriceOfDay(res,dayList[0])
+    endPriceOfDay2 = self.getEndPriceOfDay(res,dayList[1])
+    if 0 == endPriceOfDay1 or  0 == endPriceOfDay2:
+      return False
+    gr =  (endPriceOfDay2-endPriceOfDay1)/endPriceOfDay1
+    if gr < -0.09:
+      return True
+    return False
+  
+  # 是否涨停
+  def isUpwardLimit(self,res,parseDay):
+    dayList = BaseParser.getPastTradingDayList(parseDay,2)
+    endPriceOfDay1 = self.getEndPriceOfDay(res,dayList[0])
+    endPriceOfDay2 = self.getEndPriceOfDay(res,dayList[1])
+    if 0 == endPriceOfDay1 or  0 == endPriceOfDay2:
+      return False
+    gr =  (endPriceOfDay2-endPriceOfDay1)/endPriceOfDay1
+    if gr > 0.09:
+      return True
+    return False
 
 
   # 均线穿越发生在3日内
@@ -392,6 +428,40 @@ class BaseParser:
     return ratio
 
 
+  # 是否阳线
+  def isYangXian(self,res,day):
+    startPrice = self.getStartPriceOfDay(res,day)
+    endPrice = self.getEndPriceOfDay(res,day)
+    if startPrice ==0 or endPrice ==0:
+      return False
+    if endPrice <= startPrice:
+      return False
+    return True
+
+
+
+  # 获取振幅
+  def getAm(self,res,day):
+    minPrice = self.getMinPriceOfDay(res,day)
+    maxPrice = self.getMaxPriceOfDay(res,day)
+    if minPrice ==0 or maxPrice ==0:
+      return False
+    am = (maxPrice - minPrice)/minPrice
+    return am
+
+
+  # 获取实体振幅
+  def getEntityAm(self,res,day):
+    startPrice = self.getStartPriceOfDay(res,day)
+    endPrice = self.getEndPriceOfDay(res,day)
+    minPrice = min(startPrice,endPrice)
+    maxPrice = max(startPrice,endPrice)
+    if minPrice ==0 or maxPrice ==0:
+      return False
+    am = (maxPrice - minPrice)/minPrice
+    return am
+
+
   # 判断某一天是否是过去若干天的最大成交量
   def isMaxVolumeOfDays(self,res,day,days):
     dayList = BaseParser.getPastTradingDayList(day,days)
@@ -545,6 +615,16 @@ class BaseParser:
       sumV += v
     mv = sumV / days
     return mv
+
+
+  def isNewStock(self,res,parseDay):
+    dayList = BaseParser.getPastTradingDayList(parseDay,2) 
+    lastDay = dayList[-2]
+    v = self.getVolumeOfDay(res,lastDay)
+    if v <= 0 :
+      return True
+    return False
+
   
 
   def isRgb(self,id,parseDay):
@@ -619,7 +699,7 @@ class BaseParser:
         parsedNum += 1
       except Exception, e:
         pass
-        # print repr(e)
+        print repr(e)
 
     # 根据打分结果过滤
     idList = self.calcuR(idList,1)

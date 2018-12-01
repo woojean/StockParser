@@ -20,12 +20,18 @@ class KdjSpider(BaseSpider):
     BaseSpider.__init__(self,idList,threadId) 
     
   def genUrl(self,id):
-    endTime = str(int(round(time.time() * 1000))) 
-    url = 'http://pdfm2.eastmoney.com/EM_UBG_PDTI_Fast/api/js?id=$ID$1&TYPE='
-    if ('3' == str(id)[0])  or ('0' == str(id)[0]):
-      url = 'http://pdfm2.eastmoney.com/EM_UBG_PDTI_Fast/api/js?id=$ID$2&TYPE='
+    endTime = str(int(round(time.time() * 1000)))
+    url = 'http://pdfm2.eastmoney.com/EM_UBG_PDTI_Fast/api/js?id=$ID$'
+    if '000001' == id: # 上证指数
+      url += '1'
+    elif str(id)[0] in ['0','3']:
+      url += '2'
+    else:
+      url += '1'
+
     url +='k&js=$FUN$((x))&rtntype=4&extend=kdj&check=kte&authorityType=fa&$FUN$=$FUN$'
     url = url.replace('$ID$',id).replace('$FUN$','fsDataTeacma' + endTime)
+
     print url
     return url
     '''

@@ -35,6 +35,9 @@ def getKdjWkDataPath():
 def getKdjDataPath():
   return getRootPath()+'/data/kdj'  
 
+def getMaDataPath():
+  return getRootPath()+'/data/ma'  
+
 def getBiasDataPath():
   return getRootPath()+'/data/bias'  
 

@@ -245,7 +245,7 @@ def run(parseDay,parsers,isNew=False):
   if isNew:
     spiders = [
       'PriceSpider',
-      # 'KdjSpider',
+      'KdjSpider',
       # 'BiasSpider',
       # 'MacdSpider',
       # 'BasicInfoSpider'
@@ -299,7 +299,7 @@ if __name__ == '__main__':
   # ======================================================
   run(parseDay,parsers,isNew)
 
-  report(parseDay,parsers,True,traceDay)
+  # report(parseDay,parsers,True,traceDay)
 
 
 

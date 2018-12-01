@@ -460,50 +460,7 @@ class KdjParser(BaseParser):
     return False
 
 
-  # 近n日有SLOWKD死叉
-  @staticmethod
-  def haveDeathCross(parseDay,id,days,maDays):
-    path = Tools.getKdjDataPath()+'/' +id
-    try:
-      res = open(path,'r').read()
-      if len(res) < 50:
-        return False # 交由人工判断
-      dayList = BaseParser.getPastTradingDayList(parseDay,20)
-      kdjList = eval(res[26:-1])
-      dataOfDays = {}
-      for item in kdjList:
-        for d in dayList:
-          if d == item['time']:
-            dataOfDays[d] = eval(item['kdj'])
-    except Exception, e:
-      pass
-      # print repr(e)
-      return False
-
-    # 数据错误，当做无死叉，人工判断
-    if (len(dataOfDays)<1) or (len(dayList) != len(dataOfDays)):  
-      return False
-
-    cDayList = BaseParser.getPastTradingDayList(parseDay,days)
-    haveDeathCross = False
-    for i in xrange(1,days-1):
-      preD = float(dataOfDays[cDayList[i-1]][1])
-      nowD = float(dataOfDays[cDayList[i]][1])
-      sumD = 0
-      maDayList = BaseParser.getPastTradingDayList(cDayList[i],maDays)
-      for day in maDayList:
-        d = float(dataOfDays[day][1])
-        sumD += d
-      maD = sumD/maDays
-      if ((preD > maD) and (nowD < maD)):
-        haveDeathCross = True
-        break
-
-    if haveDeathCross:
-      return True
-
-    return False
-
+  
 
 
 
@@ -875,6 +832,30 @@ class KdjParser(BaseParser):
 
     return True
 
+  # KD死叉
+  @staticmethod
+  def isKdDeathCross(parseDay,id):
+    days = 2
+    dayList = BaseParser.getPastTradingDayList(parseDay,days)
+    dataOfDays = KdjParser.getKDJData(parseDay,id,days)
+    if False == dataOfDays:
+      return False
+
+    # D在20之下
+    # dayLimit = 20
+    # d = float(dataOfDays[dayList[-1]][1])
+    # if d > dayLimit or d < 1:  # d大于20，或d数据错误
+    #   return False
+   
+    k1 = float(dataOfDays[dayList[-2]][0])
+    k2 = float(dataOfDays[dayList[-1]][0])
+    d = float(dataOfDays[dayList[-1]][1])
+    
+    if not((k1 > d) and (k2 < d)):
+      return False
+
+    return True
+
 
   # J向上反转
   @staticmethod
@@ -947,6 +928,73 @@ class KdjParser(BaseParser):
     # D在指定值之下
     d = float(dataOfDays[parseDay][1])
     return d
+
+
+  # 近n日有SLOWKD死叉
+  @staticmethod
+  def haveDeathCross(parseDay,id,days,maDays):
+    dataOfDays = KdjParser.getKDJData(parseDay,id,days+maDays)
+    # print dataOfDays
+    if False == dataOfDays:
+      return False
+
+    cDayList = BaseParser.getPastTradingDayList(parseDay,days+1)
+    # print cDayList
+    haveDeathCross = False
+    for i in xrange(1,days+1):
+      preD = float(dataOfDays[cDayList[i-1]][1])
+      nowD = float(dataOfDays[cDayList[i]][1])
+      sumD = 0
+      maDayList = BaseParser.getPastTradingDayList(cDayList[i],maDays)
+      for day in maDayList:
+        d = float(dataOfDays[day][1])
+        sumD += d
+      maD = sumD/maDays
+      if ((preD > maD) and (nowD < maD)):
+        haveDeathCross = True
+        break
+
+    if haveDeathCross:
+      return True
+
+    return False
+
+
+  # D向下
+  @staticmethod
+  def isDDownward(parseDay,id):
+    days = 2
+    dataOfDays = KdjParser.getKDJData(parseDay,id,days)
+    if False == dataOfDays:
+      return False
+
+    dayList = BaseParser.getPastTradingDayList(parseDay,days)
+    preD = float(dataOfDays[dayList[0]][1])
+    nowD = float(dataOfDays[dayList[1]][1])
+
+    if nowD > preD:
+      return False
+
+    return True
+
+
+  # D向上
+  @staticmethod
+  def isDUpward(parseDay,id):
+    days = 2
+    dataOfDays = KdjParser.getKDJData(parseDay,id,days)
+    if False == dataOfDays:
+      return False
+
+    dayList = BaseParser.getPastTradingDayList(parseDay,days)
+    preD = float(dataOfDays[dayList[0]][1])
+    nowD = float(dataOfDays[dayList[1]][1])
+
+    if nowD <= preD:
+      return False
+
+    return True
+
 
 
 

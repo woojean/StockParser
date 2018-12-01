@@ -72,12 +72,67 @@ def traceEnterList(f):
   return ret
 
 
+'''
+收盘价1日止损
+'''
+def trace1(id,parseDay):
+  print id,parseDay
+  parser = RelativeParser.RelativeParser(parseDay,id)
+  priceFile = Tools.getPriceDirPath()+'/'+str(id)
+  res = open(priceFile,'r').read()
+  
+  dayList = parser.getNextTradingDayList(parseDay,20) # 
+  inDay = dayList[0]
+  inPrice = parser.getStartPriceOfDay(res,inDay)  # 买入价为板后第一天的开盘价
+  # inPrice = parser.getMinPriceOfDay(res,inDay)  # 
+  if 0==inPrice:
+    return False # 坏数据
+
+  # 确定止损价
+  sp1 = parser.getMinPriceOfDay(res,parseDay) 
+  sp2 = parser.getMinPriceOfDay(res,inDay) 
+  stopPrice = min(sp1,sp2)
+  
+  outPrice = 0 
+  dayList = dayList[1:]
+  holdDays = 0
+  for day in dayList:
+    holdDays +=1
+    minPrice = parser.getMinPriceOfDay(res,day)
+    endPrice = parser.getEndPriceOfDay(res,day)
+    if endPrice == 0:
+      outPrice = 0
+      break
+    if endPrice < stopPrice:
+      outPrice = endPrice
+      outDay = day
+      break
+    else:
+      stopPrice = minPrice
+      
+  if outPrice == 0:
+    return False
+
+
+  ret = {}
+  ret['id'] = id
+  ret['name'] = Tools.getNameById(id)
+  ret['inPrice'] = inPrice
+  ret['outDay'] = outDay
+  ret['outPrice'] = outPrice
+  ret['holdDays'] = holdDays
+  ret['minPrice'] = 0
+  ret['maxPrice'] = 0
+  return ret
+
+
 
 '''
 持有N日
 '''
 def trace(id,parseDay):
-  N = 20
+  # N = 5 # 持股天数
+  N = 20 # 持股天数
   print id,parseDay
   parser = RelativeParser.RelativeParser(parseDay,id)
   priceFile = Tools.getPriceDirPath()+'/'+str(id)
@@ -85,7 +140,8 @@ def trace(id,parseDay):
   
   dayList = parser.getNextTradingDayList(parseDay,N) # 
   inDay = dayList[0]
-  inPrice = parser.getStartPriceOfDay(res,inDay)  # 开盘价买入
+  # inPrice = parser.getStartPriceOfDay(res,inDay)  # 开盘价买入
+  inPrice = parser.getMinPriceOfDay(res,inDay)  # 最低价买入
   if 0==inPrice:
     return False # 坏数据
 
@@ -96,6 +152,7 @@ def trace(id,parseDay):
 
   minPrice = 999999
   maxPrice = 0  
+  dayList = dayList[1:]  # 从买入后第2天开始统计最高价、最低价
   for day in dayList:
     maxP = parser.getMaxPriceOfDay(res,day)
     minP = parser.getMinPriceOfDay(res,day)
@@ -104,8 +161,10 @@ def trace(id,parseDay):
     if minP < minPrice:
       minPrice = minP
 
-  # if outPrice/inPrice > 0.8:
-    # return False
+  # 无2%的盈利机会
+  # r = maxPrice/inPrice
+  # if r >1.02:
+  #   return False
 
   ret = {}
   ret['id'] = id

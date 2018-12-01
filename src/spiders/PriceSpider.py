@@ -23,7 +23,9 @@ class PriceSpider(BaseSpider):
     
   def genUrl(self,id):
     url = 'http://pdfm2.eastmoney.com/EM_UBG_PDTI_Fast/api/js?id=$ID$'
-    if str(id)[0] in ['0','3']:
+    if '000001' == id: # 上证指数
+      url += '1'
+    elif str(id)[0] in ['0','3']:
       url += '2'
     else:
       url += '1'

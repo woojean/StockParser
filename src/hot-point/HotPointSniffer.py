@@ -126,8 +126,8 @@ class HotPointSniffer(BaseHotPoint):
 
 # config
 # ===============================================================
-TOP_BK_NUM = 14  # Top n% 
-RESONANCE_NUM = 2 # Resonance atleast 2
+TOP_BK_NUM = 20  # Top n% 
+RESONANCE_NUM = 3 # Resonance atleast 2
 REVERSE = False 
 
 
