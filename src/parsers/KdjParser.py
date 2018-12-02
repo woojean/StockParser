@@ -996,6 +996,25 @@ class KdjParser(BaseParser):
     return True
 
 
+  # D向下反转
+  @staticmethod
+  def isDDownwardReverse(parseDay,id):
+    days = 3
+    dataOfDays = KdjParser.getKDJData(parseDay,id,days)
+    if False == dataOfDays:
+      return False
+
+    dayList = BaseParser.getPastTradingDayList(parseDay,days)
+    d1 = float(dataOfDays[dayList[0]][1])
+    d2 = float(dataOfDays[dayList[1]][1])
+    d3 = float(dataOfDays[dayList[2]][1])
+
+    if not ((d1 < d2) and (d2 > d3)):
+      return False
+
+    return True
+
+
 
 
 if __name__ == '__main__':

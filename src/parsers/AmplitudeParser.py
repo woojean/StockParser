@@ -38,8 +38,10 @@ class AmplitudeParser(BaseParser):
     print '***************************************************************************'
     print 'In custom mode'
     print '***************************************************************************'
-    # idFile = '振幅>=5%/'+self._parseDay+'-AmplitudeParser.sel'
-    idFile = '振幅>=5%KD死叉/'+self._parseDay+'-AmplitudeParser.sel'
+    # idFile = '振幅>=7%阳线最高价低于5日线/'+self._parseDay+'-AmplitudeParser.sel'
+    # idFile = '振幅>=7%阳线最高价低于5日线/'+self._parseDay+'-AmplitudeParser.sel'
+    # idFile = '振幅>=7%最高价低于5日线/'+self._parseDay+'-AmplitudeParser.sel'
+    idFile = '振幅>=5%阳线收盘价低于5日线/'+self._parseDay+'-AmplitudeParser.sel'
     allIdList = Tools.getIdListOfFile(idFile)
     idList = []
     num = 0
@@ -137,6 +139,14 @@ class AmplitudeParser(BaseParser):
     #   return False
 
 
+    # 收盘价低于5日线
+    # dayList = BaseParser.getPastTradingDayList(parseDay,5) 
+    # (v,v,ma) = self.getMAPrice(res,dayList)
+    # endPrice = self.getEndPriceOfDay(res,parseDay)
+    # if endPrice > ma:
+    #   return False
+
+
     # 近3日有跌停
     # haveDownwardLimit = False
     # dayList = BaseParser.getPastTradingDayList(parseDay,3) 
@@ -183,28 +193,38 @@ class AmplitudeParser(BaseParser):
     # if not ((ma20 > ma10) and (ma10 > ma5)):
     #   return False
 
-
-    # 近n日有死亡谷
-    # haveDeadValley = False
-    # dayList = BaseParser.getPastTradingDayList(parseDay,3) 
-    # for day in dayList:
-    #   minPrice2 = self.getMinPriceOfDay(res,day)
-    #   tDayList = BaseParser.getPastTradingDayList(day,2) 
-    #   lastDay = tDayList[0]
-    #   endPrice1 = self.getEndPriceOfDay(res,lastDay)
-    #   if endPrice1 == 0:
-    #     continue
-    #   r = (minPrice2-endPrice1)/endPrice1
-    #   if r < -0.095:
-    #     haveTouchDownwardLimit = True
-    #     break
-    # if not haveTouchDownwardLimit:
-    #   return False
     
+    # 盘中有跌停
+    # haveTouchDownwardLimit = False
+    # minPrice2 = self.getMinPriceOfDay(res,parseDay)
+    # tDayList = BaseParser.getPastTradingDayList(parseDay,2) 
+    # lastDay = tDayList[0]
+    # endPrice1 = self.getEndPriceOfDay(res,lastDay)
+    # if endPrice1 == 0:
+    #   return False
+    # r = (minPrice2-endPrice1)/endPrice1
+    # if r > -0.09:
+    #   return False
+
+
 
     # KD死叉
     # if not KdjParser.isKdDeathCross(parseDay,id):
     #   return False
+
+
+    # D向下反转
+    # if not KdjParser.isDDownwardReverse(parseDay,id):
+    #   return False
+
+
+    # 连续3日振幅>=n%
+    # dayList = self.getPastTradingDayList(parseDay,5)
+    # for day in dayList:
+    #   am = self.getAm(res,day)
+    #   if am < 0.07:
+    #     return False
+
 
 
     return True

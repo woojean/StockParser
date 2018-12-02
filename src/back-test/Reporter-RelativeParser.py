@@ -201,6 +201,8 @@ table {
     'V[20%,)':0
   }
 
+  value = 1.0
+  
   tables = ''
   for item in data: # 按天遍历
     totalDays += 1
@@ -231,14 +233,15 @@ table {
     dayTotalLoseNum = 0 # 日总亏损数
     dayTotalLoseRate = 0  # 日总亏损
     
-    print parseDay
+
+    # print parseDay
     for i in item['idList']: # 遍历一天中的所有交易
       totalTradeNum += 1
       code = i['id']
       name = i['name']
       inPrice = float(i['inPrice'])
       outPrice = float(i['outPrice'])
-      print parseDay,i['id']
+      # print parseDay,i['id']
       gr = (outPrice - inPrice)/inPrice
 
       totalGrowthRate += gr
@@ -294,7 +297,11 @@ table {
       tables += '</tr>'
     tables += '</table>'
     if 0!= dayTotalTradeNum:
-      totalDayAvgGrowthRate += dayTotalGrowthRate/dayTotalTradeNum
+      dayAvgGrowthRate = dayTotalGrowthRate/dayTotalTradeNum
+      print (dayAvgGrowthRate)
+      # value += value * dayAvgGrowthRate
+      value = value * (1 + dayAvgGrowthRate)
+      totalDayAvgGrowthRate += dayAvgGrowthRate
       totalTradeDays += 1
 
   #if dayTotalTradeNum!=0: # 若当日无交易，则不参与统计
@@ -322,6 +329,7 @@ table {
   s += '<td class="ar ah">亏损交易平均收益率</td>'
   s += '<td class="ar ah"><b>日均收益率</b></td>'
   s += '<td class="ar ah">单笔交易平均收益率</td>'
+  s += '<td class="ar ah">按日累计收益值</td>'
   s += '</tr>'
 
 
@@ -341,6 +349,7 @@ table {
   s += '<td class="ar">'+str(round(loseTradeAvgGr*100.0,3))+'%</td>'
   s += '<td class="ar">'+str(round(totalDayAvgGrowthRate*100.0/totalTradeDays,3))+'%</td>'
   s += '<td class="ar">'+str(round(totalGrowthRate*100.0/totalTradeNum,3))+'%</td>'
+  s += '<td class="ar">'+str(value)+'</td>'
   s += '</tr>'
   s += '</table>'
 
@@ -364,7 +373,7 @@ table {
   
   s += countTable
 
-  # s += tables # 
+  s += tables # 
 
   s += '</body></html>'
   path = Tools.getReportDirPath()+'/trace-report.html'

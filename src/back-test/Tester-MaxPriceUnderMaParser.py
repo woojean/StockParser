@@ -188,7 +188,7 @@ def traceZY(id,parseDay):
     holdDays +=1
     maxPrice = parser.getMaxPriceOfDay(res,day)
     if maxPrice == 0: # 坏数据
-      outPrice = 0
+      return False
       break
 
     # 止盈
