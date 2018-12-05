@@ -298,7 +298,8 @@ table {
     tables += '</table>'
     if 0!= dayTotalTradeNum:
       dayAvgGrowthRate = dayTotalGrowthRate/dayTotalTradeNum
-      print (dayAvgGrowthRate)
+      # print dayAvgGrowthRate,value
+      print value
       # value += value * dayAvgGrowthRate
       value = value * (1 + dayAvgGrowthRate)
       totalDayAvgGrowthRate += dayAvgGrowthRate

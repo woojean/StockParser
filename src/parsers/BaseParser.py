@@ -288,8 +288,24 @@ class BaseParser:
       #print repr(e)
     return isMaInTrend
 
-  
 
+  def isEndPriceUnderMa(self,res,parseDay,maDays):
+    dayList = BaseParser.getPastTradingDayList(parseDay,maDays) 
+    (v,v,ma) = self.getMAPrice(res,dayList)
+    endPrice = self.getEndPriceOfDay(res,parseDay)
+    if endPrice > ma:
+      return False
+    return True
+
+
+  def isMaxPriceUnderMa(self,res,parseDay,maDays):
+    dayList = BaseParser.getPastTradingDayList(parseDay,maDays) 
+    (v,v,ma) = self.getMAPrice(res,dayList)
+    maxPrice = self.getMaxPriceOfDay(res,parseDay)
+    if maxPrice > ma:
+      return False
+    return True
+    
 
   # compute
   # ----------------------------------------------------------------------------------------

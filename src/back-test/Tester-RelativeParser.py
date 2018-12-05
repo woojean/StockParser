@@ -8,6 +8,7 @@ import sys
 import threading
 import time
 import datetime
+import random
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -190,7 +191,7 @@ def traceZY(id,parseDay):
   print '最大持股20日，n%止盈，止损'
 
   maxDays = 20 # 最长持股时间
-  rate = 0.01 # 止盈利润比例
+  rate = 0.02 # 止盈利润比例
 
   parser = RelativeParser.RelativeParser(parseDay,id)
   priceFile = Tools.getPriceDirPath()+'/'+str(id)
@@ -229,11 +230,11 @@ def traceZY(id,parseDay):
       break
     
     # 止损
-    # sp = parser.getMinPriceOfDay(res,day) 
-    # if sp < stopPrice:
-    #   outPrice = stopPrice
-    #   outDay = day
-    #   break
+    sp = parser.getMinPriceOfDay(res,day) 
+    if sp < stopPrice:
+      outPrice = stopPrice
+      outDay = day
+      break
       
   if outPrice == 0:
     outPrice = parser.getEndPriceOfDay(res,dayList[-1])  # 默认按到期后的收盘价为卖出价
@@ -262,7 +263,7 @@ def tracekp(id,parseDay):
   print '限制时间，止损、开盘价止盈'
 
   maxDays = 20 # 最长持股时间
-  rate = 0.01 # 止盈利润比例
+  rate = 0.02 # 止盈利润比例
 
   # 取参数
   parser = RelativeParser.RelativeParser(parseDay,id)
@@ -301,11 +302,11 @@ def tracekp(id,parseDay):
       break
     
     # 止损
-    # sp = parser.getMinPriceOfDay(res,day) 
-    # if sp < stopPrice:
-    #   outPrice = stopPrice
-    #   outDay = day
-    #   break
+    sp = parser.getMinPriceOfDay(res,day) 
+    if sp < stopPrice:
+      outPrice = stopPrice
+      outDay = day
+      break
       
   if outPrice == 0:
     outPrice = parser.getEndPriceOfDay(res,dayList[-1])  # 默认按到期后的收盘价为卖出价
@@ -406,7 +407,7 @@ def traceBI(id,parseDay):
 '''
 持有N日
 '''
-def trace(id,parseDay):
+def traceN(id,parseDay):
   print '持有N日'
   N = 2 # 持股天数
   # N = 20 # 持股天数
@@ -425,6 +426,7 @@ def trace(id,parseDay):
   outDay = dayList[-1]
   outPrice = parser.getEndPriceOfDay(res,outDay)  # 收盘价卖出
   # outPrice = parser.getMaxPriceOfDay(res,outDay) # 最高价卖出
+  # outPrice = parser.getStartPriceOfDay(res,outDay) # 开盘价卖出
   if 0==outPrice:
     return False # 坏数据
 
@@ -443,6 +445,17 @@ def trace(id,parseDay):
   # r = maxPrice/inPrice
   # if r >1.02:
   #   return False
+
+  # 开盘价和最低价之间随机买入
+  # startPrice = parser.getStartPriceOfDay(res,inDay)
+  # minPrice = parser.getMinPriceOfDay(res,inDay)
+  # inPrice = random.uniform(minPrice, startPrice)
+
+  # 收盘价和最高价之间随机卖出
+  # endPrice = parser.getEndPriceOfDay(res,inDay)
+  # maxPrice = parser.getMaxPriceOfDay(res,inDay)
+  # outPrice = random.uniform(endPrice, maxPrice)
+
 
   ret = {}
   ret['id'] = id

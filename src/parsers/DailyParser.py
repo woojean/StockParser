@@ -36,28 +36,15 @@ class DailyParser(BaseParser):
     if not self.isYangXian(res,parseDay):
       return False
 
-    # 最高价低于5日线
-    # dayList = BaseParser.getPastTradingDayList(parseDay,5) 
-    # (v,v,ma) = self.getMAPrice(res,dayList)
-    # maxPrice = self.getMaxPriceOfDay(res,parseDay)
-    # if maxPrice > ma:
-    #   return False
-
+    # 收盘价低于5日线
+    if not self.isEndPriceUnderMa(res,parseDay,5):
+      return False
 
     # 振幅
     am = self.getAm(res,parseDay)
     if am < 0.05:
       return False
-
-
-    # D低于
-    d = KdjParser.getD(parseDay,id)
-    if False == d:
-      return False
-    if d >= 20:
-      return False
       
-
     return True
 
 

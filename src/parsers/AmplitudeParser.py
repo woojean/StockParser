@@ -38,10 +38,17 @@ class AmplitudeParser(BaseParser):
     print '***************************************************************************'
     print 'In custom mode'
     print '***************************************************************************'
+    idFile = '振幅>=5%阳线收盘价低于5日线/'+self._parseDay+'-AmplitudeParser.sel'
+
+    # idFile = '振幅>=5%/'+self._parseDay+'-AmplitudeParser.sel'
     # idFile = '振幅>=7%阳线最高价低于5日线/'+self._parseDay+'-AmplitudeParser.sel'
     # idFile = '振幅>=7%阳线最高价低于5日线/'+self._parseDay+'-AmplitudeParser.sel'
     # idFile = '振幅>=7%最高价低于5日线/'+self._parseDay+'-AmplitudeParser.sel'
-    idFile = '振幅>=5%阳线收盘价低于5日线/'+self._parseDay+'-AmplitudeParser.sel'
+    # idFile = '振幅>=5%阳线收盘价低于5日线/'+self._parseDay+'-AmplitudeParser.sel'
+    # idFile = 'MA10V/'+self._parseDay+'-MaParser.sel'
+    # idFile = '10日线向上/'+self._parseDay+'-MaParser.sel'
+    # idFile = 'D<20且剔除新股/'+self._parseDay+'-MaxPriceUnderMaParser.sel'
+    # idFile = 'D<20阳线振幅>5%/'+self._parseDay+'-MaxPriceUnderMaParser.sel'
     allIdList = Tools.getIdListOfFile(idFile)
     idList = []
     num = 0
@@ -225,6 +232,17 @@ class AmplitudeParser(BaseParser):
     #   if am < 0.07:
     #     return False
 
+
+    # 买入日限制
+    #----------------------------------------------------
+    # dayList = self.getNextTradingDayList(parseDay,1)
+    # nextDay = dayList[0]
+    # minPrice = self.getMinPriceOfDay(res,nextDay)
+    # startPrice = self.getStartPriceOfDay(res,nextDay)
+    # r = (minPrice - startPrice)/startPrice
+    # if not r == 0:
+    # # if not ((r > -0.1) and (r <= -0.08) ):
+    #   return False
 
 
     return True

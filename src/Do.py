@@ -245,7 +245,7 @@ def run(parseDay,parsers,isNew=False):
   if isNew:
     spiders = [
       'PriceSpider',
-      'KdjSpider',
+      # 'KdjSpider',
       # 'BiasSpider',
       # 'MacdSpider',
       # 'BasicInfoSpider'
