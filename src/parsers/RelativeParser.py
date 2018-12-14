@@ -33,41 +33,40 @@ class RelativeParser(BaseParser):
     BaseParser.__init__(self,parseDay) 
 
 
-  # def getParseResult(self,isDump=False):
-  #   print '***************************************************************************'
-  #   print 'In custom mode'
-  #   print '***************************************************************************'
-  #   idFile = '实体振幅>5%的阳线/'+self._parseDay+'-RelativeParser.sel'
-  #   # idFile = '5/'+self._parseDay+'-RelativeParser.sel'
-  #   allIdList = Tools.getIdListOfFile(idFile)
-  #   idList = []
-  #   num = 0
-  #   parsedNum = 0
-  #   total = len(allIdList)
-  #   for id in allIdList:
-  #     try:
-  #       self.printProcess(parsedNum,total)
-  #       f = Tools.getPriceDirPath()+'/'+id
-  #       res = open(f,'r').read()
-  #       ret = self.parse(res,self._parseDay,id)
-  #       if ret:
-  #         idList.append(id)
-  #         num += 1
-  #         print str(num) + ' ↗'
-  #       parsedNum += 1
-  #     except Exception, e:
-  #       pass
-  #       print repr(e)
+  def getParseResult2(self,isDump=False):
+    print '***************************************************************************'
+    print 'In custom mode'
+    print '***************************************************************************'
+    idFile = 'KDJ/JV/'+self._parseDay+'-RelativeParser.sel'
+    allIdList = Tools.getIdListOfFile(idFile)
+    idList = []
+    num = 0
+    parsedNum = 0
+    total = len(allIdList)
+    for id in allIdList:
+      try:
+        self.printProcess(parsedNum,total)
+        f = Tools.getPriceDirPath()+'/'+id
+        res = open(f,'r').read()
+        ret = self.parse(res,self._parseDay,id)
+        if ret:
+          idList.append(id)
+          num += 1
+          print str(num) + ' ↗'
+        parsedNum += 1
+      except Exception, e:
+        pass
+        print repr(e)
       
-  #   print idList
+    print idList
 
-  #   # 根据打分结果过滤
-  #   idList = self.calcuR(idList,1)
+    # 根据打分结果过滤
+    # idList = self.calcuR(idList,1)
 
-  #   if isDump:
-  #     self.dumpIdList(idList)
+    if isDump:
+      self.dumpIdList(idList)
 
-  #   return idList
+    return idList
 
 
   # def calcuR(self,idList,num):
@@ -156,20 +155,60 @@ class RelativeParser(BaseParser):
 
   
   def parse(self,res,parseDay,id=''):
-    rgbDays = 5
-    dayList = self.getPastTradingDayList(parseDay,rgbDays)
+    # 剔除新股（含复牌股）
+    # if self.isNewStock(res,parseDay):
+    #   return False
 
-    # 连续N天RGB
-    for day in dayList:
-      if not self.isRgb(res,day):
-        return False
 
-    # 今日最低价低于20日均线
-    dayList = BaseParser.getPastTradingDayList(parseDay,20) 
-    (v,v,ma) = self.getMAPrice(res,dayList)
-    minPrice = self.getMinPriceOfDay(res,parseDay)
-    if minPrice > ma:
+    # 阳线
+    if not self.isYangXian(res,parseDay):
       return False
+
+
+    # 振幅 
+    am = self.getAm(res,parseDay)
+    if am <= 0.05:
+      return False
+
+    # # D向上反转
+    # isDUpwardReverse = KdjParser.isDUpwardReverse(parseDay,id)
+
+    # # J向上反转
+    # isJUpwardReverse = KdjParser.isJUpwardReverse(parseDay,id)
+
+    # if ((not isDUpwardReverse) and (not isJUpwardReverse)):
+    #   return False
+
+    # D低于
+    # d = KdjParser.getD(parseDay,id)
+    # if False == d:
+    #   return False
+    # if d >= 20:
+    #   return False
+
+
+    # J低于
+    j = KdjParser.getJ(parseDay,id)
+    if False == j:
+      return False
+    if j >= 20:
+      return False
+
+    # J > D
+    # d = KdjParser.getD(parseDay,id)
+    # j = KdjParser.getJ(parseDay,id)
+    # if j <= d:
+    #   return False
+
+
+    # J > 60
+    # j = KdjParser.getJ(parseDay,id)
+    # if False == j:
+    #   return False
+    # if j <= 60:
+    #   return False
+
+
 
     return True
 

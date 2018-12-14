@@ -20,6 +20,7 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 '''
+弱水三千，只取一瓢
 '''
 class DailyParser(BaseParser):
   _tag = 'DailyParser'
@@ -28,23 +29,27 @@ class DailyParser(BaseParser):
     BaseParser.__init__(self,parseDay) 
 
   def parse(self,res,parseDay,id=''):
-    # 剔除新股
-    if self.isNewStock(res,parseDay):
-      return False
 
     # 阳线
     if not self.isYangXian(res,parseDay):
       return False
 
-    # 收盘价低于5日线
-    if not self.isEndPriceUnderMa(res,parseDay,5):
-      return False
-
     # 振幅
     am = self.getAm(res,parseDay)
-    if am < 0.05:
+    minAm = 0.05
+    if am < minAm:
       return False
-      
+
+
+    # J、D低位
+    j = KdjParser.getJ(parseDay,id)
+    d = KdjParser.getD(parseDay,id)
+    if False == j or False == d:
+      return False
+    if ((not j<30) and (not d<20)):
+      return False
+
+
     return True
 
 

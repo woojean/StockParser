@@ -197,7 +197,7 @@ class BiasParser(BaseParser):
 
 
   @staticmethod
-  def isBiasNegative(parseDay,id):
+  def isBiasAllNegative(parseDay,id):
     path = Tools.getBiasDataPath()+'/' +id
     try:
       res = open(path,'r').read()

@@ -790,7 +790,7 @@ class KdjParser(BaseParser):
       if len(res) < 50:
         return False 
       dayList = BaseParser.getPastTradingDayList(parseDay,days)
-      kdjList = eval(res[26:-1])
+      kdjList = eval(res[13:-1])
       dataOfDays = {}
       for item in kdjList:
         for d in dayList:
@@ -928,36 +928,22 @@ class KdjParser(BaseParser):
     # D在指定值之下
     d = float(dataOfDays[parseDay][1])
     return d
+ 
 
-
-  # 近n日有SLOWKD死叉
+  # 获取J值
   @staticmethod
-  def haveDeathCross(parseDay,id,days,maDays):
-    dataOfDays = KdjParser.getKDJData(parseDay,id,days+maDays)
-    # print dataOfDays
+  def getJ(parseDay,id):
+    days = 1
+    dayList = BaseParser.getPastTradingDayList(parseDay,days)
+    dataOfDays = KdjParser.getKDJData(parseDay,id,days)
     if False == dataOfDays:
       return False
+    
+    # D在指定值之下
+    j = float(dataOfDays[parseDay][2])
+    return j
 
-    cDayList = BaseParser.getPastTradingDayList(parseDay,days+1)
-    # print cDayList
-    haveDeathCross = False
-    for i in xrange(1,days+1):
-      preD = float(dataOfDays[cDayList[i-1]][1])
-      nowD = float(dataOfDays[cDayList[i]][1])
-      sumD = 0
-      maDayList = BaseParser.getPastTradingDayList(cDayList[i],maDays)
-      for day in maDayList:
-        d = float(dataOfDays[day][1])
-        sumD += d
-      maD = sumD/maDays
-      if ((preD > maD) and (nowD < maD)):
-        haveDeathCross = True
-        break
-
-    if haveDeathCross:
-      return True
-
-    return False
+  
 
 
   # D向下
@@ -1014,6 +1000,52 @@ class KdjParser(BaseParser):
 
     return True
 
+
+  # 近n日有SLOWKD死叉
+  @staticmethod
+  def haveSLOWKDDeathCross(parseDay,id,days,maDays):
+    dataOfDays = KdjParser.getKDJData(parseDay,id,days+maDays)
+    # print dataOfDays
+    if False == dataOfDays:
+      return False
+
+    cDayList = BaseParser.getPastTradingDayList(parseDay,days+1)
+    # print cDayList
+    haveDeathCross = False
+    for i in xrange(1,days+1):
+      preD = float(dataOfDays[cDayList[i-1]][1])
+      nowD = float(dataOfDays[cDayList[i]][1])
+      sumD = 0
+      maDayList = BaseParser.getPastTradingDayList(cDayList[i],maDays)
+      for day in maDayList:
+        d = float(dataOfDays[day][1])
+        sumD += d
+      maD = sumD/maDays
+      if ((preD > maD) and (nowD < maD)):
+        haveDeathCross = True
+        break
+
+    if haveDeathCross:
+      return True
+
+    return False
+
+
+  # D向上反转
+  @staticmethod
+  def isDUpwardReverse(parseDay,id=''):
+    days = 3
+    dayList = BaseParser.getPastTradingDayList(parseDay,days)
+    dataOfDays = KdjParser.getKDJData(parseDay,id,days)
+    if False == dataOfDays:
+      return False
+
+    d1 = float(dataOfDays[dayList[0]][1])
+    d2 = float(dataOfDays[dayList[1]][1])
+    d3 = float(dataOfDays[dayList[2]][1])
+    if not ( ( d2 < d1 )and( d2 < d3 ) ):
+      return False
+    return True
 
 
 

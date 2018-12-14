@@ -28,9 +28,9 @@ class KdjSpider(BaseSpider):
       url += '2'
     else:
       url += '1'
-
-    url +='k&js=$FUN$((x))&rtntype=4&extend=kdj&check=kte&authorityType=fa&$FUN$=$FUN$'
-    url = url.replace('$ID$',id).replace('$FUN$','fsDataTeacma' + endTime)
+    
+    url +='&TYPE=k&js=$FUN$((x))&rtntype=4&extend=kdj&check=kte&authorityType=fa&$FUN$=$FUN$'
+    url = url.replace('$ID$',id).replace('$FUN$','fsDataTeacma')
 
     print url
     return url

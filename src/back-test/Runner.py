@@ -46,12 +46,11 @@ class Runner(threading.Thread):
 if __name__ == '__main__':
   # 回测parser
   # parser = 'MaxPriceUnderMaParser'
-  # parser = 'RelativeParser'
+  parser = 'RelativeParser'
   # parser = 'RgbParser'
   # parser = 'SwallowUpParser'
   # parser = 'MaParser'
-  parser = 'AmplitudeParser'
-
+  # parser = 'AmplitudeParser'
 
   # 起止日期
   # beginDate = '2016-08-31'  
@@ -63,8 +62,8 @@ if __name__ == '__main__':
   # beginDate = '2018-10-24'  
   # testDays = 7
 
-  # beginDate = '2018-03-26'  
-  # testDays = 1
+  # beginDate = '2018-06-05'  
+  # testDays = 20
 
 
   dayList = BaseParser.BaseParser.getNextTradingDayList(beginDate,testDays-1)
