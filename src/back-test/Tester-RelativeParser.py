@@ -412,11 +412,11 @@ def trace555(id,parseDay):
 '''
 最大持股20日，n%止盈，止损 ☆☆☆☆☆
 '''
-def traceZZ(id,parseDay):
+def traceNN(id,parseDay):
   print '最大持股20日，n%止盈（止盈价和最高价之间卖出），信号日和买入日的最低价为止损价'
 
   maxDays = 20 # 最长持股时间
-  rate = 0.02 # 止盈利润比例
+  rate = 0.00 # 止盈利润比例
 
   parser = RelativeParser.RelativeParser(parseDay,id)
   priceFile = Tools.getPriceDirPath()+'/'+str(id)
@@ -455,6 +455,7 @@ def traceZZ(id,parseDay):
 
     # 止盈
     if maxPrice >= targetPrice:
+    # if endPrice >= targetPrice:
     # if (maxPrice >= targetPrice) and (endPrice < startPrice): # 阴线，且最高价达到目标价
       # outPrice = targetPrice  # 目标价止盈
       outPrice = round(random.uniform(targetPrice, maxPrice),3)  # 目标止盈价和当日最高价之间卖出
@@ -462,6 +463,7 @@ def traceZZ(id,parseDay):
       # outPrice = round(random.uniform(inPrice, maxPrice),3)  # 买入价和当日最高价之间卖出
       # outPrice = round(random.uniform(endPrice, maxPrice),3)  # 当日收盘价和当日最高价之间卖出
       # outPrice = endPrice # 收盘价卖出
+      # outPrice = round(random.uniform(min(targetPrice,endPrice), max(targetPrice,endPrice)),3)  # 目标价和收盘价之间卖出（当天必走）
       outDay = day
       break
     
@@ -520,6 +522,13 @@ def trace(id,parseDay):
   if 0==inPrice:
     return False # 坏数据
 
+  # 高低开判断
+  # endPrice = parser.getEndPriceOfDay(res,parseDay)
+  # r  = (inPrice - endPrice)/endPrice
+  # # if r < 0.07:
+  # if r > -0.02:
+  #   return False
+  
   outDay = dayList[-1]
   outPrice = parser.getEndPriceOfDay(res,outDay)  # 收盘价卖出
   # outPrice = parser.getMaxPriceOfDay(res,outDay) # 最高价卖出

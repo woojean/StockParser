@@ -220,6 +220,25 @@ class BaseParser:
     if gr < -0.09:
       return True
     return False
+
+  def isOneLineUpwardLimit(self,res,parseDay):
+    dayList = BaseParser.getPastTradingDayList(parseDay,2)
+    endPriceOfDay1 = self.getEndPriceOfDay(res,dayList[0])
+    endPriceOfDay2 = self.getEndPriceOfDay(res,dayList[1])
+    if 0 == endPriceOfDay1 or  0 == endPriceOfDay2:
+      return False
+
+    # 一字板
+    minPrice = self.getMinPriceOfDay(res,parseDay)
+    maxPrice = self.getMaxPriceOfDay(res,parseDay)
+    if not minPrice == maxPrice:
+      return False
+
+    gr =  (endPriceOfDay2-endPriceOfDay1)/endPriceOfDay1
+    if gr > 0.095:
+      return True
+    return False
+
   
   # 是否涨停
   def isUpwardLimit(self,res,parseDay):
@@ -228,8 +247,15 @@ class BaseParser:
     endPriceOfDay2 = self.getEndPriceOfDay(res,dayList[1])
     if 0 == endPriceOfDay1 or  0 == endPriceOfDay2:
       return False
+
+    # 排除一字板
+    minPrice = self.getMinPriceOfDay(res,parseDay)
+    maxPrice = self.getMaxPriceOfDay(res,parseDay)
+    if minPrice == maxPrice:
+      return False
+
     gr =  (endPriceOfDay2-endPriceOfDay1)/endPriceOfDay1
-    if gr > 0.09:
+    if gr > 0.095:
       return True
     return False
 
@@ -648,8 +674,8 @@ class BaseParser:
     res = open(path,'r').read()
 
     R = 5
-    G = 8
-    B = 13
+    G = 10
+    B = 20
       
     dayList = self.getPastTradingDayList(parseDay,R)
     (v,v,maR) = self.getMAPrice(res,dayList)
@@ -664,6 +690,32 @@ class BaseParser:
       return False
 
     return True
+
+
+  # 缩量（相对前一日）
+  def isVolumnDecline(self,res,parseDay):
+    dayList = BaseParser.getPastTradingDayList(parseDay,2)
+    lastDay = dayList[0]
+    v1 = self.getVolumeOfDay(res,lastDay)
+    v2 = self.getVolumeOfDay(res,parseDay)
+    if not v2 < v1:
+      return False
+    return True
+  
+  # 量是n日最低
+  def minVolumnOfDays(self,res,parseDay):
+    days = 0
+    volume = self.getVolumeOfDay(res,parseDay)
+    dayList = self.getPastTradingDayList(parseDay,100)
+    dayList.reverse()
+    for day in dayList:
+      days += 1
+      v = self.getVolumeOfDay(res,day)
+      if v < volume:
+        break
+    return days
+
+
 
   #  inherit
   # ----------------------------------------------------------------------------------------

@@ -30,24 +30,20 @@ class DailyParser(BaseParser):
 
   def parse(self,res,parseDay,id=''):
 
-    # 阳线
-    if not self.isYangXian(res,parseDay):
-      return False
-
-    # 振幅
-    am = self.getAm(res,parseDay)
-    minAm = 0.05
-    if am < minAm:
+    # 20日线向上
+    if not self.isMaUpward(res,parseDay,20):
       return False
 
 
-    # J、D低位
-    j = KdjParser.getJ(parseDay,id)
-    d = KdjParser.getD(parseDay,id)
-    if False == j or False == d:
+    # 缩量
+    if not self.isVolumnDecline(res,parseDay):
       return False
-    if ((not j<30) and (not d<20)):
-      return False
+
+
+    # 量是n日最小
+    # days = self.minVolumnOfDays(res,parseDay)
+    # if days < 20:
+    #   return False
 
 
     return True
