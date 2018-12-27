@@ -105,23 +105,107 @@ class RelativeParser(BaseParser):
 
   
   def parse(self,res,parseDay,id=''):
-    # 剔除新股（含复牌股）
-    if self.isNewStock(res,parseDay):
-      return False
+
+    # # # 量缩至5日均量线下
+    # # # -------------------------------------------------------
+    # days = 5
+    # if not self.isVolumnUnderMv(res,parseDay,days):
+    #   return False
+
+    # # D
+    # isDUpward = KdjParser.isDUpward(parseDay,id)
+    # d = KdjParser.getD(parseDay,id)
+    # if (not isDUpward) and (not d < 20):
+    #   return False
+
+
+    # # # 近n日涨停数达到一定值
+    # # # -------------------------------------------------------
+    # days = 120
+    # minUpwardLimitNum = 6
+    # upwardLimitNum = self.countUpwardLimits(res,parseDay,days)
+    # if not upwardLimitNum >= minUpwardLimitNum:
+    #   return False
+
+
+    # # 连板股 + 缩量阴线
+    # dayList = BaseParser.getPastTradingDayList(parseDay,2)
+    # lastDay = dayList[0]
+
+    # # 阴线
+    # if self.isYangXian(res,parseDay):
+    #   return False
+
+
+    # if not self.isContinusUpwardLimit(res,lastDay):
+    #   return False
+
+    # # 缩量
+    # v1 = self.getVolumeOfDay(res,lastDay)
+    # v2 = self.getVolumeOfDay(res,parseDay)
+    # if not v2 < v1:
+    #   return False
 
     
-    # 20日线向上
-    if not self.isMaUpward(res,parseDay,20):
-      return False
+    # # DV
+    # if not KdjParser.isDUpwardReverse(parseDay,id):
+    #   return False
+
+    # # D < 20
+    # d = KdjParser.getD(parseDay,id)
+    # if False == d:
+    #   return False
+    # if d >= 20:
+    #   return False
 
 
-    # 缩量
-    dayList = BaseParser.getPastTradingDayList(parseDay,2)
-    lastDay = dayList[0]
-    v1 = self.getVolumeOfDay(res,lastDay)
-    v2 = self.getVolumeOfDay(res,parseDay)
-    if v2 >= v1:
-      return False
+
+    # 近期最大振幅
+    # days = 60
+    # am = getAmplitudeOfDays(res,parseDay,days)
+    # if not am < 1:
+    #   return False
+
+
+    # # 最高价低于MA
+    # if not self.isMaxPriceUnderMa(res,parseDay,5):
+    #   return False
+
+   
+
+    # # 量缩至5日均量线下
+    # # -------------------------------------------------------
+    # days = 5
+    # if not self.isVolumnUnderMv(res,parseDay,days):
+    #   return False
+
+    # # 振幅
+    # am = self.getAm(res,parseDay)
+    # if not am >= 0.05:
+    #   return False
+
+    # # 近n日涨停数达到一定值
+    # # -------------------------------------------------------
+    # days = 120
+    # minUpwardLimitNum = 1
+    # upwardLimitNum = self.countUpwardLimits(res,parseDay,days)
+    # if not upwardLimitNum >= minUpwardLimitNum:
+    #   return False
+
+
+
+
+    # # 剔除新股（含复牌股）
+    # if self.isNewStock(res,parseDay):
+    #   return False
+
+    
+    # # 20日线向上
+    # if not self.isMaUpward(res,parseDay,20):
+    #   return False
+
+
+    
 
 
     return True
@@ -228,9 +312,7 @@ class RelativeParser(BaseParser):
     # if not ((startPrice2 < endPrice1) and (endPrice2 > startPrice1)):
     #   return False
 
-    # 最高价低于MA
-    # if not self.isMaxPriceUnderMa(res,parseDay,10):
-    #   return False
+    
 
 
     # 量大于MV5
@@ -291,9 +373,7 @@ class RelativeParser(BaseParser):
     # if self.isNewStock(res,parseDay):
     #   return False
 
-    # # 阳线
-    # if not self.isYangXian(res,parseDay):
-    #   return False
+    
 
     # # 振幅
     # am = self.getAm(res,parseDay)

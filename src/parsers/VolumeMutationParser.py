@@ -18,50 +18,94 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 '''
-“最大成交量判断”
+量突变
 '''
 class VolumeMutationParser(BaseParser):
   _tag = 'VolumeMutationParser'
-  _days = 30
 
-  def __init__(self,parseDay,days = 30):
-    self._days = days
+  def __init__(self,parseDay):
     BaseParser.__init__(self,parseDay) 
 
-
+  
   def parse(self,res,parseDay,id=''):
-    ret = False
-
-    # 是阳线
-    if not self.isRise(res,parseDay):
+    # 近期有涨停（含当日）
+    days = 10
+    if not self.recentlyHaveUpwardLimit(res,parseDay,days):
+      return False
+    
+    if not self.recentlyHaveDownwardLimit(res,parseDay,days):
       return False
 
-    # 成交量最大
-    if not self.isMaxVolumeOfDays(res,parseDay,self._days):
-     return False
+    # 缩量至近期低点
+    # recentShrinkDays = 10
+    # days = self.minVolumnOfDays(res,parseDay)
+    # if not days >= recentShrinkDays:
+    #   return False
 
-    # 之前的成交量比较小
-    parseDayVolume = self.getVolumeOfDay(res,parseDay)
+    # 相对前一日缩量程度
+    # dayList = BaseParser.getPastTradingDayList(parseDay,2)
+    # lastDay = dayList[0]
+    # v1 = self.getVolumeOfDay(res,lastDay)
+    # v2 = self.getVolumeOfDay(res,parseDay)
+    # print v2/v1
+    # if not (v2/v1 < 0.7) :
+    #   return False
+    
 
-    pastDayList = BaseParser.getPastTradingDayList(parseDay,self._days)[:-1]
-    for day in pastDayList:
-      volume = self.getVolumeOfDay(res,day)
-      rate = volume/parseDayVolume
-      if (rate > 0.5) or (rate == 0):
-        return False
+    # 涨停（排除一字板）
+    # if not self.isUpwardLimit(res,parseDay):
+    #   return False
+
+
+
+    # 相对前一日缩量
+    # dayList = BaseParser.getPastTradingDayList(parseDay,2)
+    # lastDay = dayList[0]
+    # v1 = self.getVolumeOfDay(res,lastDay)
+    # v2 = self.getVolumeOfDay(res,parseDay)
+    # if not v2 < v1 :
+    #   return False
+
+
+    # 近期有一字板涨停（含当日）
+    # days = 10
+    # if not self.recentlyHaveOneLineUpwardLimit(res,parseDay,days):
+    #   return False
+
+    
+
+    # # 缩量（相对前一日）*
+    # # -------------------------------------------------------
+    # if not self.isVolumnShrink(res,parseDay):
+    #   return False
+
+
+    # # 20日线向上，60日线向上，20日线在60日线上方
+    # # -------------------------------------------------------
+    # if not self.isMaInUpTrend(res,parseDay,20,60):
+    #   return False
+
+    
+    # # 近20日有涨停 
+    # # -------------------------------------------------------
+    # if not self.recentlyHaveUpwardLimit(res,parseDay,20):
+    #   return False
+
+
     return True
+
+
+
 
 
 
 if __name__ == '__main__':
   print 'VolumeMutationParser'
 
-  days = 20
-
   parseDay = BaseParser.getParseDay()
   print parseDay
 
-  idList = VolumeMutationParser(parseDay,days).getParseResult(True)
+  idList = VolumeMutationParser(parseDay).getParseResult(True)
   print idList
 
 

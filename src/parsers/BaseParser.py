@@ -217,9 +217,24 @@ class BaseParser:
     if 0 == endPriceOfDay1 or  0 == endPriceOfDay2:
       return False
     gr =  (endPriceOfDay2-endPriceOfDay1)/endPriceOfDay1
-    if gr < -0.09:
+    if gr < -0.095:
       return True
     return False
+
+
+  # 近期是否有跌停
+  def recentlyHaveDownwardLimit(self,res,parseDay,days):
+    haveDownwardLimit = False
+    dayList = BaseParser.getPastTradingDayList(parseDay,days)
+    for day in dayList:
+      if self.isDownwardLimit(res,day):
+        haveDownwardLimit = True
+        break
+    if not haveDownwardLimit:
+      return False
+    return True
+
+
 
   def isOneLineUpwardLimit(self,res,parseDay):
     dayList = BaseParser.getPastTradingDayList(parseDay,2)
@@ -258,6 +273,86 @@ class BaseParser:
     if gr > 0.095:
       return True
     return False
+
+
+  # 是否连板
+  def isContinusUpwardLimit(self,res,parseDay):
+    dayList = BaseParser.getPastTradingDayList(parseDay,2)
+    if not self.isUpwardLimit(res,dayList[0]):
+      return False
+    if not self.isUpwardLimit(res,dayList[1]):
+      return False
+    return True
+
+  
+
+  # 近期是否有连板
+  def recentlyHaveContinusUpwardLimit(self,res,parseDay,days):
+    have = False
+    dayList = BaseParser.getPastTradingDayList(parseDay,days)
+    for day in dayList:
+      if self.isContinusUpwardLimit(res,day): # 排除一字板
+        have = True
+        break
+    if not have:
+      return False
+    return True
+
+
+
+  # 近期是否有涨停
+  def recentlyHaveUpwardLimit(self,res,parseDay,days):
+    haveUpwardLimit = False
+    dayList = BaseParser.getPastTradingDayList(parseDay,days)
+    for day in dayList:
+      if self.isUpwardLimit(res,day): # 排除一字板
+        haveUpwardLimit = True
+        break
+    if not haveUpwardLimit:
+      return False
+    return True
+  
+
+  # 近期是否有一字板涨停
+  def recentlyHaveOneLineUpwardLimit(self,res,parseDay,days):
+    haveUpwardLimit = False
+    dayList = BaseParser.getPastTradingDayList(parseDay,days)
+    for day in dayList:
+      if self.isOneLineUpwardLimit(res,day): # 排除一字板
+        haveUpwardLimit = True
+        break
+    if not haveUpwardLimit:
+      return False
+    return True
+  
+
+  # 过去指定天数涨停板数
+  def countUpwardLimits(self,res,parseDay,days):
+    dayList = BaseParser.getPastTradingDayList(parseDay,days)
+    upwardLimitNum = 0
+    for day in dayList:
+      if self.isUpwardLimit(res,day):
+        upwardLimitNum += 1
+    return upwardLimitNum
+
+
+  # 近阶段振幅
+  def getAmplitudeOfDays(self,res,parseDay,days):
+    minPrice = 99999
+    maxPrice = 0
+    dayList = BaseParser.getPastTradingDayList(parseDay,days)
+    for day in dayList:
+      minP = self.getMinPriceOfDay(res,day)
+      maxP = self.getMaxPriceOfDay(res,day)
+      if minP < minPrice:
+        minPrice = minP
+      if maxP > maxPrice:
+        maxPrice = maxP
+    if minPrice == 0:
+      return False
+    am = (maxPrice - minPrice)/minPrice
+    return am
+
 
 
   # 均线穿越发生在3日内
@@ -313,6 +408,71 @@ class BaseParser:
       isMaInTrend = None
       #print repr(e)
     return isMaInTrend
+
+
+  def isMaInUpTrend(self,res,parseDay,maDays1,maDays2):
+    # 20日线向上
+    # -------------------------------------------------------
+    if not self.isMaUpward(res,parseDay,maDays1):
+      return False
+
+    # 60日线向上
+    # -------------------------------------------------------
+    if not self.isMaUpward(res,parseDay,maDays2):
+      return False
+
+    # 20日线在60日线上方
+    # -------------------------------------------------------
+    dayList = BaseParser.getPastTradingDayList(parseDay,maDays1)
+    (v,v,ma20) = self.getMAPrice(res,dayList)
+    dayList = BaseParser.getPastTradingDayList(parseDay,maDays2)
+    (v,v,ma60) = self.getMAPrice(res,dayList)
+    if ma20 < 0 or ma60<0:
+      return False
+    if not ma20 > ma60:
+      return False
+
+    return True
+
+
+  def isMaUpwardReverse(self,res,parseDay,maDays):
+    dayList = BaseParser.getPastTradingDayList(parseDay,3)
+    day1 = dayList[0]
+    day2 = dayList[1]
+    day3 = dayList[2]
+    dayList1 = BaseParser.getPastTradingDayList(day1,maDays)
+    (v,v,ma1) = self.getMAPrice(res,dayList1)
+    dayList2 = BaseParser.getPastTradingDayList(day2,maDays)
+    (v,v,ma2) = self.getMAPrice(res,dayList2)
+    dayList3 = BaseParser.getPastTradingDayList(day3,maDays)
+    (v,v,ma3) = self.getMAPrice(res,dayList3)
+    if not ((ma1 > ma2) and (ma3 > ma2)):
+      return False
+    return True
+
+
+  
+  def isVolumnShrink(self,res,parseDay):
+    dayList = BaseParser.getPastTradingDayList(parseDay,2)
+    lastDay = dayList[0]
+    v1 = self.getVolumeOfDay(res,lastDay)
+    v2 = self.getVolumeOfDay(res,parseDay)
+    if not v2 < v1:
+      return False
+    return True
+
+
+  def getVolumnShrinkRate(self,res,parseDay):
+    dayList = BaseParser.getPastTradingDayList(parseDay,2)
+    lastDay = dayList[0]
+    v1 = self.getVolumeOfDay(res,lastDay)
+    v2 = self.getVolumeOfDay(res,parseDay)
+    if v1 == 0:
+      return False
+    rate = v2/v1
+    return rate
+
+
 
 
   def isEndPriceUnderMa(self,res,parseDay,maDays):
@@ -453,6 +613,18 @@ class BaseParser:
     except Exception, e:
       maVolume = 0
     return maVolume
+
+
+  # 量在均量线下
+  def isVolumnUnderMv(self,res,parseDay,days):
+    dayList = BaseParser.getPastTradingDayList(parseDay,days)
+    maVolume = self.getMaVolume(res,dayList)
+    volumn = self.getVolumeOfDay(res,parseDay)
+    if volumn < maVolume:
+      return True
+    return False
+
+
 
   # 获取量比
   def getVolumeRatioOfDays(self,res,day,days):
@@ -706,12 +878,14 @@ class BaseParser:
   def minVolumnOfDays(self,res,parseDay):
     days = 0
     volume = self.getVolumeOfDay(res,parseDay)
+    if volume <=0 :
+      return 0
     dayList = self.getPastTradingDayList(parseDay,100)
     dayList.reverse()
     for day in dayList:
       days += 1
       v = self.getVolumeOfDay(res,day)
-      if v < volume:
+      if (v < volume) and ( v > 0 ):
         break
     return days
 

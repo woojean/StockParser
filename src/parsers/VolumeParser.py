@@ -70,42 +70,49 @@ class VolumeParser(BaseParser):
   #   return idList
 
 
+  # def parse(self,res,parseDay,id=''):
+  #   # 近期有连板（剔除一字板）
+  #   days = 20
+  #   if not self.recentlyHaveContinusUpwardLimit(res,parseDay,days):
+  #     return False
+    
 
+  #   # 相对前一日缩量
+  #   # -------------------------------------------------------
+  #   if not self.isVolumnShrink(res,parseDay):
+  #     return False
+
+
+  #   return True
 
   
+
   def parse(self,res,parseDay,id=''):
+
+    # 相对前一日缩量
+    # -------------------------------------------------------
+    # r = self.getVolumnShrinkRate(res,parseDay)
+    # if not r <= 0.8:
+    #   return False
+
     
-    # 20日线向上
+    # D 
     # -------------------------------------------------------
-    if not self.isMaUpward(res,parseDay,20):
+    if not KdjParser.isDUpward(parseDay,id):
+      return False
+
+    d = KdjParser.getD(parseDay,id)
+    # if not ((d > 30) and (d < 60)):
+    if not (d < 20):
       return False
 
 
-    # 60日线向上
+    # 近n日涨停数达到一定值
     # -------------------------------------------------------
-    if not self.isMaUpward(res,parseDay,60):
-      return False
-    
-
-    # 20日线在60日线上方
-    # -------------------------------------------------------
-    dayList = BaseParser.getPastTradingDayList(parseDay,20)
-    (v,v,ma20) = self.getMAPrice(res,dayList)
-    dayList = BaseParser.getPastTradingDayList(parseDay,60)
-    (v,v,ma60) = self.getMAPrice(res,dayList)
-    if ma20 < 0 or ma60<0:
-      return False
-    if not ma20 > ma60:
-      return False
-
-
-    # 缩量
-    # -------------------------------------------------------
-    dayList = BaseParser.getPastTradingDayList(parseDay,2)
-    lastDay = dayList[0]
-    v1 = self.getVolumeOfDay(res,lastDay)
-    v2 = self.getVolumeOfDay(res,parseDay)
-    if not v2 < v1:
+    days = 120
+    minUpwardLimitNum = 3
+    upwardLimitNum = self.countUpwardLimits(res,parseDay,days)
+    if not upwardLimitNum >= minUpwardLimitNum:
       return False
 
 

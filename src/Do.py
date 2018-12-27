@@ -245,7 +245,7 @@ def run(parseDay,parsers,isNew=False):
   if isNew:
     spiders = [
       'PriceSpider',
-      # 'KdjSpider',
+      'KdjSpider',
       # 'BiasSpider',
       # 'MacdSpider',
       # 'BasicInfoSpider'
@@ -291,7 +291,7 @@ if __name__ == '__main__':
   }
 
   parsers = {
-    'DailyParser':'每日执行',
+    'DailyParser':'每日执行'
   }
 
   (parseDay, isNew,traceDay) = getParams()

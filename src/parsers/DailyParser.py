@@ -30,20 +30,26 @@ class DailyParser(BaseParser):
 
   def parse(self,res,parseDay,id=''):
 
-    # 20日线向上
-    if not self.isMaUpward(res,parseDay,20):
+    # D向上
+    # -------------------------------------------------------
+    if not KdjParser.isDUpward(parseDay,id):
       return False
 
 
-    # 缩量
-    if not self.isVolumnDecline(res,parseDay):
+    # D低于20 
+    # -------------------------------------------------------
+    d = KdjParser.getD(parseDay,id)
+    if not (d < 20):
       return False
 
 
-    # 量是n日最小
-    # days = self.minVolumnOfDays(res,parseDay)
-    # if days < 20:
-    #   return False
+    # 近n日涨停数达到一定值（至少2个月有一个涨停）
+    # -------------------------------------------------------
+    days = 120
+    minUpwardLimitNum = 3
+    upwardLimitNum = self.countUpwardLimits(res,parseDay,days)
+    if not upwardLimitNum >= minUpwardLimitNum:
+      return False
 
 
     return True

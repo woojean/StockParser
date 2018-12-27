@@ -35,7 +35,7 @@ class MaxPriceUnderMaParser(BaseParser):
     print 'In custom mode'
     print '***************************************************************************'
     # idFile = '最高价低于5日线的阳线且剔除新股/'+self._parseDay+'-MaxPriceUnderMaParser.sel'
-    idFile = 'D<20且剔除新股/'+self._parseDay+'-MaxPriceUnderMaParser.sel'
+    # idFile = 'D<20且剔除新股/'+self._parseDay+'-MaxPriceUnderMaParser.sel'
     # idFile = 'D<20阳线振幅>5%/'+self._parseDay+'-MaxPriceUnderMaParser.sel'
     allIdList = Tools.getIdListOfFile(idFile)
     idList = []

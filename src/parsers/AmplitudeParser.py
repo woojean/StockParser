@@ -116,6 +116,13 @@ class AmplitudeParser(BaseParser):
     if not self.isYangXian(res,parseDay):
       return False
 
+    # 量缩至5日均量线下
+    # -------------------------------------------------------
+    days = 5
+    if not self.isVolumnUnderMv(res,parseDay,days):
+      return False
+      
+
     # # 最高价低于5日线
     # dayList = BaseParser.getPastTradingDayList(parseDay,5) 
     # (v,v,ma) = self.getMAPrice(res,dayList)

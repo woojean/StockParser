@@ -509,7 +509,7 @@ def traceNN(id,parseDay):
 '''
 def trace(id,parseDay):
   print '持有N日'
-  N = 5 # 持股天数
+  N = 8 # 持股天数
   print id,parseDay
   parser = RelativeParser.RelativeParser(parseDay,id)
   priceFile = Tools.getPriceDirPath()+'/'+str(id)
