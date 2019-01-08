@@ -27,29 +27,36 @@ class DailyParser(BaseParser):
   
   def __init__(self,parseDay,id=''):
     BaseParser.__init__(self,parseDay) 
+  
 
   def parse(self,res,parseDay,id=''):
-
-    # D向上
+    # 阳线
     # -------------------------------------------------------
-    if not KdjParser.isDUpward(parseDay,id):
+    if not self.isYangXian(res,parseDay):
       return False
 
-
-    # D低于20 
+    # 最高价低于5日线
     # -------------------------------------------------------
-    d = KdjParser.getD(parseDay,id)
-    if not (d < 20):
+    if not self.isMaxPriceUnderMa(res,parseDay,5):
       return False
+    
 
-
-    # 近n日涨停数达到一定值（至少2个月有一个涨停）
+    
+    # 近n日涨停数达到一定值
     # -------------------------------------------------------
-    days = 120
-    minUpwardLimitNum = 3
+    days = 60
+    minUpwardLimitNum = 1
     upwardLimitNum = self.countUpwardLimits(res,parseDay,days)
     if not upwardLimitNum >= minUpwardLimitNum:
       return False
+
+
+
+    # 振幅>n%
+    # -------------------------------------------------------
+    # am = self.getAm(res,parseDay)
+    # if not am >= 0.05:
+    #   return False
 
 
     return True

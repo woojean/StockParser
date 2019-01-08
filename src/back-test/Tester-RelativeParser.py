@@ -87,12 +87,15 @@ def trace1(id,parseDay):
   dayList = parser.getNextTradingDayList(parseDay,20) # 
   inDay = dayList[0]
   startPrice = parser.getStartPriceOfDay(res,inDay)
+  endPrice = parser.getEndPriceOfDay(res,inDay)
   minPrice = parser.getMinPriceOfDay(res,inDay)
   if 0==startPrice:
     return False # 坏数据
-  # inPrice = startPrice  # 开盘价买入
-  inPrice = round(random.uniform(minPrice, startPrice),3)  # 目标止盈价和当日最高价之间卖出
-
+  inPrice = startPrice  # 开盘价买入
+  
+  # 剔除买入日阴线
+  if endPrice < startPrice:
+    return False
 
   # 确定止损价
   sp1 = parser.getMinPriceOfDay(res,parseDay) 
@@ -102,18 +105,21 @@ def trace1(id,parseDay):
   outPrice = 0 
   dayList = dayList[1:]
   holdDays = 1
+  minP = 99999
+  maxP = 0
   for day in dayList:
     holdDays +=1
     minPrice = parser.getMinPriceOfDay(res,day)
+    maxPrice = parser.getMaxPriceOfDay(res,day)
+    if minPrice < minP:
+      minP = minPrice
+    if maxPrice > maxP:
+      maxP = maxPrice
     endPrice = parser.getEndPriceOfDay(res,day)
     if minPrice == 0:
       return False
-    # if minPrice < stopPrice:  # 最低价低于止损价
-    #   outPrice = stopPrice
-    #   outDay = day
-    #   break
-    if endPrice < stopPrice:  # 收盘价低于止损价
-      outPrice = endPrice
+    if minPrice < stopPrice:  # 最低价低于止损价
+      outPrice = stopPrice
       outDay = day
       break
     else:
@@ -130,8 +136,8 @@ def trace1(id,parseDay):
   ret['outDay'] = outDay
   ret['outPrice'] = outPrice
   ret['holdDays'] = holdDays
-  ret['minPrice'] = 0
-  ret['maxPrice'] = 0
+  ret['minPrice'] = minP
+  ret['maxPrice'] = maxP
   return ret
 
 
@@ -509,26 +515,27 @@ def traceNN(id,parseDay):
 '''
 def trace(id,parseDay):
   print '持有N日'
-  N = 8 # 持股天数
+  N = 5 # 持股天数
   print id,parseDay
   parser = RelativeParser.RelativeParser(parseDay,id)
   priceFile = Tools.getPriceDirPath()+'/'+str(id)
   res = open(priceFile,'r').read()
   
+
   dayList = parser.getNextTradingDayList(parseDay,N) # 
   inDay = dayList[0]
   inPrice = parser.getStartPriceOfDay(res,inDay)  # 开盘价买入
   # inPrice = parser.getMinPriceOfDay(res,inDay)  # 最低价买入
+  startPrice = parser.getStartPriceOfDay(res,inDay)
+  endPrice = parser.getEndPriceOfDay(res,inDay)
+
   if 0==inPrice:
     return False # 坏数据
 
-  # 高低开判断
-  # endPrice = parser.getEndPriceOfDay(res,parseDay)
-  # r  = (inPrice - endPrice)/endPrice
-  # # if r < 0.07:
-  # if r > -0.02:
-  #   return False
-  
+  # 剔除买入日阴线
+  if endPrice < startPrice:
+    return False
+
   outDay = dayList[-1]
   outPrice = parser.getEndPriceOfDay(res,outDay)  # 收盘价卖出
   # outPrice = parser.getMaxPriceOfDay(res,outDay) # 最高价卖出
@@ -546,21 +553,6 @@ def trace(id,parseDay):
       maxPrice = maxP
     if minP < minPrice:
       minPrice = minP
-
-  # 无2%的盈利机会
-  # r = maxPrice/inPrice
-  # if r >1.02:
-  #   return False
-
-  # 开盘价和最低价之间随机买入
-  # startPrice = parser.getStartPriceOfDay(res,inDay)
-  # minPrice = parser.getMinPriceOfDay(res,inDay)
-  # inPrice = random.uniform(minPrice, startPrice)
-
-  # 收盘价和最高价之间随机卖出
-  # endPrice = parser.getEndPriceOfDay(res,inDay)
-  # maxPrice = parser.getMaxPriceOfDay(res,inDay)
-  # outPrice = random.uniform(endPrice, maxPrice)
 
 
   ret = {}

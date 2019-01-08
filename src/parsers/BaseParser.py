@@ -183,9 +183,13 @@ class BaseParser:
     day2 = dayList[-1]
     endPrice1 = self.getEndPriceOfDay(res,day1)
     endPrice2 = self.getEndPriceOfDay(res,day2)
+    if endPrice1 == 0 or endPrice2 ==0 :
+      return False
     if endPrice2 <= endPrice1:
       return False
     return True
+  
+
 
 
   # 判断是否处在上升趋势中（今日的ma60大于5天前的ma60）
@@ -408,6 +412,28 @@ class BaseParser:
       isMaInTrend = None
       #print repr(e)
     return isMaInTrend
+  
+
+  def isInUpTrend(self,res,parseDay):
+    if not self.isMaUpward(res,parseDay,5):
+      return False
+    if not self.isMaUpward(res,parseDay,10):
+      return False
+    if not self.isMaUpward(res,parseDay,20):
+      return False
+
+    dayList = BaseParser.getPastTradingDayList(parseDay,5)
+    (v,v,ma5) = self.getMAPrice(res,dayList)
+    dayList = BaseParser.getPastTradingDayList(parseDay,10)
+    (v,v,ma10) = self.getMAPrice(res,dayList)
+    dayList = BaseParser.getPastTradingDayList(parseDay,20)
+    (v,v,ma20) = self.getMAPrice(res,dayList)
+    
+    if not((ma5 > ma10) and (ma10 > ma20)):
+      return False
+
+    return True
+
 
 
   def isMaInUpTrend(self,res,parseDay,maDays1,maDays2):
@@ -479,6 +505,8 @@ class BaseParser:
     dayList = BaseParser.getPastTradingDayList(parseDay,maDays) 
     (v,v,ma) = self.getMAPrice(res,dayList)
     endPrice = self.getEndPriceOfDay(res,parseDay)
+    if ma <0:
+      return False
     if endPrice > ma:
       return False
     return True
@@ -488,7 +516,20 @@ class BaseParser:
     dayList = BaseParser.getPastTradingDayList(parseDay,maDays) 
     (v,v,ma) = self.getMAPrice(res,dayList)
     maxPrice = self.getMaxPriceOfDay(res,parseDay)
+    if ma <0:
+      return False
     if maxPrice > ma:
+      return False
+    return True
+
+
+  def isMinPriceOnMa(self,res,parseDay,maDays):
+    dayList = BaseParser.getPastTradingDayList(parseDay,maDays) 
+    (v,v,ma) = self.getMAPrice(res,dayList)
+    minPrice = self.getMinPriceOfDay(res,parseDay)
+    if ma <0:
+      return False
+    if ma > minPrice:
       return False
     return True
     
@@ -841,10 +882,22 @@ class BaseParser:
 
   
 
-  def isRgb(self,id,parseDay):
-    path = Tools.getPriceDirPath()+'/'+str(id)
-    res = open(path,'r').read()
+  def isMinPriceUpwardReverse(self,res,parseDay):
+    dayList = self.getPastTradingDayList(parseDay,3)
+    min1 = self.getMinPriceOfDay(res,dayList[0])
+    min2 = self.getMinPriceOfDay(res,dayList[1])
+    min3 = self.getMinPriceOfDay(res,dayList[2])
+    
+    if min1==0 or min2 ==0 or min3 ==0:
+      return False
+    
+    if not ((min1 > min2) and (min3 > min2)):
+      return False
+    
+    return True
 
+
+  def isRgb(self,res,parseDay):
     R = 5
     G = 10
     B = 20
@@ -873,6 +926,18 @@ class BaseParser:
     if not v2 < v1:
       return False
     return True
+
+
+  # 近n日涨幅
+  def getGrOfDays(self,res,parseDay,days):
+    dayList = BaseParser.getPastTradingDayList(parseDay,days)
+    endPrice1 = self.getEndPriceOfDay(res,dayList[0])
+    endPrice2 = self.getEndPriceOfDay(res,parseDay)
+    if endPrice1 == 0:
+      return False
+
+    gr = (endPrice2 - endPrice1)/endPrice1
+    return gr
   
   # 量是n日最低
   def minVolumnOfDays(self,res,parseDay):
@@ -944,7 +1009,7 @@ class BaseParser:
         print repr(e)
 
     # 根据打分结果过滤
-    idList = self.calcuR(idList,1)
+    idList = self.calcuR(idList,10)
 
     if isDump:
       self.dumpIdList(idList)

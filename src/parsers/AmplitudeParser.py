@@ -40,8 +40,8 @@ class AmplitudeParser(BaseParser):
     print '***************************************************************************'
     # idFile = '振幅/振幅>=5%D<=20D向上/'+self._parseDay+'-AmplitudeParser.sel'
 
-    idFile = '5日线下阳线/5日线下阳线/'+self._parseDay+'-AmplitudeParser.sel'
-    # idFile = '5日线下阳线/5日线下阳线-振幅>5%/'+self._parseDay+'-AmplitudeParser.sel'
+    idFile = '2017年所有5日线下阳线/'+self._parseDay+'-AmplitudeParser.sel'
+    # idFile = '2018年所有5日线下振幅超过5%的阳线/'+self._parseDay+'-AmplitudeParser.sel'
 
     allIdList = Tools.getIdListOfFile(idFile)
     idList = []
@@ -66,7 +66,7 @@ class AmplitudeParser(BaseParser):
     print idList
 
     # 根据打分结果过滤
-    idList = self.calcuR(idList,2)
+    # idList = self.calcuR(idList,2)
 
     if isDump:
       self.dumpIdList(idList)
@@ -75,61 +75,103 @@ class AmplitudeParser(BaseParser):
 
 
   # -------------------------------------------------------------------------------------
-  def calcuR(self,idList,num):
-    vList = []
-    for id in idList:
-      path = Tools.getPriceDirPath()+'/'+str(id)
-      res = open(path,'r').read()
+  # def calcuR(self,idList,num):
+  #   vList = []
+  #   for id in idList:
+  #     path = Tools.getPriceDirPath()+'/'+str(id)
+  #     res = open(path,'r').read()
       
-      r = random.random()
+  #     r = random.random() # 随机
 
-      vList.append((id,r))
+  #     vList.append((id,r))
 
-    # 排序
-    sList = sorted(vList,key=lambda x: -x[1]) 
-    # sList = sorted(vList,key=lambda x: x[1]) 
-    print "sorted list:"
-    print sList
-    selectedList = sList[:num]
+  #   # 排序
+  #   sList = sorted(vList,key=lambda x: -x[1]) 
+  #   # sList = sorted(vList,key=lambda x: x[1]) 
+  #   print "sorted list:"
+  #   print sList
+  #   selectedList = sList[:num]
 
-    print "\nselected list:"
-    print selectedList
-    l = []
-    for item in selectedList:
-      l.append(item[0])
-    return l
+  #   print "\nselected list:"
+  #   print selectedList
+  #   l = []
+  #   for item in selectedList:
+  #     l.append(item[0])
+  #   return l
 
 
 
   # -------------------------------------------------------------------------------------
   def parse(self,res,parseDay,id=''):
+    # if not self.isMaUpward(res,parseDay,20):
+    #   return False
+
+
+    # 近n日涨停数达到一定值
+    # -------------------------------------------------------
+    # days = 60
+    # minUpwardLimitNum = 1
+    # upwardLimitNum = self.countUpwardLimits(res,parseDay,days)
+    # if not upwardLimitNum >= minUpwardLimitNum:
+    #   return False
+
+
+
     # 剔除新股（含复牌股）
+    # -------------------------------------------------------
     # if self.isNewStock(res,parseDay):
     #   return False
 
-    # 振幅>n%
-    # am = self.getAm(res,parseDay)
-    # if not am > 0.07:
-    #   return False
 
     # 阳线
-    if not self.isYangXian(res,parseDay):
-      return False
-
-    # 量缩至5日均量线下
     # -------------------------------------------------------
-    days = 5
-    if not self.isVolumnUnderMv(res,parseDay,days):
-      return False
-      
-
-    # # 最高价低于5日线
-    # dayList = BaseParser.getPastTradingDayList(parseDay,5) 
-    # (v,v,ma) = self.getMAPrice(res,dayList)
-    # maxPrice = self.getMaxPriceOfDay(res,parseDay)
-    # if maxPrice > ma:
+    # if not self.isYangXian(res,parseDay):
     #   return False
 
+    
+    # # 振幅>n%
+    # # -------------------------------------------------------
+    am = self.getAm(res,parseDay)
+    # if not am >= 0.05:
+    if am > 0.02:
+      return False
+
+
+
+    # 最高价低于5日线
+    # -------------------------------------------------------
+    # if not self.isMaxPriceUnderMa(res,parseDay,5):
+    #   return False
+
+
+    
+    # 量缩至5日均量线下
+    # -------------------------------------------------------
+    # days = 5
+    # if not self.isVolumnUnderMv(res,parseDay,days):
+    #   return False
+
+
+    # 最低价高于60日线
+    # if not self.isMinPriceOnMa(res,parseDay,60):
+    #   return False
+
+
+    # 相对前一日缩量
+    # if not self.isVolumnShrink(res,parseDay):
+    #   return False
+
+
+    # 量缩至5、10、20日均量线下
+    # -------------------------------------------------------
+    # if not self.isVolumnUnderMv(res,parseDay,5):
+    #   return False
+    # if not self.isVolumnUnderMv(res,parseDay,10):
+    #   return False
+    # if not self.isVolumnUnderMv(res,parseDay,20):
+    #   return False
+
+    
 
     # 最高价相对5日线向下乖离程度
     # dayList = BaseParser.getPastTradingDayList(parseDay,5) 
@@ -152,8 +194,9 @@ class AmplitudeParser(BaseParser):
     # d = KdjParser.getD(parseDay,id)
     # if False == d:
     #   return False
-    # if d > 30:
+    # if d > 20:
     #   return False
+
 
     # 收盘价低于5日线
     # dayList = BaseParser.getPastTradingDayList(parseDay,5) 
