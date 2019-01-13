@@ -41,25 +41,26 @@ class DailyParser(BaseParser):
       return False
     
 
+    # 振幅
+    # -------------------------------------------------------
+    am = self.getAm(res,parseDay)
+    # if not am >= 0.05:
+    #   return False
+
     
-    # 近n日涨停数达到一定值
+    # 近n日涨停数
     # -------------------------------------------------------
     days = 60
     minUpwardLimitNum = 1
     upwardLimitNum = self.countUpwardLimits(res,parseDay,days)
-    if not upwardLimitNum >= minUpwardLimitNum:
+
+
+    if (not upwardLimitNum >= minUpwardLimitNum) and (not am >= 0.05):
       return False
 
 
-
-    # 振幅>n%
-    # -------------------------------------------------------
-    # am = self.getAm(res,parseDay)
-    # if not am >= 0.05:
-    #   return False
-
-
     return True
+
 
 
 if __name__ == '__main__':
