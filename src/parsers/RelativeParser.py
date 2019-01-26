@@ -34,90 +34,154 @@ class RelativeParser(BaseParser):
     BaseParser.__init__(self,parseDay) 
 
 
-  # def getParseResult(self,isDump=False):
-  #   print '***************************************************************************'
-  #   print 'In custom mode'
-  #   print '***************************************************************************'
-  #   idFile = '振幅/振幅>=5%阳线最高价低于5日线'+self._parseDay+'-AmplitudeParser.sel'
-  #   allIdList = Tools.getIdListOfFile(idFile)
-  #   idList = []
-  #   num = 0
-  #   parsedNum = 0
-  #   total = len(allIdList)
-  #   for id in allIdList:
-  #     try:
-  #       self.printProcess(parsedNum,total)
-  #       f = Tools.getPriceDirPath()+'/'+id
-  #       res = open(f,'r').read()
-  #       ret = self.parse(res,self._parseDay,id)
-  #       if ret:
-  #         idList.append(id)
-  #         num += 1
-  #         print str(num) + ' ↗'
-  #       parsedNum += 1
-  #     except Exception, e:
-  #       pass
-  #       print repr(e)
+  def getParseResult(self,isDump=False):
+    print '***************************************************************************'
+    print 'In custom mode'
+    print '***************************************************************************'
+    idFile = '2018年所有5日线下阳线，且近60日有涨停/'+self._parseDay+'-AmplitudeParser.sel'
+    allIdList = Tools.getIdListOfFile(idFile)
+    idList = []
+    num = 0
+    parsedNum = 0
+    total = len(allIdList)
+    for id in allIdList:
+      try:
+        self.printProcess(parsedNum,total)
+        f = Tools.getPriceDirPath()+'/'+id
+        res = open(f,'r').read()
+        ret = self.parse(res,self._parseDay,id)
+        if ret:
+          idList.append(id)
+          num += 1
+          print str(num) + ' ↗'
+        parsedNum += 1
+      except Exception, e:
+        pass
+        print repr(e)
       
-  #   print idList
+    print idList
 
-  #   # 根据打分结果过滤
-  #   # idList = self.calcuR(idList,10)
+    # 根据打分结果过滤
+    idList = self.calcuR(idList,5)
 
-  #   if isDump:
-  #     self.dumpIdList(idList)
+    if isDump:
+      self.dumpIdList(idList)
 
-  #   return idList
+    return idList
 
   
 
 
-  # def calcuR(self,idList,num):
-  #   vList = []
-  #   for id in idList:
-  #     path = Tools.getPriceDirPath()+'/'+str(id)
-  #     res = open(path,'r').read()
+  def calcuR(self,idList,num):
+    vList = []
+    for id in idList:
+      path = Tools.getPriceDirPath()+'/'+str(id)
+      res = open(path,'r').read()
       
-  #     # am = self.getEntityAm(res,parseDay)
-  #     # d = KdjParser.getD(parseDay,id)
+      upwardLimitNum = self.countUpwardLimits(res,parseDay,60)
+      r = upwardLimitNum
 
-  #     # r = am/d
-  #     # r = d
+      vList.append((id,r))
 
-  #     # dayList = BaseParser.getPastTradingDayList(parseDay,5) 
-  #     # (v,v,ma) = self.getMAPrice(res,dayList)
-  #     # endPrice = self.getEndPriceOfDay(res,parseDay)
+    # 排序
+    sList = sorted(vList,key=lambda x: -x[1]) 
+    # sList = sorted(vList,key=lambda x: x[1]) 
+    print "sorted list:"
+    print sList
+    selectedList = sList[:num]
 
-  #     # r = ma/endPrice
-
-  #     # vList.append((id,r))
-
-  #     days = 5
-  #     r = self.getGrOfDays(res,parseDay,days)
-
-  #     # r = random.random()
-  #     vList.append((id,r))
-
-  #   # 排序
-  #   sList = sorted(vList,key=lambda x: -x[1]) 
-  #   # sList = sorted(vList,key=lambda x: x[1]) 
-  #   print "sorted list:"
-  #   print sList
-  #   selectedList = sList[:num]
-
-  #   print "\nselected list:"
-  #   print selectedList
-  #   l = []
-  #   for item in selectedList:
-  #     l.append(item[0])
-  #   return l
-
+    print "\nselected list:"
+    print selectedList
+    l = []
+    for item in selectedList:
+      l.append(item[0])
+    return l
   
+
   def parse(self,res,parseDay,id=''):
+    # 阳线
+    # -------------------------------------------------------
+    # if not self.isYangXian(res,parseDay):
+    #   return False
+
+    # 最高价低于5日线
+    # -------------------------------------------------------
+    # if not self.isMaxPriceUnderMa(res,parseDay,5):
+    #   return False
+    
+
+    # 振幅
+    # -------------------------------------------------------
+    # am = self.getAm(res,parseDay)
+    # if not am >= 0.05:
+    #   return False
+
+    
+    # 近n日涨停数
+    # -------------------------------------------------------
+    # days = 60
+    # minUpwardLimitNum = 6
+    # upwardLimitNum = self.countUpwardLimits(res,parseDay,days)
+
+    # if not upwardLimitNum >= minUpwardLimitNum:
+    #   return False
+
+
+    # 量为5日最大
+    # -------------------------------------------------------
+    # days = self.minVolumnOfDays(res,parseDay)
+    # if days < 5:
+    #   return False
+
+
+    # 买入日是阳线
+    # dayList = self.getNextTradingDayList(parseDay,2)
+    # inDay = dayList[0]
+    # if not self.isYangXian(res,inDay):
+    #   return False
+
+
+    # # D>=70，且向下
+    # # -------------------------------------------------------
+    # # D
+    # isDUpward = KdjParser.isDUpward(parseDay,id)
+    # d = KdjParser.getD(parseDay,id)
+    # if not ((d >= 70) and (not isDUpward)):
+    #   return False
+
+
+    # D<=30，且向上
+    # -------------------------------------------------------
+    # D
+    # isDUpward = KdjParser.isDUpward(parseDay,id)
+    # d = KdjParser.getD(parseDay,id)
+    # if not ((d <= 30) and (isDUpward)):
+    #   return False
+
+
+    # D<=20
+    # -------------------------------------------------------
+    # d = KdjParser.getD(parseDay,id)
+    # if not (d <= 20):
+    #   return False
+
+
+    # D向上
+    # -------------------------------------------------------
+    # isDUpward = KdjParser.isDUpward(parseDay,id)
+    # if not isDUpward:
+    #   return False
+
+
+    return True
+
+    
+  
+  # def parse(self,res,parseDay,id=''):
     
     # 非一字板涨停
-    if not self.isUpwardLimit(res,parseDay):
-      return False
+    # if not self.isUpwardLimit(res,parseDay):
+    #   return False
 
     # # 阳线
     # # -------------------------------------------------------
@@ -169,21 +233,21 @@ class RelativeParser(BaseParser):
     # if not self.isMinPriceOnMa(res,parseDay,60):
     #   return False
 
-    return True
+    # return True
 
 
-  def parse2(self,res,parseDay,id=''):
+  # def parse2(self,res,parseDay,id=''):
 
     # 阳线
     # -------------------------------------------------------
-    if not self.isYangXian(res,parseDay):
-      return False
+    # if not self.isYangXian(res,parseDay):
+    #   return False
 
 
     # 最高价低于5日线
     # -------------------------------------------------------
-    if not self.isMaxPriceUnderMa(res,parseDay,5):
-      return False
+    # if not self.isMaxPriceUnderMa(res,parseDay,5):
+    #   return False
 
 
     # 中线趋势向上
@@ -193,9 +257,9 @@ class RelativeParser(BaseParser):
 
 
     # 振幅
-    am = self.getAm(res,parseDay)
-    if not am >= 0.05:
-      return False
+    # am = self.getAm(res,parseDay)
+    # if not am >= 0.05:
+    #   return False
 
 
     # 放量
@@ -226,7 +290,7 @@ class RelativeParser(BaseParser):
  
 
 
-    return True
+    # return True
 
 
 

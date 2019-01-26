@@ -374,7 +374,7 @@ table {
   
   s += countTable
 
-  # s += tables # 
+  s += tables # 
 
   s += '</body></html>'
   path = Tools.getReportDirPath()+'/trace-report.html'

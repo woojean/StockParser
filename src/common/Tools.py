@@ -124,6 +124,7 @@ def getIdListOfDir(d):
 def getIdListOfFile(f):
   l = []
   path = getRootPath()+'/config/'+f
+  print path
   s = open(path,'r').read()
   l = s.split(',')
   return l
@@ -181,6 +182,11 @@ def getIdList():
   idList = [item for item in idList if item not in ignoreIdList]
   return idList
 
+
+def getDayList(f):
+  s = open(getRootPath()+'/config/dayList/'+f,'r').read()
+  l = eval(s)
+  return l
 
 
 def get300IdList():

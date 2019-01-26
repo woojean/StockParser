@@ -19,8 +19,12 @@ from MaxPriceUnderMaParser import MaxPriceUnderMaParser
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
+rootPath = sys.path[0][0:sys.path[0].index('StockParser')]+'/StockParser'
+sys.path.append(rootPath+'/src') 
+from common import Tools
+
 '''
-弱水三千，只取一瓢
+5日线下阳线，涨停数前20
 '''
 class DailyParser(BaseParser):
   _tag = 'DailyParser'
@@ -29,7 +33,38 @@ class DailyParser(BaseParser):
     BaseParser.__init__(self,parseDay) 
   
 
+  def calcuR(self,idList,num):
+    num = topNum # 前n
+    vList = []
+    for id in idList:
+      path = Tools.getPriceDirPath()+'/'+str(id)
+      res = open(path,'r').read()
+      
+      # 近60日涨停数
+      upwardLimitNum = self.countUpwardLimits(res,parseDay,60)
+      if upwardLimitNum < 1:
+        continue
+      print str(upwardLimitNum)
+
+      r = upwardLimitNum
+      vList.append((id,r))
+
+    # 排序
+    sList = sorted(vList,key=lambda x: -x[1]) 
+    print "sorted list:"
+    print sList
+    selectedList = sList[:num]
+
+    print "\nselected list:"
+    print selectedList
+    l = []
+    for item in selectedList:
+      l.append(item[0])
+    return l
+
+
   def parse(self,res,parseDay,id=''):
+
     # 阳线
     # -------------------------------------------------------
     if not self.isYangXian(res,parseDay):
@@ -40,28 +75,10 @@ class DailyParser(BaseParser):
     if not self.isMaxPriceUnderMa(res,parseDay,5):
       return False
     
-
-    # 振幅
-    # -------------------------------------------------------
-    am = self.getAm(res,parseDay)
-    # if not am >= 0.05:
-    #   return False
-
-    
-    # 近n日涨停数
-    # -------------------------------------------------------
-    days = 60
-    minUpwardLimitNum = 1
-    upwardLimitNum = self.countUpwardLimits(res,parseDay,days)
-
-
-    if (not upwardLimitNum >= minUpwardLimitNum) and (not am >= 0.05):
-      return False
-
-
     return True
 
 
+topNum = 20
 
 if __name__ == '__main__':
   print 'DailyParser'

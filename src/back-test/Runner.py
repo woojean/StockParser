@@ -46,23 +46,21 @@ class Runner(threading.Thread):
 if __name__ == '__main__':
   # 回测parser
   # parser = 'MaxPriceUnderMaParser'
-  # parser = 'RelativeParser'
+  parser = 'RelativeParser'
   # parser = 'RgbParser'
   # parser = 'SwallowUpParser'
   # parser = 'VolumeShrinkUpwardLimitParser'
-  parser = 'AmplitudeParser'
+  # parser = 'AmplitudeParser'
 
   # 起止日期
-  # beginDate = '2016-08-31'  
-  # testDays = 489
+  beginDate = '2018-01-02'  
+  testDays = 243
+  
+  # beginDate = '2017-01-03'  
+  # testDays = 244
 
-  # beginDate = '2018-01-02'  
-  # testDays = 243
   
-  beginDate = '2017-01-03'  
-  testDays = 244
-  
-  # beginDate = '2018-06-20'  
+  # beginDate = '2018-12-05'  
   # testDays = 1
 
 
@@ -70,11 +68,14 @@ if __name__ == '__main__':
   dayList.insert(0,beginDate)
   print dayList
 
+  # # 自定义dayList
+  # dayListFile = '2017年中小板指数D向上'
+  # dayList = Tools.getDayList(dayListFile)
+
   isNew = False if (len(sys.argv) <= 1) else ('new' ==sys.argv[1])
   if isNew:
     Tools.initDir('enterList')
   
-  print parser,beginDate,testDays
   print dayList
   
   for parseDay in dayList:

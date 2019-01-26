@@ -953,7 +953,22 @@ class BaseParser:
       if (v < volume) and ( v > 0 ):
         break
     return days
+  
 
+  # 量是n日最大
+  def maxVolumnOfDays(self,res,parseDay):
+    days = 0
+    volume = self.getVolumeOfDay(res,parseDay)
+    if volume <=0 :
+      return 0
+    dayList = self.getPastTradingDayList(parseDay,100)
+    dayList.reverse()
+    for day in dayList:
+      days += 1
+      v = self.getVolumeOfDay(res,day)
+      if (v > volume) and ( v > 0 ):
+        break
+    return days
 
 
   #  inherit
