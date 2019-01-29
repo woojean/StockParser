@@ -38,7 +38,7 @@ class RelativeParser(BaseParser):
     print '***************************************************************************'
     print 'In custom mode'
     print '***************************************************************************'
-    idFile = '2018年所有5日线下阳线，且近60日有涨停/'+self._parseDay+'-AmplitudeParser.sel'
+    idFile = '2017年所有5日线下振幅超过5%的阳线/'+self._parseDay+'-AmplitudeParser.sel'
     allIdList = Tools.getIdListOfFile(idFile)
     idList = []
     num = 0
@@ -62,7 +62,7 @@ class RelativeParser(BaseParser):
     print idList
 
     # 根据打分结果过滤
-    idList = self.calcuR(idList,5)
+    # idList = self.calcuR(idList,5)
 
     if isDump:
       self.dumpIdList(idList)
@@ -112,9 +112,9 @@ class RelativeParser(BaseParser):
 
     # 振幅
     # -------------------------------------------------------
-    # am = self.getAm(res,parseDay)
-    # if not am >= 0.05:
-    #   return False
+    am = self.getAm(res,parseDay)
+    if not am >= 0.07:
+      return False
 
     
     # 近n日涨停数

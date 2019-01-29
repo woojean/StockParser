@@ -291,7 +291,9 @@ if __name__ == '__main__':
   }
 
   parsers = {
-    'DailyParser':'每日执行'
+    'DailyParser':'日常',
+    # 'A1Parser':'5日线下阳线，近60日涨停数前n',
+    # 'A2Parser':'5日线下阳线，振幅前n',
   }
 
   (parseDay, isNew,traceDay) = getParams()

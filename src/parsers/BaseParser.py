@@ -532,7 +532,27 @@ class BaseParser:
     if ma > minPrice:
       return False
     return True
-    
+  
+
+  def isMinPriceContinuousRise(self,res,parseDay,days,isJustRight = False):
+    dayList = BaseParser.getPastTradingDayList(parseDay,days)
+    ret = True
+    for i in xrange(0,days-1):
+      minPrice1 = self.getMinPriceOfDay(res,dayList[i])
+      minPrice2 = self.getMinPriceOfDay(res,dayList[i+1])
+      if (minPrice2 < minPrice1) or (0 == minPrice1*minPrice2):
+        ret = False
+        break
+
+    if isJustRight:
+      dayList = BaseParser.getPastTradingDayList(parseDay,days+1)
+      minPrice1 = self.getMinPriceOfDay(res,dayList[0])
+      minPrice2 = self.getMinPriceOfDay(res,dayList[1])
+      if (minPrice1 < minPrice2) or (0 == minPrice1*minPrice2):
+        ret = False
+
+    return ret
+
 
   # compute
   # ----------------------------------------------------------------------------------------
@@ -915,6 +935,28 @@ class BaseParser:
       return False
 
     return True
+
+  
+  def isMaUpwardReverse(self,res,parseDay,maDays):
+    dayList = self.getPastTradingDayList(parseDay,3)
+    day1 = dayList[0]
+    day2 = dayList[1]
+    day3 = dayList[2]
+
+    dayList1 = self.getPastTradingDayList(day1,maDays)
+    (v,v,ma1) = self.getMAPrice(res,dayList1)
+
+    dayList2 = self.getPastTradingDayList(day2,maDays)
+    (v,v,ma2) = self.getMAPrice(res,dayList2)
+
+    dayList3 = self.getPastTradingDayList(day3,maDays)
+    (v,v,ma3) = self.getMAPrice(res,dayList3)
+
+    if not ((ma1 > ma2) and (ma3 > ma2)):
+      return False
+
+    return True
+
 
 
   # 缩量（相对前一日）
