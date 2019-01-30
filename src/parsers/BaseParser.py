@@ -554,6 +554,26 @@ class BaseParser:
     return ret
 
 
+  def isContinuouslySunny(self,res,parseDay,days,isJustRight = False):
+    dayList = BaseParser.getPastTradingDayList(parseDay,days)
+    ret = True
+    for i in xrange(0,days):
+      startPrice = self.getStartPriceOfDay(res,dayList[i])
+      endPrice = self.getEndPriceOfDay(res,dayList[i])
+      if (endPrice <= startPrice) or (0 == startPrice*endPrice):
+        ret = False
+        break
+
+    if isJustRight:
+      dayList = BaseParser.getPastTradingDayList(parseDay,days+1)
+      startPrice = self.getStartPriceOfDay(res,dayList[0])
+      endPrice = self.getEndPriceOfDay(res,dayList[0])
+      if (endPrice >= startPrice) or (0 == startPrice*endPrice):
+        ret = False
+
+    return ret
+
+
   # compute
   # ----------------------------------------------------------------------------------------
   # def isInRiseTrend(self,res,day):
@@ -713,6 +733,20 @@ class BaseParser:
       return False
     return True
 
+  
+  # 是否向上跳空缺口
+  def isUpwardGap(self,res,parseDay):
+    dayList = self.getPastTradingDayList(parseDay,2)
+    lastDay = dayList[0]
+    maxPrice1 = self.getMaxPriceOfDay(res,lastDay)
+    minPrice2 = self.getMinPriceOfDay(res,parseDay)
+    if 0 == maxPrice1*minPrice2:
+      return False
+
+    if not(minPrice2 - maxPrice1 > 0.01):
+      return False
+
+    return True
 
 
   # 获取振幅

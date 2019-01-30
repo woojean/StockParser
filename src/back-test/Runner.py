@@ -51,14 +51,16 @@ if __name__ == '__main__':
   # parser = 'SwallowUpParser'
   # parser = 'VolumeShrinkUpwardLimitParser'
   # parser = 'AmplitudeParser'
-  parser = 'MinPriceContinuousRiseParser'
+  # parser = 'MinPriceContinuousRiseParser'
+  # parser = 'ContinuouslySunnyParser'
+  parser = 'AdamParser'
 
   # 起止日期
-  # beginDate = '2018-01-02'  
-  # testDays = 243
+  beginDate = '2018-01-02'  
+  testDays = 243
   
-  beginDate = '2017-01-03'  
-  testDays = 244
+  # beginDate = '2017-01-03'  
+  # testDays = 244
 
   
   # beginDate = '2018-07-05'  
