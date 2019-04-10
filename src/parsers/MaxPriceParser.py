@@ -23,9 +23,9 @@ sys.setdefaultencoding('utf-8')
 class MaxPriceParser(BaseParser):
   _tag = 'MaxPriceParser'
   
-  _days = 200
+  _days = 60
 
-  def __init__(self,parseDay,days = 55):
+  def __init__(self,parseDay,days):
     self._days = days
     BaseParser.__init__(self,parseDay) 
 
@@ -43,7 +43,7 @@ class MaxPriceParser(BaseParser):
 if __name__ == '__main__':
   print 'MaxPriceParser'
 
-  days = 55
+  days = 60
 
   parseDay = BaseParser.getParseDay()
   print parseDay

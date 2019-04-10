@@ -192,6 +192,8 @@ class BaseParser:
 
 
 
+
+
   # 判断是否处在上升趋势中（今日的ma60大于5天前的ma60）
   def isInRiseTrend(self,id,parseDay):
     try:
@@ -843,7 +845,7 @@ class BaseParser:
 
 
 
-  # 判断某一天是否是过去若干天的最高价
+  # 判断某一天收盘价是否是过去若干天的最高价
   def isMaxPriceOfDays(self,res,day,days):
     dayList = BaseParser.getPastTradingDayList(day,days)
     dayList = dayList[:-1]
@@ -851,7 +853,6 @@ class BaseParser:
 
     otherDayMaxPrice = 0
     for d in dayList:
-      # price = self.getEndPriceOfDay(res,d)
       price = self.getMaxPriceOfDay(res,d)
       if price > otherDayMaxPrice: # 错误数据（交易日不连贯）
         otherDayMaxPrice = price

@@ -34,71 +34,102 @@ class RelativeParser(BaseParser):
     BaseParser.__init__(self,parseDay) 
 
 
-  def getParseResult(self,isDump=False):
-    print '***************************************************************************'
-    print 'In custom mode'
-    print '***************************************************************************'
-    idFile = '2017年所有5日线下振幅超过5%的阳线/'+self._parseDay+'-AmplitudeParser.sel'
-    allIdList = Tools.getIdListOfFile(idFile)
-    idList = []
-    num = 0
-    parsedNum = 0
-    total = len(allIdList)
-    for id in allIdList:
-      try:
-        self.printProcess(parsedNum,total)
-        f = Tools.getPriceDirPath()+'/'+id
-        res = open(f,'r').read()
-        ret = self.parse(res,self._parseDay,id)
-        if ret:
-          idList.append(id)
-          num += 1
-          print str(num) + ' ↗'
-        parsedNum += 1
-      except Exception, e:
-        pass
-        print repr(e)
+  # def getParseResult(self,isDump=False):
+  #   print '***************************************************************************'
+  #   print 'In custom mode'
+  #   print '***************************************************************************'
+  #   idFile = '2017年所有5日线下振幅超过5%的阳线/'+self._parseDay+'-AmplitudeParser.sel'
+  #   allIdList = Tools.getIdListOfFile(idFile)
+  #   idList = []
+  #   num = 0
+  #   parsedNum = 0
+  #   total = len(allIdList)
+  #   for id in allIdList:
+  #     try:
+  #       self.printProcess(parsedNum,total)
+  #       f = Tools.getPriceDirPath()+'/'+id
+  #       res = open(f,'r').read()
+  #       ret = self.parse(res,self._parseDay,id)
+  #       if ret:
+  #         idList.append(id)
+  #         num += 1
+  #         print str(num) + ' ↗'
+  #       parsedNum += 1
+  #     except Exception, e:
+  #       pass
+  #       print repr(e)
       
-    print idList
+  #   print idList
 
-    # 根据打分结果过滤
-    # idList = self.calcuR(idList,5)
+  #   # 根据打分结果过滤
+  #   # idList = self.calcuR(idList,5)
 
-    if isDump:
-      self.dumpIdList(idList)
+  #   if isDump:
+  #     self.dumpIdList(idList)
 
-    return idList
+  #   return idList
 
   
 
 
-  def calcuR(self,idList,num):
-    vList = []
-    for id in idList:
-      path = Tools.getPriceDirPath()+'/'+str(id)
-      res = open(path,'r').read()
+  # def calcuR(self,idList,num):
+  #   vList = []
+  #   for id in idList:
+  #     path = Tools.getPriceDirPath()+'/'+str(id)
+  #     res = open(path,'r').read()
       
-      upwardLimitNum = self.countUpwardLimits(res,parseDay,60)
-      r = upwardLimitNum
+  #     upwardLimitNum = self.countUpwardLimits(res,parseDay,60)
+  #     r = upwardLimitNum
 
-      vList.append((id,r))
+  #     vList.append((id,r))
 
-    # 排序
-    sList = sorted(vList,key=lambda x: -x[1]) 
-    # sList = sorted(vList,key=lambda x: x[1]) 
-    print "sorted list:"
-    print sList
-    selectedList = sList[:num]
+  #   # 排序
+  #   sList = sorted(vList,key=lambda x: -x[1]) 
+  #   # sList = sorted(vList,key=lambda x: x[1]) 
+  #   print "sorted list:"
+  #   print sList
+  #   selectedList = sList[:num]
 
-    print "\nselected list:"
-    print selectedList
-    l = []
-    for item in selectedList:
-      l.append(item[0])
-    return l
+  #   print "\nselected list:"
+  #   print selectedList
+  #   l = []
+  #   for item in selectedList:
+  #     l.append(item[0])
+  #   return l
   
 
   def parse(self,res,parseDay,id=''):
+    # 阴线
+    # -------------------------------------------------------
+    if self.isYangXian(res,parseDay):
+      return False
+
+    dayList = self.getPastTradingDayList(parseDay,7)
+    
+    lastDay = dayList[0]
+    endPrice = self.getEndPriceOfDay(res,parseDay)
+    endPrice1 = self.getEndPriceOfDay(res,lastDay)
+    gr = endPrice/endPrice1
+    # print gr
+
+    # 当日跌幅大于2%
+    if gr > 0.98:
+      return False
+
+    maxEndPriceOfDays = 0
+    for day in dayList:
+      endP = self.getEndPriceOfDay(res,day)
+      if endP > maxEndPriceOfDays:
+        maxEndPriceOfDays = endP
+    r = endPrice/maxEndPriceOfDays
+    # print r
+    if r >= 0.9:
+      return False
+
+    return True
+
+
+  # def parse(self,res,parseDay,id=''):
     # 阳线
     # -------------------------------------------------------
     # if not self.isYangXian(res,parseDay):
@@ -112,9 +143,9 @@ class RelativeParser(BaseParser):
 
     # 振幅
     # -------------------------------------------------------
-    am = self.getAm(res,parseDay)
-    if not am >= 0.07:
-      return False
+    # am = self.getAm(res,parseDay)
+    # if not am >= 0.07:
+    #   return False
 
     
     # 近n日涨停数
@@ -173,7 +204,7 @@ class RelativeParser(BaseParser):
     #   return False
 
 
-    return True
+    # return True
 
     
   
