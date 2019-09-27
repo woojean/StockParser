@@ -226,7 +226,7 @@ class BaseParser:
     if gr < -0.095:
       return True
     return False
-
+ 
 
   # 近期是否有跌停
   def recentlyHaveDownwardLimit(self,res,parseDay,days):

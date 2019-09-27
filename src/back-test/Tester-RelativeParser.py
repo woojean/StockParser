@@ -78,7 +78,7 @@ def traceEnterList(f):
 '''
 n日跟踪止损
 '''
-def traceG(id,parseDay):
+def trace(id,parseDay):
   print id,parseDay
   traceDays = 1  # n日跟踪止损
   parser = RelativeParser.RelativeParser(parseDay,id)
@@ -291,61 +291,6 @@ def traceWW(id,parseDay):
 
 
 
-'''
-持有N日
-'''
-def trace(id,parseDay):
-  print '持有N日'
-  N = 20 # 持股天数
-  print id,parseDay
-  parser = RelativeParser.RelativeParser(parseDay,id)
-  priceFile = Tools.getPriceDirPath()+'/'+str(id)
-  res = open(priceFile,'r').read()
-  
-
-  dayList = parser.getNextTradingDayList(parseDay,N) # 
-  inDay = dayList[0]
-  inPrice = parser.getStartPriceOfDay(res,inDay)  # 开盘价买入
-  # inPrice = parser.getMinPriceOfDay(res,inDay)  # 最低价买入
-  startPrice = parser.getStartPriceOfDay(res,inDay)
-  endPrice = parser.getEndPriceOfDay(res,inDay)
-
-  if 0==inPrice:
-    return False # 坏数据
-
-  # 剔除买入日阴线
-  # if endPrice < startPrice:
-  #   return False
-
-  outDay = dayList[-1]
-  outPrice = parser.getEndPriceOfDay(res,outDay)  # 收盘价卖出
-  # outPrice = parser.getMaxPriceOfDay(res,outDay) # 最高价卖出
-  # outPrice = parser.getStartPriceOfDay(res,outDay) # 开盘价卖出
-  if 0==outPrice:
-    return False # 坏数据
-
-  minPrice = 999999
-  maxPrice = 0  
-  dayList = dayList[1:]  # 从买入后第2天开始统计最高价、最低价
-  for day in dayList:
-    maxP = parser.getMaxPriceOfDay(res,day)
-    minP = parser.getMinPriceOfDay(res,day)
-    if maxP > maxPrice:
-      maxPrice = maxP
-    if minP < minPrice:
-      minPrice = minP
-
-
-  ret = {}
-  ret['id'] = id
-  ret['name'] = Tools.getNameById(id)
-  ret['inPrice'] = inPrice
-  ret['outDay'] = outDay
-  ret['outPrice'] = outPrice
-  ret['holdDays'] = N
-  ret['minPrice'] = minPrice
-  ret['maxPrice'] = maxPrice
-  return ret
 
 
 
@@ -355,7 +300,7 @@ def trace(id,parseDay):
 '''
 def traceXX(id,parseDay):
   print '持有N日'
-  N = 2 # 持股天数
+  N = 20 # 持股天数
   print id,parseDay
   parser = RelativeParser.RelativeParser(parseDay,id)
   priceFile = Tools.getPriceDirPath()+'/'+str(id)
@@ -405,6 +350,66 @@ def traceXX(id,parseDay):
   ret['minPrice'] = minPrice
   ret['maxPrice'] = maxPrice
   return ret
+
+
+
+'''
+持有N日
+'''
+def trace(id,parseDay):
+  print '持有N日'
+  N = 20 # 持股天数
+  print id,parseDay
+  parser = RelativeParser.RelativeParser(parseDay,id)
+  priceFile = Tools.getPriceDirPath()+'/'+str(id)
+  res = open(priceFile,'r').read()
+  
+
+  dayList = parser.getNextTradingDayList(parseDay,N) # 
+  inDay = dayList[0]
+  inPrice = parser.getStartPriceOfDay(res,inDay)  # 开盘价买入
+  startPrice = parser.getStartPriceOfDay(res,inDay)
+  endPrice = parser.getEndPriceOfDay(res,inDay)
+
+  if 0==inPrice:
+    return False # 坏数据
+
+  # 剔除买入日阴线
+  # if endPrice < startPrice:
+  #   return False
+
+  outDay = dayList[-1]
+  outPrice = parser.getEndPriceOfDay(res,outDay)  # 收盘价卖出
+  # outPrice = parser.getMaxPriceOfDay(res,outDay) # 最高价卖出
+  # outPrice = parser.getStartPriceOfDay(res,outDay) # 开盘价卖出
+  if 0==outPrice:
+    return False # 坏数据
+
+  minPrice = 999999
+  maxPrice = 0  
+  dayList = dayList[1:]  # 从买入后第2天开始统计最高价、最低价
+  for day in dayList:
+    maxP = parser.getMaxPriceOfDay(res,day)
+    minP = parser.getMinPriceOfDay(res,day)
+    if maxP > maxPrice:
+      maxPrice = maxP
+    if minP < minPrice:
+      minPrice = minP
+
+
+  ret = {}
+  ret['id'] = id
+  ret['name'] = Tools.getNameById(id)
+  ret['inPrice'] = inPrice
+  ret['outDay'] = outDay
+  ret['outPrice'] = outPrice
+  ret['holdDays'] = N
+  ret['minPrice'] = minPrice
+  ret['maxPrice'] = maxPrice
+  return ret
+
+
+
 
 
 

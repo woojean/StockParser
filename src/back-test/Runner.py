@@ -45,7 +45,7 @@ class Runner(threading.Thread):
 
 if __name__ == '__main__':
   # 回测parser
-  parser = 'UpParser'
+  parser = 'MaxPriceUnderMaParser'
   # parser = 'RelativeParser'
   # parser = 'RgbParser'
   # parser = 'SwallowUpParser'
@@ -63,9 +63,10 @@ if __name__ == '__main__':
   # beginDate = '2017-01-03'  
   # testDays = 244
 
-  
-  beginDate = '2018-05-22'  
-  testDays = 20 # 上证涨0.41%
+
+  # 2018年全年（大熊市）
+  beginDate = '2018-01-02'  
+  testDays = 243 
 
 
   dayList = BaseParser.BaseParser.getNextTradingDayList(beginDate,testDays-1)
